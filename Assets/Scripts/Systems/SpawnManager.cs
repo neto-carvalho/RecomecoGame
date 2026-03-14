@@ -7,9 +7,12 @@ public class SpawnManager : MonoBehaviour
 
     public GameObject latinhaPrefab;
 
+    [Tooltip("Quantidade de latinhas ao iniciar a cena")]
     public int quantidadeInicial = 10;
+    [Tooltip("Raio da área de spawn (em unidades)")]
     public float areaSpawn = 20f;
-    public float tempoRespawn = 30f;
+    [Tooltip("Segundos para uma nova latinha aparecer após uma ser coletada")]
+    public float tempoRespawn = 8f;
 
     void Awake()
     {

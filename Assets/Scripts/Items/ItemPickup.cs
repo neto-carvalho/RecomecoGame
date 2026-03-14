@@ -32,6 +32,10 @@ public class ItemPickup : MonoBehaviour
 
             if (added)
             {
+                if (InteractionUI.instance != null)
+                    InteractionUI.instance.HideText();
+                if (SpawnManager.instance != null)
+                    SpawnManager.instance.RespawnLatinha();
                 UnityEngine.Debug.Log("Item coletado: " + item.itemName);
                 Destroy(gameObject);
             }

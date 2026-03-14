@@ -159,38 +159,91 @@ Inventário funcionando corretamente.
 
 ---
 
+# DIA 8 — Movimentação completa e sistema de dinheiro
+
+**Movimentação (Fase 1 concluída):**
+
+* andar (WASD), correr (Shift), pular (Space), agachar (Ctrl)
+* uso de CharacterController com gravidade
+* script: PlayerMovement.cs
+
+**Sistema de dinheiro (Fase 5):**
+
+* MoneyManager.cs — singleton com AddMoney(), RemoveMoney(), GetMoney()
+* MoneyUI.cs — componente opcional para exibir dinheiro
+* HUD atualizado para mostrar dinheiro a partir do MoneyManager (dinheiro inicial configurável, ex.: R$ 420)
+
+Resultado:
+
+Personagem com movimento completo; dinheiro exibido no HUD e centralizado em um único sistema.
+
+---
+
+# DIA 9 — Sistema de venda e integração com inventário
+
+**Venda (Fase 6):**
+
+* SellItems.cs — zona de venda (ferro velho) usa o inventário do jogador e o MoneyManager
+* venda por nome de item (ex.: "Latinha") e preço por unidade configurável
+* Inventory: GetItemCount() e RemoveItem() para contar e remover itens por nome
+
+**Unificação:**
+
+* HUD de latinhas passa a ler do inventário (GetItemCount("Latinha")), não mais do GameManager
+* SlotUI ajustado para aceitar slot vazio (SetItem null)
+* Coleta atualiza apenas o inventário; venda remove do inventário e adiciona dinheiro via MoneyManager
+
+Resultado:
+
+Loop completo: explorar → coletar → inventário → vender no ferro velho → ganhar dinheiro.
+
+---
+
+# DIA 10 — Mensagens de interação e conclusão do MVP
+
+**Mensagens ao se aproximar/afastar:**
+
+* ItemPickup: "Aperte E para coletar" ao entrar no trigger; mensagem some ao sair
+* SellItems: "Aperte E para vender" (ou texto configurável) ao entrar na área de venda; mensagem some ao afastar
+* Uso do InteractionUI existente (ShowText / HideText)
+
+Resultado:
+
+Feedback claro para o jogador em coleta e venda; MVP do loop principal concluído.
+
+---
+
 # ESTADO ATUAL DO PROJETO
 
 Sistemas funcionando:
 
-* movimentação do player
-* sistema de interação
-* coleta de itens
-* inventário com slots
-* stack de itens
+* movimentação completa do player (andar, correr, pular, agachar)
+* sistema de interação com mensagens (coletar / vender)
+* coleta de itens (Latinha)
+* inventário com slots e stack
+* sistema de dinheiro (MoneyManager, exibição no HUD)
+* venda no ferro velho (itens do inventário → dinheiro)
+* spawn de itens no mapa (SpawnManager)
 
-Sistema em desenvolvimento:
+Loop do MVP concluído:
 
-* sistema de dinheiro
-* sistema de venda de itens
+Explorar → Coletar → Armazenar no inventário → Vender no ferro velho → Ganhar dinheiro
 
 ---
 
 # PRÓXIMOS PASSOS
 
-De acordo com o roadmap do projeto:
+De acordo com o roadmap:
 
-1. implementar sistema de dinheiro
-2. implementar venda de itens
-3. criar ferro velho para vender latinhas
-4. criar spawn de itens no mapa
+1. Fase 8 — NPCs simples (parados, jogador interage para vender)
+2. Fase 9 — Mapa do MVP (praça, ferro velho, mercado com áreas distintas)
+3. Fase 10 — Testes e polish do loop completo
+4. Expansões futuras: reputação, necessidades, veículos, comércio avançado
 
 ---
 
 # OBSERVAÇÕES
 
-O projeto ainda está na fase de protótipo.
+O projeto saiu da fase de protótipo: o loop principal do MVP está implementado e jogável.
 
-O foco atual é construir o loop principal do jogo:
-
-Explorar → Coletar → Vender → Lucrar
+Próximo foco: NPCs ou expansão do mapa, conforme prioridade do desenvolvimento.
