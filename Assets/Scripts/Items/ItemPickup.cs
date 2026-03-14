@@ -2,46 +2,55 @@ using UnityEngine;
 
 public class ItemPickup : MonoBehaviour
 {
-    public float pickupDistance = 2f;
-    private GameObject player;
-    private bool playerPerto = false;
+    public ItemData item;
+
+    private Inventory playerInventory;
+    private bool playerNear;
 
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player");
+        playerInventory = FindObjectOfType<Inventory>();
     }
 
     void Update()
     {
-        if (player == null) return;
-
-        float distance = Vector3.Distance(player.transform.position, transform.position);
-
-        if (distance < pickupDistance)
+        if (playerNear && Input.GetKeyDown(KeyCode.E))
         {
-            if (!playerPerto)
+            if (playerInventory == null)
             {
-                InteractionUI.instance.ShowText("Pressione E para coletar");
-                playerPerto = true;
+                UnityEngine.Debug.LogError("Inventory não encontrado!");
+                return;
             }
 
-            if (Input.GetKeyDown(KeyCode.E))
+            if (item == null)
             {
-                GameManager.instance.AddLatinha();
-                SpawnManager.instance.RespawnLatinha();
+                UnityEngine.Debug.LogError("ItemData não configurado!");
+                return;
+            }
 
-                InteractionUI.instance.HideText();
+            bool added = playerInventory.AddItem(item);
 
+            if (added)
+            {
+                UnityEngine.Debug.Log("Item coletado: " + item.itemName);
                 Destroy(gameObject);
             }
         }
-        else
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
         {
-            if (playerPerto)
-            {
-                InteractionUI.instance.HideText();
-                playerPerto = false;
-            }
+            playerNear = true;
+        }
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            playerNear = false;
         }
     }
 }

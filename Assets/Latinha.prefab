@@ -127,5 +127,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1678863fdd986240bbbad11da28c671, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemPickup
-  itemName: Latinha
-  pickupDistance: 2
+  item: {fileID: 11400000, guid: fd676a4b826436641968a8d7348401c4, type: 2}
