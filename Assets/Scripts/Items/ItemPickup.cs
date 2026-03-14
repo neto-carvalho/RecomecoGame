@@ -43,6 +43,8 @@ public class ItemPickup : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerNear = true;
+            if (InteractionUI.instance != null)
+                InteractionUI.instance.ShowText("Aperte E para coletar");
         }
     }
 
@@ -51,6 +53,8 @@ public class ItemPickup : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerNear = false;
+            if (InteractionUI.instance != null)
+                InteractionUI.instance.HideText();
         }
     }
 }
