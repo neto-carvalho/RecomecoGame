@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Latinha
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   itemName: Latinha
-  icon: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
+  icon: {fileID: 21300000, guid: 6781215099e6c4346ae39d1cfdadc40c, type: 3}

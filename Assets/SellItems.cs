@@ -36,7 +36,7 @@ public class SellItems : MonoBehaviour
         if (!Input.GetKeyDown(KeyCode.E)) return;
 
         Inventory inv = player.GetComponent<Inventory>();
-        if (inv == null) inv = FindObjectOfType<Inventory>();
+        if (inv == null) inv = FindFirstObjectByType<Inventory>();
         if (inv == null)
         {
             UnityEngine.Debug.LogWarning("SellItems: Inventário não encontrado.");

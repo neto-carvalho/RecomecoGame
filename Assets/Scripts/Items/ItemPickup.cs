@@ -39,6 +39,11 @@ public class ItemPickup : MonoBehaviour
                 UnityEngine.Debug.Log("Item coletado: " + item.itemName);
                 Destroy(gameObject);
             }
+            else
+            {
+                if (InteractionUI.instance != null)
+                    InteractionUI.instance.ShowText("Inventário cheio!");
+            }
         }
     }
 

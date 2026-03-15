@@ -2,7 +2,11 @@ using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
+    [Tooltip("Nùmero de slots do inventùrio")]
     public int slotCount = 12;
+
+    [Tooltip("Quantidade mùxima do mesmo item por slot (stack)")]
+    public int maxStackPerSlot = 20;
 
     public InventorySlot[] slots;
     public SlotUI[] slotUIs;
@@ -10,48 +14,126 @@ public class Inventory : MonoBehaviour
     void Awake()
     {
         slots = new InventorySlot[slotCount];
-
         for (int i = 0; i < slotCount; i++)
-        {
             slots[i] = new InventorySlot();
-        }
 
-        UnityEngine.Debug.Log("Invent·rio iniciado com " + slotCount + " slots");
+        // Se slotUIs nùo foi preenchido no Inspector, tenta achar no painel do inventùrio
+        if (slotUIs == null || slotUIs.Length == 0)
+        {
+            InventoryUI invUI = FindFirstObjectByType<InventoryUI>();
+            if (invUI != null && invUI.inventoryPanel != null)
+            {
+                SlotUI[] found = GetSlotUIsInOrder(invUI.inventoryPanel.transform);
+                if (found != null && found.Length > 0)
+                {
+                    slotCount = Mathf.Min(slotCount, found.Length);
+                    slotUIs = new SlotUI[slotCount];
+                    slots = new InventorySlot[slotCount];
+                    for (int i = 0; i < slotCount; i++)
+                    {
+                        slotUIs[i] = found[i];
+                        slots[i] = new InventorySlot();
+                    }
+                }
+            }
+            if (slotUIs == null || slotUIs.Length == 0)
+                UnityEngine.Debug.LogWarning("Inventory: atribua os SlotUIs no Inspector ou use um painel com filhos Slot (com SlotUI).");
+        }
+    }
+
+    /// <summary>Atualiza a exibiùùo de todos os slots na UI. Chamar ao abrir o inventùrio.</summary>
+    public void RefreshAllSlots()
+    {
+        TryFindSlotUIsIfMissing();
+        int n = GetSlotCount();
+        if (n == 0) return;
+        for (int i = 0; i < n; i++)
+        {
+            if (slotUIs[i] == null) continue;
+            if (slots[i].IsEmpty())
+                slotUIs[i].SetItem(null, 0);
+            else
+                slotUIs[i].SetItem(slots[i].item, slots[i].quantity);
+        }
+    }
+
+    void TryFindSlotUIsIfMissing()
+    {
+        if (slotUIs != null && slotUIs.Length > 0) return;
+        InventoryUI invUI = FindFirstObjectByType<InventoryUI>();
+        if (invUI == null || invUI.inventoryPanel == null) return;
+        SlotUI[] found = GetSlotUIsInOrder(invUI.inventoryPanel.transform);
+        if (found == null || found.Length == 0) return;
+        slotCount = Mathf.Min(slotCount, found.Length);
+        slotUIs = new SlotUI[slotCount];
+        for (int i = 0; i < slotCount; i++)
+            slotUIs[i] = found[i];
+        if (slots == null || slots.Length < slotCount)
+        {
+            InventorySlot[] old = slots;
+            slots = new InventorySlot[slotCount];
+            for (int i = 0; i < slotCount; i++)
+                slots[i] = (old != null && i < old.Length) ? old[i] : new InventorySlot();
+        }
     }
 
     public bool AddItem(ItemData item)
     {
-        // STACK
-        for (int i = 0; i < slots.Length; i++)
+        if (item == null) return false;
+        int n = GetSlotCount();
+        if (n == 0) return false;
+
+        // 1) Tentar empilhar em slot existente (respeitando limite por slot)
+        for (int i = 0; i < n; i++)
         {
-            if (!slots[i].IsEmpty() && slots[i].CanStack(item))
-            {
-                slots[i].quantity++;
+            if (slots[i].IsEmpty() || !slots[i].CanStack(item)) continue;
+            int space = maxStackPerSlot - slots[i].quantity;
+            if (space <= 0) continue;
 
+            slots[i].quantity += 1;
+            if (slotUIs != null && i < slotUIs.Length && slotUIs[i] != null)
                 slotUIs[i].SetItem(slots[i].item, slots[i].quantity);
-
-                return true;
-            }
+            return true;
         }
 
-        // SLOT VAZIO
-        for (int i = 0; i < slots.Length; i++)
+        // 2) Usar um slot vazio (quando o primeiro estù cheio ou para novo tipo de item)
+        for (int i = 0; i < n; i++)
         {
-            if (slots[i].IsEmpty())
+            if (!slots[i].IsEmpty()) continue;
+            slots[i].item = item;
+            slots[i].quantity = 1;
+            if (slotUIs != null && i < slotUIs.Length && slotUIs[i] != null)
             {
-                slots[i].item = item;
-                slots[i].quantity = 1;
-
                 slotUIs[i].SetItem(item, 1);
-
-                return true;
+                if (i > 0) UnityEngine.Debug.Log("[Inventario] Item no slot " + (i + 1) + ": " + item.itemName);
             }
+            return true;
         }
 
         return false;
     }
 
-    /// <summary>Retorna a quantidade total de itens com o nome dado no invent·rio.</summary>
+    int GetSlotCount()
+    {
+        if (slots == null) return 0;
+        if (slotUIs == null) return slots.Length;
+        return Mathf.Min(slots.Length, slotUIs.Length);
+    }
+
+    /// <summary>Obtùm os SlotUIs na ordem exata dos filhos do painel (Slot, Slot (1), Slot (2)...).</summary>
+    static SlotUI[] GetSlotUIsInOrder(Transform panel)
+    {
+        if (panel == null) return null;
+        var list = new System.Collections.Generic.List<SlotUI>();
+        for (int i = 0; i < panel.childCount; i++)
+        {
+            SlotUI su = panel.GetChild(i).GetComponent<SlotUI>();
+            if (su != null) list.Add(su);
+        }
+        return list.Count > 0 ? list.ToArray() : null;
+    }
+
+    /// <summary>Retorna a quantidade total de itens com o nome dado no inventùrio.</summary>
     public int GetItemCount(string itemName)
     {
         if (string.IsNullOrEmpty(itemName)) return 0;
@@ -64,7 +146,7 @@ public class Inventory : MonoBehaviour
         return total;
     }
 
-    /// <summary>Remove atÈ 'amount' itens com o nome dado. Retorna quantos foram removidos.</summary>
+    /// <summary>Remove atù 'amount' itens com o nome dado. Retorna quantos foram removidos.</summary>
     public int RemoveItem(string itemName, int amount)
     {
         if (string.IsNullOrEmpty(itemName) || amount <= 0) return 0;
@@ -81,11 +163,13 @@ public class Inventory : MonoBehaviour
             {
                 slots[i].item = null;
                 slots[i].quantity = 0;
-                slotUIs[i].SetItem(null, 0);
+                if (slotUIs != null && i < slotUIs.Length && slotUIs[i] != null)
+                    slotUIs[i].SetItem(null, 0);
             }
             else
             {
-                slotUIs[i].SetItem(slots[i].item, slots[i].quantity);
+                if (slotUIs != null && i < slotUIs.Length && slotUIs[i] != null)
+                    slotUIs[i].SetItem(slots[i].item, slots[i].quantity);
             }
         }
         return removed;
