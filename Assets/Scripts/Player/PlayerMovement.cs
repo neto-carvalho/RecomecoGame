@@ -28,6 +28,7 @@ public class PlayerMovement : MonoBehaviour
     [Tooltip("Tempo para agachar/levantar (suavização)")]
     public float crouchTime = 0.2f;
 
+
     private CharacterController controller;
     private Vector3 velocity;
     private bool isGrounded;
@@ -52,6 +53,7 @@ public class PlayerMovement : MonoBehaviour
         standingCenter = controller.center;
         currentHeight = standingHeight;
         currentCenter = standingCenter;
+
     }
 
     void Update()
