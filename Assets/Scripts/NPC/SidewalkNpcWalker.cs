@@ -126,11 +126,13 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
     private void CacheAnimatorFromHierarchy()
     {
         _hasHor = _hasVert = _hasState = _hasIsJump = false;
-        _animator = GetComponentInChildren<Animator>(true);
+        _animator = FindLocomotionAnimator();
         if (_animator == null)
             return;
 
         _animator.applyRootMotion = false;
+        _animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+
         foreach (var p in _animator.parameters)
         {
             if (p.name == "Hor") _hasHor = true;
@@ -138,6 +140,38 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
             if (p.name == "State") _hasState = true;
             if (p.name == "IsJump") _hasIsJump = true;
         }
+
+        // Garante estado de locomotion (evita ficar no idle do import Mixamo / defaults).
+        if (_hasHor || _hasVert)
+        {
+            _animator.Play("Movement", 0, 0f);
+            _animator.Update(0f);
+        }
+    }
+
+    /// <summary>Mixamo/FBX podem ter vários Animators; usa o que tem Character_Movement (Hor/Vert).</summary>
+    private Animator FindLocomotionAnimator()
+    {
+        Animator fallback = null;
+        foreach (var a in GetComponentsInChildren<Animator>(true))
+        {
+            if (a == null || !a.enabled)
+                continue;
+
+            if (a.runtimeAnimatorController == null)
+                continue;
+
+            fallback ??= a;
+
+            foreach (var p in a.parameters)
+            {
+                if (p.name != "Hor" && p.name != "Vert")
+                    continue;
+                return a;
+            }
+        }
+
+        return fallback ?? GetComponentInChildren<Animator>(true);
     }
 
     /// <summary>Remove o modelo embebido e instancia o prefab de skin (síncrono para o Animator apanhar o novo rig).</summary>
@@ -155,15 +189,41 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
         for (var i = transform.childCount - 1; i >= 0; i--)
         {
             var ch = transform.GetChild(i).gameObject;
-            Object.DestroyImmediate(ch);
+            if (Application.isPlaying)
+                Destroy(ch);
+            else
+                DestroyImmediate(ch);
         }
 
-        var inst = Object.Instantiate(prefab, transform);
+        var inst = Instantiate(prefab, transform);
         inst.transform.localPosition = Vector3.zero;
         inst.transform.localRotation = Quaternion.identity;
         inst.transform.localScale = Vector3.one;
         inst.name = prefab.name;
+
+        if (!HasSkinnedMeshBonesInHierarchy(inst))
+        {
+            Debug.LogError(
+                $"[SidewalkNpc] O prefab '{prefab.name}' não tem ossos na hierarquia (só o mesh). " +
+                "No Unity: Recomeco → NPC → Mixamo → Reparar prefab(s) de skin selecionado(s).",
+                prefab);
+        }
+
         return true;
+    }
+
+    static bool HasSkinnedMeshBonesInHierarchy(GameObject root)
+    {
+        foreach (var smr in root.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+        {
+            if (smr.bones == null || smr.bones.Length == 0)
+                continue;
+            var bone = smr.bones[0];
+            if (bone != null && bone.transform.IsChildOf(root.transform))
+                return true;
+        }
+
+        return root.transform.childCount > 0;
     }
 
     private void Update()
@@ -330,10 +390,12 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
         var horTarget = walkingAnim ? local.x : 0f;
         var vertTarget = walkingAnim ? local.z : 0f;
 
+        // Resposta mais rápida ao começar a andar (evita parecer idle enquanto já se desloca).
+        var blendStep = walkingAnim ? 12f * dt : 4.5f * dt;
         if (_hasHor)
-            _animator.SetFloat("Hor", Mathf.MoveTowards(_animator.GetFloat("Hor"), horTarget, 4.5f * dt));
+            _animator.SetFloat("Hor", Mathf.MoveTowards(_animator.GetFloat("Hor"), horTarget, blendStep));
         if (_hasVert)
-            _animator.SetFloat("Vert", Mathf.MoveTowards(_animator.GetFloat("Vert"), vertTarget, 4.5f * dt));
+            _animator.SetFloat("Vert", Mathf.MoveTowards(_animator.GetFloat("Vert"), vertTarget, blendStep));
         if (_hasState)
         {
             _animator.SetFloat(

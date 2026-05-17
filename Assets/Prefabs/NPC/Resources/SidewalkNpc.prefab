@@ -87,8 +87,8 @@ MonoBehaviour:
   idlePauseDurationSeconds: 1.25
   animatorStateBlendSpeed: 4
   optionalFullCharacterRigPrefabs:
-  - {fileID: 919132149155446097, guid: 6ec589b0dd0bced4fa00f1897de6b849, type: 3}
-  - {fileID: 58456909262930181, guid: e091f62fa51956c4cb5534000d85b4b0, type: 3}
+  - {fileID: 7049152069468427703, guid: 23c0ffbfe4d75b8439b55dea2d92aa04, type: 3}
+  - {fileID: 2005707907975765399, guid: 6ecbddbb3d824aa43844b814c6864e28, type: 3}
   - {fileID: 4790146685688098719, guid: 481f62ff20d977a4a9780433c33be211, type: 3}
   - {fileID: 9132405907763196456, guid: 6e88af4fdc3ac144e953e15d730f1b2a, type: 3}
   diffuseTextures:
