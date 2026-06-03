@@ -32,22 +32,54 @@ namespace Controller
         protected Vector2 m_Angles;
         protected float m_Distance;
 
-        public Vector3 Target => m_Target.position;
-        public float TargetDistance => TARGET_DISTANCE;
+        public Vector3 Target
+        {
+            get
+            {
+                EnsureTarget();
+                if (m_Target != null)
+                    return m_Target.position;
+                if (m_Player != null)
+                    return m_Player.position + m_Player.forward * TargetDistance;
+                return m_Transform.position + m_Transform.forward * 5f;
+            }
+        }
+
+        /// <summary>Distância do alvo de movimento; acompanha a escala do jogador (ex.: scale 0.3).</summary>
+        public float TargetDistance => TARGET_DISTANCE * GetPlayerScaleFactor();
+
+        protected float GetPlayerScaleFactor()
+        {
+            if (m_Player == null)
+                return 1f;
+            return Mathf.Max(0.15f, m_Player.lossyScale.y);
+        }
 
         protected virtual void Awake()
         {
             m_Transform = transform;
-
-            m_Target = new GameObject($"Target_{gameObject.name}").transform;
-            if(m_Transform.parent != null)
-            {
-                m_Target.transform.parent = m_Transform.parent;
-            }
+            EnsureTarget();
         }
 
-        public void SetPlayer(Transform player) {
+        public void SetPlayer(Transform player)
+        {
             m_Player = player;
+            EnsureTarget();
+        }
+
+        /// <summary>
+        /// Alvo da câmara fica como filho da câmara (não do parent da cena antiga) para sobreviver a LoadScene.
+        /// </summary>
+        protected void EnsureTarget()
+        {
+            if (m_Target != null)
+                return;
+
+            m_Transform = transform;
+            var go = new GameObject($"Target_{gameObject.name}");
+            go.hideFlags = HideFlags.HideInHierarchy;
+            m_Target = go.transform;
+            m_Target.SetParent(m_Transform, false);
         }
 
         public virtual void SetInput(in Vector2 delta, float scroll)
@@ -58,7 +90,8 @@ namespace Controller
             m_Zoom += scroll * m_SensetivityZoom;
             m_Zoom = Mathf.Clamp01(m_Zoom);
 
-            m_Distance = (1f - m_Zoom) * (MAX_DISTANCE - MIN_DISTANCE) + MIN_DISTANCE;
+            var baseDistance = (1f - m_Zoom) * (MAX_DISTANCE - MIN_DISTANCE) + MIN_DISTANCE;
+            m_Distance = baseDistance * GetPlayerScaleFactor();
         }
     }
 }

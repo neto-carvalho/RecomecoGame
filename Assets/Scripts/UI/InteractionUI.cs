@@ -11,16 +11,68 @@ public class InteractionUI : MonoBehaviour
     void Awake()
     {
         TryAutoWire();
+        RegisterIfValid();
     }
 
     void Start()
     {
-        // Várias instâncias na cena: o singleton deve ser sempre uma com TMP válido (evita Canvas com campos vazios).
         TryAutoWire();
+        RegisterIfValid();
+    }
+
+    void OnDestroy()
+    {
+        if (instance == this)
+            instance = null;
+    }
+
+    void RegisterIfValid()
+    {
         if (interactionText != null)
-            instance = this;
+            Register(this);
         else if (instance == null)
             instance = this;
+    }
+
+    public static void Register(InteractionUI ui)
+    {
+        if (ui == null)
+            return;
+        ui.TryAutoWire();
+        if (ui.interactionText != null)
+            instance = ui;
+    }
+
+    /// <summary>Usa UI da cena ativa ou a que viajou com DontDestroyOnLoad.</summary>
+    public static void BindForActiveScene()
+    {
+        if (instance != null && instance.interactionText != null)
+            return;
+
+        foreach (var ui in FindObjectsByType<InteractionUI>(FindObjectsSortMode.None))
+        {
+            if (ui == null)
+                continue;
+            ui.TryAutoWire();
+            if (ui.interactionText != null)
+            {
+                Register(ui);
+                return;
+            }
+        }
+    }
+
+    public static void ShowMessage(string message)
+    {
+        BindForActiveScene();
+        if (instance != null)
+            instance.ShowText(message);
+    }
+
+    public static void HideMessage()
+    {
+        if (instance != null)
+            instance.HideText();
     }
 
     void TryAutoWire()

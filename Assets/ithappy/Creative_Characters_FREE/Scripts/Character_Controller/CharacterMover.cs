@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Controller
 {
+    [DefaultExecutionOrder(0)]
     [RequireComponent(typeof(CharacterController))]
     [DisallowMultipleComponent]
     public class CharacterMover : MonoBehaviour
@@ -61,48 +62,134 @@ namespace Controller
         {
             m_Transform = transform;
             m_Controller = GetComponent<CharacterController>();
-            m_Animator = ResolveAnimator();
+            BindAnimator();
 
-            m_Movement = new MovementHandler(m_Controller, m_Transform, m_WalkSpeed, m_RunSpeed, m_RotateSpeed, m_JumpHeight, m_Space);
+            m_Movement = new MovementHandler(m_Controller, m_Transform, m_WalkSpeed / 3.6f, m_RunSpeed / 3.6f, m_RotateSpeed, m_JumpHeight, m_Space);
+        }
+
+        private void Start()
+        {
+            if (m_Animator == null || !m_Animator.isActiveAndEnabled)
+                BindAnimator();
+        }
+
+        void BindAnimator()
+        {
+            PlayerAnimatorSetup.Apply(gameObject, RecomecoGameplaySettings.Instance);
+            m_Animator = ResolveAnimator();
             m_Animation = m_Animator != null
                 ? new AnimationHandler(m_Animator, m_HorizontalID, m_VerticalID, m_StateID, m_JumpID)
                 : null;
         }
 
+        public void RebindAnimator()
+        {
+            BindAnimator();
+        }
+
+        public void SetLocomotionSpeeds(float walkSpeed, float runSpeed, float rotateSpeed)
+        {
+            m_WalkSpeed = walkSpeed;
+            m_RunSpeed = runSpeed;
+            m_RotateSpeed = rotateSpeed;
+            m_Movement?.SetStats(m_WalkSpeed / 3.6f, m_RunSpeed / 3.6f, m_RotateSpeed, m_JumpHeight, m_Space);
+        }
+
+        public void SetJumpHeight(float jumpHeight)
+        {
+            m_JumpHeight = Mathf.Max(0f, jumpHeight);
+            m_Movement?.SetStats(m_WalkSpeed / 3.6f, m_RunSpeed / 3.6f, m_RotateSpeed, m_JumpHeight, m_Space);
+        }
+
         /// <summary>
-        /// Animator pode estar no filho (ex.: Base_Mesh). Prefere o que tem Controller + Avatar humanoide.
+        /// Animator no filho com SkinnedMeshRenderer + Character_Movement (evita Animator extra na raiz).
         /// </summary>
         private Animator ResolveAnimator()
         {
-            Animator onRoot = GetComponent<Animator>();
+            Animator best = null;
+            var bestScore = -1;
+
+            foreach (var a in GetComponentsInChildren<Animator>(true))
+            {
+                var score = 0;
+                if (a.isActiveAndEnabled)
+                    score += 8;
+
+                var ctrl = a.runtimeAnimatorController;
+                if (ctrl != null && ctrl.name.IndexOf("Character_Movement", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                    score += 40;
+                else if (a.avatar != null && a.avatar.isHuman && a.GetComponentInChildren<SkinnedMeshRenderer>() != null)
+                    score += 10;
+                if (a.GetComponentInChildren<SkinnedMeshRenderer>() != null)
+                    score += 25;
+                if (a.avatar != null && a.avatar.isHuman)
+                    score += 15;
+                if (a.transform != m_Transform)
+                    score += 5;
+
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    best = a;
+                }
+            }
+
+            if (best != null)
+            {
+                if (!best.isActiveAndEnabled)
+                {
+                    best.gameObject.SetActive(true);
+                    best.enabled = true;
+                }
+
+                return best;
+            }
+
+            var onRoot = GetComponent<Animator>();
             if (onRoot != null && onRoot.runtimeAnimatorController != null)
                 return onRoot;
 
-            Animator best = null;
-            foreach (var a in GetComponentsInChildren<Animator>(true))
-            {
-                if (a.runtimeAnimatorController == null) continue;
-                if (a.avatar != null && a.avatar.isHuman)
-                    return a;
-                if (best == null)
-                    best = a;
-            }
-            if (best != null)
-                return best;
-            if (onRoot != null)
-                return onRoot;
-            UnityEngine.Debug.LogError("CharacterMover: nenhum Animator com Controller encontrado. Coloque Character_Movement.controller no Animator (Player ou filho Base_Mesh).");
+            UnityEngine.Debug.LogError(
+                "CharacterMover: nenhum Animator com Character_Movement. " +
+                "Use Recomeco → Player → Corrigir locomoção (ithappy) na cena.");
             return null;
         }
 
         private void Update()
         {
             m_Movement.Move(Time.deltaTime, in m_Axis, in m_Target, m_IsRun, m_IsJump, m_IsMoving, out var animAxis, out var isAir);
-            m_Animation?.Animate(in animAxis, m_IsRun ? 1f : 0f, isAir, Time.deltaTime);
+
+            // State 0 = andar, State 1 = correr (Character_Movement). Parado = 0.
+            var locomotionState = m_IsMoving ? (m_IsRun ? 1f : 0f) : 0f;
+
+            // WASD → Hor/Vert no blend tree (direcional andar/correr).
+            var driveAxis = m_IsMoving && m_Axis.sqrMagnitude > 0.01f ? m_Axis : animAxis;
+
+            ApplyLocomotionParameters(driveAxis, locomotionState, isAir, Time.deltaTime);
+        }
+
+        void ApplyLocomotionParameters(Vector2 driveAxis, float locomotionState, bool isJump, float deltaTime)
+        {
+            if (m_Animator == null)
+                return;
+
+            const float blendSpeed = 10f;
+            var dt = blendSpeed * deltaTime;
+
+            var hor = Mathf.MoveTowards(m_Animator.GetFloat(m_HorizontalID), driveAxis.x, dt);
+            var vert = Mathf.MoveTowards(m_Animator.GetFloat(m_VerticalID), driveAxis.y, dt);
+            var state = Mathf.MoveTowards(m_Animator.GetFloat(m_StateID), locomotionState, dt);
+
+            m_Animator.SetFloat(m_HorizontalID, hor);
+            m_Animator.SetFloat(m_VerticalID, vert);
+            m_Animator.SetFloat(m_StateID, state);
+            m_Animator.SetBool(m_JumpID, isJump);
         }
 
         private void OnAnimatorIK()
         {
+            if (m_Animator == null || m_Target.sqrMagnitude < 0.01f)
+                return;
             m_Animation?.AnimateIK(in m_Target, m_LookWeight);
         }
 
@@ -359,8 +446,9 @@ namespace Controller
                 m_Animator.SetFloat(m_StateID, Mathf.Clamp01(m_FlowState));
                 m_Animator.SetBool(m_JumpID, isJump);
 
-                m_FlowAxis = Vector2.ClampMagnitude(m_FlowAxis + k_InputFlow * deltaTime * (axis - m_FlowAxis).normalized, 1f);
-                m_FlowState = Mathf.Clamp01(m_FlowState + k_InputFlow * deltaTime * Mathf.Sign(state - m_FlowState));
+                m_FlowAxis = Vector2.MoveTowards(m_FlowAxis, axis, k_InputFlow * deltaTime);
+                m_FlowAxis = Vector2.ClampMagnitude(m_FlowAxis, 1f);
+                m_FlowState = Mathf.MoveTowards(m_FlowState, Mathf.Clamp01(state), k_InputFlow * deltaTime);
             }
 
             public void AnimateIK(in Vector3 target, in LookWeight lookWeight)

@@ -73,3 +73,7 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Gregor Quendel ambience: 5+ arquivos .wav > 100 MB (GitHub recusa push sem Git LFS).
+# Cada pessoa importa o pack na Unity; ver Assets/Audio/Ambient/LEIA-ME.txt
+/[Aa]ssets/[Gg]regor [Qq]uendel*/

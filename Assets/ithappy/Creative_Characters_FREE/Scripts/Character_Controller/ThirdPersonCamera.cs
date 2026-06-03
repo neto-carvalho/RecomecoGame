@@ -24,8 +24,9 @@ namespace Controller
             var dir = new Vector3(0, 0, -m_Distance);
             var rot = Quaternion.Euler(m_Angles.x, m_Angles.y, 0f);
 
+            var scale = GetPlayerScaleFactor();
             var playerPos = (m_Player == null) ? Vector3.zero : m_Player.position;
-            m_LookPoint = playerPos + m_Offset * Vector3.up;
+            m_LookPoint = playerPos + m_Offset * scale * Vector3.up;
             m_TargetPos = m_LookPoint + rot * dir;
         }
 
@@ -53,10 +54,9 @@ namespace Controller
 
             void target()
             {
-                if(m_Target == null)
-                {
+                EnsureTarget();
+                if (m_Target == null)
                     return;
-                }
 
                 m_Target.position = m_Transform.position + m_Transform.forward * TargetDistance;
             }

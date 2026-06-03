@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed4aaef2728d24b4ea9605a1e051f6ec, type: 3}
+  m_Name: AmbientAudioProfile
+  m_EditorClassIdentifier: 
+  cityAmbience: {fileID: 8300000, guid: 4e0ac2c31e65041779ad848caeb36726, type: 3}
+  cityVolume: 0.22
+  natureBirds: {fileID: 8300000, guid: c56de75b2f07542cf8f6d7cb6885e51d, type: 3}
+  natureVolume: 0.35
+  natureWind: {fileID: 8300000, guid: 2333b726d05c74cd59cd763bcc388443, type: 3}
+  windVolume: 0.12
+  waterStream: {fileID: 8300000, guid: 3f55cbb864768466a9d2a8b83e0577ff, type: 3}
+  waterVolume: 0.28
+  blendSeconds: 2

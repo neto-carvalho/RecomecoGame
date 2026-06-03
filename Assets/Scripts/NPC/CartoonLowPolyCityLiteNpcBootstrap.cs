@@ -3,13 +3,12 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Ao abrir a cena CartoonLowPolyCityLite_01, instancia NPCs decorativos.
-/// Se existirem objetos com <see cref="SidewalkNpcSpawnPoint"/> na cena, usa-os (recomendado).
-/// Caso contrário, usa posições embutidas (podem estar erradas para o teu layout) e avisa no Console.
+/// Instancia NPCs decorativos quando a cena tem <see cref="SidewalkNpcSpawnPoint"/>.
+/// Funciona em qualquer cena (mapa novo, cidade, etc.). Sem marcadores, só tenta fallback na cena legada.
 /// </summary>
 public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
 {
-    private const string TargetSceneName = "CartoonLowPolyCityLite_01";
+    private const string LegacySceneName = "CartoonLowPolyCityLite_01";
     /// <summary>Relativo a qualquer pasta <c>Resources</c> do projeto (aqui: Assets/Prefabs/NPC/Resources/SidewalkNpc).</summary>
     private const string NpcPrefabResourcePath = "SidewalkNpc";
 
@@ -24,7 +23,15 @@ public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void AfterSceneLoad()
     {
-        if (SceneManager.GetActiveScene().name != TargetSceneName)
+        var scene = SceneManager.GetActiveScene();
+        if (!scene.isLoaded)
+            return;
+
+        var hasSpawnMarkers = FindObjectsByType<SidewalkNpcSpawnPoint>(
+            FindObjectsInactive.Exclude, FindObjectsSortMode.None).Length > 0;
+        var isLegacyScene = scene.name == LegacySceneName;
+
+        if (!hasSpawnMarkers && !isLegacyScene)
             return;
 
         var host = new GameObject(nameof(CartoonLowPolyCityLiteNpcBootstrap));
@@ -48,12 +55,15 @@ public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
 
         if (spawnPoints.Length > 0)
         {
+            Debug.Log($"[NPC] A spawnar {spawnPoints.Length} NPC(s) em '{SceneManager.GetActiveScene().name}'.");
+
             for (var i = 0; i < spawnPoints.Length; i++)
             {
                 var sp = spawnPoints[i];
                 var dir = sp.GetPatrolWorldDirection();
                 var rot = dir.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(dir, Vector3.up) : Quaternion.identity;
-                var instance = Instantiate(prefab, sp.transform.position, rot);
+                var spawnPos = SnapSpawnToGround(sp.transform.position);
+                var instance = Instantiate(prefab, spawnPos, rot);
                 instance.name = $"SidewalkNpc_{i + 1}";
 
                 ConfigureNpcInstance(instance, i, dir, sp.PatrolHalfLength, sp.WalkSpeed);
@@ -81,11 +91,43 @@ public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
         Destroy(gameObject);
     }
 
+    static Vector3 SnapSpawnToGround(Vector3 position)
+    {
+        const float rayStart = 80f;
+        const float rayDistance = 200f;
+        var origin = position + Vector3.up * rayStart;
+        if (Physics.Raycast(origin, Vector3.down, out var hit, rayDistance, ~0, QueryTriggerInteraction.Ignore))
+            return hit.point + Vector3.up * 0.03f;
+
+        Debug.LogWarning(
+            $"[NPC] Raycast não encontrou chão em {position}. Ajusta Y do marcador na calçada.");
+        return position;
+    }
+
     private static void ConfigureNpcInstance(GameObject instance, int index, Vector3 patrolDir, float halfLength, float speed)
     {
+        var worldScale = GetPlayerWorldScale();
+        instance.transform.localScale = Vector3.one * worldScale;
+
         var walker = instance.GetComponent<SidewalkNpcWalker>();
         if (walker != null)
-            walker.ConfigurePatrol(patrolDir, halfLength, speed, index);
+            walker.ConfigurePatrol(patrolDir, halfLength * worldScale, speed * Mathf.Sqrt(worldScale), index);
+
+        var cc = instance.GetComponent<CharacterController>();
+        if (cc != null)
+        {
+            CharacterGroundSnap.FitControllerToWorldScale(cc, 2f, new Vector3(0f, 1f, 0f), 0.35f, 0.25f, 0.08f);
+            CharacterGroundSnap.TrySnap(instance.transform, cc);
+        }
+    }
+
+    /// <summary>Escala dos NPCs igual à do jogador (ex.: Player scale 0.3).</summary>
+    static float GetPlayerWorldScale()
+    {
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+            return 1f;
+        return Mathf.Max(0.15f, player.transform.lossyScale.y);
     }
 
     private readonly struct NpcSpawnSpec

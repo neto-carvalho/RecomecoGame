@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 703d25bd620220a4f8cea8d6fb489058, type: 3}
+  m_Name: RecomecoGameplaySettings
+  m_EditorClassIdentifier: 
+  movementController: {fileID: 9100000, guid: fac54571ff27f2b46b28cd6d82cd3c4c, type: 2}
+  playerAvatar: {fileID: 9000000, guid: ad472b939cd48144e9521d873c2e3018, type: 3}
+  referencePlayerScale: 0.2
+  walkSpeed: 5
+  runSpeed: 15
+  rotateSpeed: 200
+  jumpHeight: 5
+  playerScaleCity: 0.2
+  playerScaleFerroVelho: 0.2

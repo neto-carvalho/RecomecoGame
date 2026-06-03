@@ -189,7 +189,7 @@ public static class RecomecoSceneSetup
         sell.messageNear = "Aperte E para vender no ferro velho";
 
         EditorUtility.DisplayDialog("Recomeco",
-            "FerroVelho criado na frente da câmera da Scene (ou na origem).\n\nMova o objeto para o lugar da loja e ajuste Sell Distance no Inspector.",
+            "Zona de venda criada nesta cena.\n\nPara cena separada (2+ cenas): use Recomeco → Cenas → Criar cena FerroVelho e Portal para FerroVelho.\n\nMova o objeto e ajuste Sell Distance.",
             "OK");
         Selection.activeGameObject = go;
     }

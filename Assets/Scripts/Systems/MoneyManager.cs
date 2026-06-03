@@ -19,8 +19,9 @@ public class MoneyManager : MonoBehaviour
         {
             instance = this;
             money = initialMoney;
+            DontDestroyOnLoad(gameObject);
         }
-        else
+        else if (instance != this)
         {
             Destroy(gameObject);
         }
@@ -46,5 +47,11 @@ public class MoneyManager : MonoBehaviour
     public int GetMoney()
     {
         return money;
+    }
+
+    /// <summary>Define o saldo (restauro entre cenas).</summary>
+    public void SetMoney(int amount)
+    {
+        money = Mathf.Max(0, amount);
     }
 }

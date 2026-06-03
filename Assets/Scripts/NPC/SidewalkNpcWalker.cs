@@ -88,19 +88,6 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
     private void Start()
     {
         _patrolOrigin = transform.position;
-        if (snapToGroundOnStart && Physics.Raycast(
-                transform.position + Vector3.up * groundProbeHeight,
-                Vector3.down,
-                out var hit,
-                groundProbeDistance,
-                ~0,
-                QueryTriggerInteraction.Ignore))
-        {
-            var p = transform.position;
-            p.y = hit.point.y;
-            transform.position = p;
-            _patrolOrigin = p;
-        }
 
         patrolWorldDirection.y = 0f;
         if (patrolWorldDirection.sqrMagnitude < 0.0001f)
@@ -121,6 +108,16 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
 
         if (!_replacedDefaultRig)
             ApplySkinVisual(variant);
+
+        if (snapToGroundOnStart)
+        {
+            if (_animator != null)
+                _animator.Update(0f);
+
+            CharacterGroundSnap.FitControllerToWorldScale(_controller, 2f, new Vector3(0f, 1f, 0f), 0.35f, 0.25f, 0.08f);
+            CharacterGroundSnap.TrySnap(transform, _controller, 0.02f, groundProbeHeight + 40f, groundProbeDistance + 80f);
+            _patrolOrigin = transform.position;
+        }
     }
 
     private void CacheAnimatorFromHierarchy()
@@ -398,9 +395,11 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
             _animator.SetFloat("Vert", Mathf.MoveTowards(_animator.GetFloat("Vert"), vertTarget, blendStep));
         if (_hasState)
         {
+            // Character_Movement: State 0 = andar, State 1 = correr (NPCs só andam).
+            var stateTarget = 0f;
             _animator.SetFloat(
                 "State",
-                Mathf.MoveTowards(_animator.GetFloat("State"), 0f, animatorStateBlendSpeed * dt));
+                Mathf.MoveTowards(_animator.GetFloat("State"), stateTarget, animatorStateBlendSpeed * dt));
         }
         if (_hasIsJump)
             _animator.SetBool("IsJump", false);
