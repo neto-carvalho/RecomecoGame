@@ -41,6 +41,9 @@ public static class GameplaySceneRuntimeSetup
 
     public static void Run()
     {
+        if (RecomecoSceneNames.IsMenuScene(SceneManager.GetActiveScene()))
+            return;
+
         FerroVelhoWalkableGround.EnsureInActiveScene();
 
         var player = FindPlayer();

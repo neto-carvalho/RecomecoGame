@@ -23,7 +23,7 @@ public class RecomecoGameplaySettings : ScriptableObject
     public float jumpHeight = 5f;
 
     [Header("Escala do player por cena (portal / DontDestroyOnLoad)")]
-    [Tooltip("Escala uniforme (X=Y=Z) na cidade. Use a mesma da Hierarchy do Player na Demo.")]
+    [Tooltip("Escala uniforme (X=Y=Z) na cidade. Use a mesma da Hierarchy do Player na cena Cidade.")]
     public float playerScaleCity = 0.2f;
 
     [Tooltip("Escala no ferro velho. Igual à cidade = prefira encolher o ambiente junkyard no editor.")]

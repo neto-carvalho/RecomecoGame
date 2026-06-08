@@ -5,6 +5,8 @@ public class InteractionUI : MonoBehaviour
 {
     public static InteractionUI instance;
 
+    static object _messageOwner;
+
     public GameObject interactionTextObject;
     public TextMeshProUGUI interactionText;
 
@@ -62,15 +64,20 @@ public class InteractionUI : MonoBehaviour
         }
     }
 
-    public static void ShowMessage(string message)
+    public static void ShowMessage(string message, object owner = null)
     {
         BindForActiveScene();
+        _messageOwner = owner;
         if (instance != null)
             instance.ShowText(message);
     }
 
-    public static void HideMessage()
+    public static void HideMessage(object owner = null)
     {
+        if (owner != null && _messageOwner != null && _messageOwner != owner)
+            return;
+
+        _messageOwner = null;
         if (instance != null)
             instance.HideText();
     }

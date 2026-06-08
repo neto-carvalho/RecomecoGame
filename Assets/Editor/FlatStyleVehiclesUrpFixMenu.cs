@@ -10,17 +10,21 @@ using UnityEngine.SceneManagement;
 public static class FlatStyleVehiclesUrpFixMenu
 {
     const string PackRoot = "Assets/Flat_Style_Vehicles";
+    const string CidadeScenePath = "Assets/Scenes/Cidade.unity";
 
-    [MenuItem("Recomeco/Flat Style Vehicles/Corrigir cena Demo cinza (iluminação + materiais)")]
+    [MenuItem("Recomeco/Flat Style Vehicles/Corrigir cena Cidade cinza (iluminação + materiais)")]
     static void FixDemoGrayLook()
     {
         ConvertPackMaterialsToUrp(silent: true);
-        var scenePath = $"{PackRoot}/Demo/Demo.unity";
+        var scenePath = CidadeScenePath;
         if (!System.IO.File.Exists(scenePath))
         {
-            EditorUtility.DisplayDialog("Demo", "Cena Demo não encontrada.", "OK");
+            EditorUtility.DisplayDialog("Cidade", "Cena não encontrada em:\n" + CidadeScenePath, "OK");
             return;
         }
+
+        if (SceneManager.GetActiveScene().path != scenePath)
+            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
 
         var sky = AssetDatabase.LoadAssetAtPath<Material>(
             "Assets/AllSkyFree/Epic_BlueSunset/Epic_BlueSunset.mat");
@@ -33,15 +37,15 @@ public static class FlatStyleVehiclesUrpFixMenu
         LightingBalanceMenu.EnsureFillLight();
 
         EditorUtility.DisplayDialog(
-            "Demo",
+            "Cidade",
             "Skybox, luz ambiente, sol mais alto, luz de preenchimento e GI assado desligado.\n\n" +
-            "Guarda a cena Demo (Ctrl+S). Na Scene View, desliga o botão Fog se ainda estiver ativo.",
+            "Guarda a cena Cidade (Ctrl+S). Na Scene View, desliga o botão Fog se ainda estiver ativo.",
             "OK");
         var scene = SceneManager.GetActiveScene();
         if (scene.IsValid())
             EditorSceneManager.MarkSceneDirty(scene);
 
-        Debug.Log("[Flat Style Vehicles] Demo: iluminação e materiais ajustados.");
+        Debug.Log("[Flat Style Vehicles] Cidade: iluminação e materiais ajustados.");
     }
 
     /// <summary>
@@ -62,7 +66,7 @@ public static class FlatStyleVehiclesUrpFixMenu
         {
             Debug.LogWarning(
                 "[Flat Style Vehicles] Lighting Settings não encontrado em " + assetPath +
-                ". Abre a cena Demo e guarda (Ctrl+S); o asset deve ser importado pelo Unity.");
+                ". Abre a cena Cidade e guarda (Ctrl+S); o asset deve ser importado pelo Unity.");
             return;
         }
 
@@ -118,7 +122,7 @@ public static class FlatStyleVehiclesUrpFixMenu
             EditorUtility.DisplayDialog(
                 "Flat Style Vehicles",
                 $"Materiais convertidos para URP: {converted}\nIgnorados (já URP ou skybox): {skipped}\n\n" +
-                "Fecha e reabre a cena Demo (ou volta à tua cena).",
+                "Fecha e reabre a cena Cidade (ou volta à tua cena).",
                 "OK");
         }
 

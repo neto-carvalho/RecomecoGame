@@ -25,10 +25,10 @@ public class SellItems : MonoBehaviour
         bool playerInRange = player != null && Vector3.Distance(player.transform.position, transform.position) < sellDistance;
 
         // Mostra ou esconde a mensagem ao se aproximar/afastar
-        if (playerInRange && !playerWasInRange && InteractionUI.instance != null)
-            InteractionUI.instance.ShowText(messageNear);
-        if (!playerInRange && playerWasInRange && InteractionUI.instance != null)
-            InteractionUI.instance.HideText();
+        if (playerInRange && !playerWasInRange)
+            InteractionUI.ShowMessage(messageNear, this);
+        if (!playerInRange && playerWasInRange)
+            InteractionUI.HideMessage(this);
         playerWasInRange = playerInRange;
 
         if (!playerInRange || player == null) return;

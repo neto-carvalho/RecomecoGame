@@ -14,6 +14,7 @@ public static class SceneTransitionPlayerSetup
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        InteractionUI.HideMessage();
 
         var cc = player.GetComponent<CharacterController>();
         if (cc != null)

@@ -32,8 +32,7 @@ public class ItemPickup : MonoBehaviour
 
             if (added)
             {
-                if (InteractionUI.instance != null)
-                    InteractionUI.instance.HideText();
+                InteractionUI.HideMessage(this);
                 if (SpawnManager.instance != null)
                     SpawnManager.instance.RespawnLatinha();
                 UnityEngine.Debug.Log("Item coletado: " + item.itemName);
@@ -41,29 +40,40 @@ public class ItemPickup : MonoBehaviour
             }
             else
             {
-                if (InteractionUI.instance != null)
-                    InteractionUI.instance.ShowText("Inventário cheio!");
+                InteractionUI.ShowMessage("Inventário cheio!", this);
             }
         }
     }
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
-        {
-            playerNear = true;
-            if (InteractionUI.instance != null)
-                InteractionUI.instance.ShowText("Aperte E para coletar");
-        }
+        if (!IsPlayerCollider(other))
+            return;
+
+        playerNear = true;
+        InteractionUI.ShowMessage("Aperte E para coletar", this);
     }
 
     void OnTriggerExit(Collider other)
     {
+        if (!IsPlayerCollider(other))
+            return;
+
+        playerNear = false;
+        InteractionUI.HideMessage(this);
+    }
+
+    static bool IsPlayerCollider(Collider other)
+    {
+        if (other == null)
+            return false;
+
         if (other.CompareTag("Player"))
-        {
-            playerNear = false;
-            if (InteractionUI.instance != null)
-                InteractionUI.instance.HideText();
-        }
+            return true;
+
+        if (other.GetComponentInParent<CharacterController>() != null)
+            return true;
+
+        return other.transform.root.CompareTag("Player");
     }
 }

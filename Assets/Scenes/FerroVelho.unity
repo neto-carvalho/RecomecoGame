@@ -10793,7 +10793,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e07a466706bac74ba53bac787bd9708, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetSceneName: Demo
+  targetSceneName: Cidade
   targetSpawnId: EntradaCidade
   messageNear: "Aperte E para voltar \xE0 cidade"
   interactKey: 101

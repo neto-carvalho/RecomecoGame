@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48c9c31dd8c83bc4f8a600e20e93dd51, type: 3}
+  m_Name: MainMenuButtonSet
+  m_EditorClassIdentifier: 
+  jogar:
+    normal: {fileID: 21300000, guid: 03a38e8332e75d34cae27bed80956bd4, type: 3}
+    hover: {fileID: 21300000, guid: 519151bebd3c48149bc81597042e4978, type: 3}
+    selected: {fileID: 21300000, guid: 519151bebd3c48149bc81597042e4978, type: 3}
+  opcoes:
+    normal: {fileID: 21300000, guid: 600ad2540c23e8e4a983d12a8db82225, type: 3}
+    hover: {fileID: 21300000, guid: 76e671c4081b4d24ebbe2d4876e1f55a, type: 3}
+    selected: {fileID: 0}
+  creditos:
+    normal: {fileID: 21300000, guid: f8ecaf9fab42ae04d844b44dc6b84ef2, type: 3}
+    hover: {fileID: 21300000, guid: 655ec8736dc00174fb277ad43725e04d, type: 3}
+    selected: {fileID: 0}
+  sair:
+    normal: {fileID: 21300000, guid: 5d5abb3f29de3a24db2791c1b8ad81e6, type: 3}
+    hover: {fileID: 21300000, guid: 0e4aa2f39fc64224e99b51dbc985e0c5, type: 3}
+    selected: {fileID: 0}

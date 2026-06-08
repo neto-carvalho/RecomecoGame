@@ -13,6 +13,7 @@ public static class SceneTransitionSetupMenu
 {
     const string MenuRoot = "Recomeco/";
     const string FerroVelhoScenePath = "Assets/Scenes/FerroVelho.unity";
+    const string CidadeScenePath = "Assets/Scenes/Cidade.unity";
     const string JunkyardDemoPath = "Assets/Junkyard models/Scenes/Demo.unity";
     const string BaseMeshPrefabPath = "Assets/ithappy/Creative_Characters_FREE/Prefabs/Base_Mesh.prefab";
     const string MovementControllerPath =
@@ -103,7 +104,7 @@ public static class SceneTransitionSetupMenu
         EnsureReturnPortal();
         MarkDirty();
         EditorUtility.DisplayDialog("Recomeco",
-            "Portal_VoltaCidade configurado.\n\nNo Inspector, defina targetSceneName com o nome EXATO da sua cena de cidade (ex.: Demo ou Gameplay_City).",
+            "Portal_VoltaCidade configurado.\n\nTarget Scene Name deve ser Cidade (nome da cena em Assets/Scenes/Cidade.unity).",
             "OK");
     }
 
@@ -187,7 +188,16 @@ public static class SceneTransitionSetupMenu
     {
         var existing = GameObject.Find("Portal_VoltaCidade");
         if (existing != null)
+        {
+            var existingZone = existing.GetComponent<SceneTransitionZone>();
+            if (existingZone != null && SceneManager.GetActiveScene().name == RecomecoSceneNames.FerroVelho)
+            {
+                Undo.RecordObject(existingZone, "Update return portal");
+                existingZone.targetSceneName = RecomecoSceneNames.Cidade;
+            }
+
             return;
+        }
 
         var view = SceneView.lastActiveSceneView;
         var pos = view != null
@@ -196,8 +206,8 @@ public static class SceneTransitionSetupMenu
 
         var portal = CreatePortalObject("Portal_VoltaCidade", pos);
         var zone = portal.GetComponent<SceneTransitionZone>();
-        zone.targetSceneName = SceneManager.GetActiveScene().name == "FerroVelho"
-            ? GuessCitySceneName()
+        zone.targetSceneName = SceneManager.GetActiveScene().name == RecomecoSceneNames.FerroVelho
+            ? RecomecoSceneNames.Cidade
             : SceneManager.GetActiveScene().name;
         zone.targetSpawnId = "EntradaCidade";
         zone.messageNear = "Aperte E para voltar à cidade";
@@ -600,9 +610,19 @@ public static class SceneTransitionSetupMenu
                 paths.Add(path);
         }
 
+        AddIfExists("Assets/Scenes/MenuInicial.unity");
         AddIfExists(FerroVelhoScenePath);
+        AddIfExists(CidadeScenePath);
         var active = SceneManager.GetActiveScene().path;
         AddIfExists(active);
+
+        paths.RemoveAll(p => p != null && (
+            p.Replace('\\', '/').EndsWith("/Flat_Style_Vehicles/Demo/Demo.unity", System.StringComparison.OrdinalIgnoreCase) ||
+            p.Replace('\\', '/').EndsWith("/Demo/Demo.unity", System.StringComparison.OrdinalIgnoreCase)));
+
+        const string menuPath = "Assets/Scenes/MenuInicial.unity";
+        if (paths.Remove(menuPath))
+            paths.Insert(0, menuPath);
 
         var scenes = new EditorBuildSettingsScene[paths.Count];
         for (int i = 0; i < paths.Count; i++)

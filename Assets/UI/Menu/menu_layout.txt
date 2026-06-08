@@ -1,0 +1,6 @@
+# Gerado por Tools/slice_menu_art.py — referência 1920×1080
+buttonSize=825.0,86.2
+JOGAR=0.5000,0.5122
+OPCOES=0.5000,0.6059
+CREDITOS=0.5000,0.6997
+SAIR=0.5000,0.7934
