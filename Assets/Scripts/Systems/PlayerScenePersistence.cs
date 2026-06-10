@@ -37,6 +37,25 @@ public static class PlayerScenePersistence
         }
 
         PersistInteractionUI();
+        PersistGameplayHud();
+    }
+
+    static void PersistGameplayHud()
+    {
+        var root = GameplayHudBootstrap.GetHudRoot();
+        if (root == null)
+        {
+            var hud = Object.FindFirstObjectByType<HUDController>();
+            if (hud == null)
+                return;
+
+            root = hud.transform.root.gameObject;
+        }
+
+        if (root.GetComponent<Canvas>() == null && root.GetComponentInChildren<Canvas>() == null)
+            return;
+
+        Object.DontDestroyOnLoad(root);
     }
 
     static void PersistInteractionUI()
@@ -98,10 +117,32 @@ public static class PlayerScenePersistence
         InteractionUI.BindForActiveScene();
     }
 
+    public static void ResetForMenuGameplayStart()
+    {
+        if (_travelingPlayer != null)
+            Object.Destroy(_travelingPlayer);
+        if (_travelingCamera != null)
+            Object.Destroy(_travelingCamera.gameObject);
+
+        _travelingPlayer = null;
+        _travelingCamera = null;
+    }
+
+    public static void RegisterRuntimeCamera(PlayerCamera camera, GameObject player)
+    {
+        if (camera == null)
+            return;
+
+        _travelingCamera = camera;
+        if (player != null)
+            _travelingPlayer = player;
+    }
+
     public static PlayerCamera GetTravelingCamera()
     {
         if (_travelingCamera != null)
             return _travelingCamera;
+
         return Object.FindFirstObjectByType<PlayerCamera>();
     }
 
@@ -130,7 +171,7 @@ public static class PlayerScenePersistence
 
     public static GameObject ResolvePlayerInLoadedScene()
     {
-        if (_travelingPlayer == null)
+        if (_travelingPlayer == null || !_travelingPlayer)
             return GameObject.FindGameObjectWithTag("Player");
 
         RemoveDuplicatePlayers(_travelingPlayer);

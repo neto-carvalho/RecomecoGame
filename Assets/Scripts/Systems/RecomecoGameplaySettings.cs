@@ -11,6 +11,13 @@ public class RecomecoGameplaySettings : ScriptableObject
     public RuntimeAnimatorController movementController;
     public Avatar playerAvatar;
 
+    [Header("Aparência padrão do jogador")]
+    public Mesh animBodyMesh;
+    public Mesh faceMesh;
+    public Mesh hairMesh;
+    public Mesh outwearMesh;
+    public Mesh pantsMesh;
+
     [Tooltip("Escala Y do player para a qual walk/run/jump abaixo foram calibrados (ex.: 0.2 no pack ithappy)")]
     public float referencePlayerScale = 0.2f;
 
@@ -21,6 +28,10 @@ public class RecomecoGameplaySettings : ScriptableObject
 
     [Tooltip("Altura do pulo em metros (CharacterMover.m_JumpHeight) na referencePlayerScale")]
     public float jumpHeight = 5f;
+
+    [Header("Áudio")]
+    [Tooltip("Biblioteca de sons de passos por superfície (Assets/Audio/FootstepSurfaceLibrary.asset)")]
+    public FootstepSurfaceLibrary footstepLibrary;
 
     [Header("Escala do player por cena (portal / DontDestroyOnLoad)")]
     [Tooltip("Escala uniforme (X=Y=Z) na cidade. Use a mesma da Hierarchy do Player na cena Cidade.")]
@@ -86,5 +97,18 @@ public class RecomecoGameplaySettings : ScriptableObject
             _cached = Resources.Load<RecomecoGameplaySettings>("RecomecoGameplaySettings");
             return _cached;
         }
+    }
+
+    public Mesh GetAppearanceMesh(PlayerAppearanceSetup.AppearanceSlot slot)
+    {
+        return slot switch
+        {
+            PlayerAppearanceSetup.AppearanceSlot.Body => animBodyMesh,
+            PlayerAppearanceSetup.AppearanceSlot.Face => faceMesh,
+            PlayerAppearanceSetup.AppearanceSlot.Hair => hairMesh,
+            PlayerAppearanceSetup.AppearanceSlot.Outwear => outwearMesh,
+            PlayerAppearanceSetup.AppearanceSlot.Pants => pantsMesh,
+            _ => null,
+        };
     }
 }

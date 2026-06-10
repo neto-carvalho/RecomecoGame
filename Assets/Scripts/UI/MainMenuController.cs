@@ -8,12 +8,10 @@ using UnityEngine.UI;
 /// </summary>
 public class MainMenuController : MonoBehaviour
 {
-    [Header("Cena ao clicar em Jogar")]
-    [SerializeField] string gameplaySceneName = RecomecoSceneNames.Cidade;
-
     [Header("Painéis opcionais (filhos da UI)")]
     [SerializeField] GameObject optionsPanel;
     [SerializeField] GameObject creditsPanel;
+    [SerializeField] GameObject levelSelectPanel;
     [SerializeField] GameObject mainButtonsPanel;
 
     [Header("Destaque do botão selecionado")]
@@ -32,10 +30,15 @@ public class MainMenuController : MonoBehaviour
         Cursor.visible = true;
         Time.timeScale = 1f;
 
+        EnsureCanvasScaler();
+
         if (artLayout == null)
             artLayout = GetComponent<MainMenuArtLayout>();
         if (artLayout == null)
             artLayout = gameObject.AddComponent<MainMenuArtLayout>();
+
+        EnsureMenuMusic();
+        EnsureLevelSelectPanel();
 
         artLayout.Apply();
 
@@ -44,6 +47,55 @@ public class MainMenuController : MonoBehaviour
         ApplyCreditsText();
         ShowMainButtons();
         HighlightButton(0);
+    }
+
+    void EnsureCanvasScaler()
+    {
+        var scaler = GetComponent<CanvasScaler>();
+        if (scaler == null)
+            return;
+
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Shrink;
+        scaler.matchWidthOrHeight = 0.5f;
+    }
+
+    void EnsureMenuMusic()
+    {
+        if (GetComponent<MainMenuMusic>() == null)
+            gameObject.AddComponent<MainMenuMusic>();
+    }
+
+    void EnsureLevelSelectPanel()
+    {
+        MainMenuLevelSelect levelSelect = null;
+
+        if (levelSelectPanel != null)
+            levelSelect = levelSelectPanel.GetComponent<MainMenuLevelSelect>();
+
+        if (levelSelect == null)
+            levelSelect = GetComponentInChildren<MainMenuLevelSelect>(true);
+
+        if (levelSelect == null)
+        {
+            var panelGo = new GameObject("Panel_EscolherCena");
+            panelGo.transform.SetParent(transform, false);
+            var rect = panelGo.AddComponent<RectTransform>();
+            StretchPanel(rect);
+            levelSelect = panelGo.AddComponent<MainMenuLevelSelect>();
+        }
+
+        levelSelect.BuildIfNeeded();
+        levelSelectPanel = levelSelect.gameObject;
+    }
+
+    static void StretchPanel(RectTransform rect)
+    {
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
     }
 
     void CacheButtonImages()
@@ -78,21 +130,28 @@ public class MainMenuController : MonoBehaviour
 
     public void OnPlayClicked()
     {
-        if (string.IsNullOrEmpty(gameplaySceneName))
+        OpenSubPanel(levelSelectPanel);
+    }
+
+    public void LoadGameplayScene(string sceneName)
+    {
+        if (string.IsNullOrEmpty(sceneName))
         {
-            Debug.LogError("MainMenuController: defina o nome da cena de jogo (ex.: Cidade).");
+            Debug.LogError("MainMenuController: nome da cena vazio.");
             return;
         }
 
-        if (!Application.CanStreamedLevelBeLoaded(gameplaySceneName))
+        if (!Application.CanStreamedLevelBeLoaded(sceneName))
         {
             Debug.LogError(
-                "MainMenuController: cena '" + gameplaySceneName +
+                "MainMenuController: cena '" + sceneName +
                 "' não está em File → Build Settings.");
             return;
         }
 
-        SceneManager.LoadScene(gameplaySceneName);
+        MainMenuMusic.StopIfPlaying();
+        PlayerScenePersistence.ResetForMenuGameplayStart();
+        SceneManager.LoadScene(sceneName);
     }
 
     public void OnOptionsClicked()
@@ -153,6 +212,11 @@ public class MainMenuController : MonoBehaviour
             optionsPanel.SetActive(false);
         if (creditsPanel != null)
             creditsPanel.SetActive(false);
+        if (levelSelectPanel != null)
+            levelSelectPanel.SetActive(false);
+
+        if (artLayout != null)
+            artLayout.SetLogoVisible(true);
     }
 
     void OpenSubPanel(GameObject panel)
@@ -166,8 +230,14 @@ public class MainMenuController : MonoBehaviour
             optionsPanel.SetActive(false);
         if (creditsPanel != null && creditsPanel != panel)
             creditsPanel.SetActive(false);
+        if (levelSelectPanel != null && levelSelectPanel != panel)
+            levelSelectPanel.SetActive(false);
+
+        if (artLayout != null)
+            artLayout.SetLogoVisible(panel == optionsPanel || panel == creditsPanel);
 
         panel.SetActive(true);
+        panel.transform.SetAsLastSibling();
     }
 
     void ApplyCreditsText()
@@ -193,6 +263,7 @@ public class MainMenuController : MonoBehaviour
     {
         WireCloseButtonInPanel(optionsPanel);
         WireCloseButtonInPanel(creditsPanel);
+        WireCloseButtonInPanel(levelSelectPanel);
     }
 
     void WireCloseButtonInPanel(GameObject panel)

@@ -155,8 +155,5 @@ public static class PlayerAnimatorSetup
             mover.RebindAnimator();
         }
 
-        var input = player.GetComponent<Controller.MovePlayerInput>();
-        if (input != null)
-            input.RefreshCameraBinding();
     }
 }

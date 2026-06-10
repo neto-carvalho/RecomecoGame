@@ -1,18 +1,23 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Instancia NPCs decorativos quando a cena tem <see cref="SidewalkNpcSpawnPoint"/>.
-/// Funciona em qualquer cena (mapa novo, cidade, etc.). Sem marcadores, só tenta fallback na cena legada.
+/// Funciona em Cidade, na cena legada do pack e em qualquer mapa com marcadores de spawn.
 /// </summary>
 public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
 {
-    private const string LegacySceneName = "CartoonLowPolyCityLite_01";
-    /// <summary>Relativo a qualquer pasta <c>Resources</c> do projeto (aqui: Assets/Prefabs/NPC/Resources/SidewalkNpc).</summary>
-    private const string NpcPrefabResourcePath = "SidewalkNpc";
+    const string LegacySceneName = "CartoonLowPolyCityLite_01";
+    const string RuntimeNpcRootName = "Runtime_SidewalkNpcs";
+    const string NpcPrefabResourcePath = "SidewalkNpc";
 
-    private static readonly NpcSpawnSpec[] s_FallbackSpecs =
+    static bool _sceneHookRegistered;
+    static int _spawnedForSceneHandle = int.MinValue;
+
+    static readonly NpcSpawnSpec[] s_FallbackSpecs =
     {
         new(new Vector3(-27.35f, 0.83f, 43f), new Vector3(0f, 0f, 1f), 6.5f, 1.25f),
         new(new Vector3(-27.35f, 0.83f, 54f), new Vector3(0f, 0f, -1f), 6.5f, 1.15f),
@@ -21,25 +26,68 @@ public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
     };
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-    private static void AfterSceneLoad()
+    static void RegisterSceneHook()
     {
-        var scene = SceneManager.GetActiveScene();
-        if (!scene.isLoaded)
+        if (_sceneHookRegistered)
             return;
 
-        var hasSpawnMarkers = FindObjectsByType<SidewalkNpcSpawnPoint>(
-            FindObjectsInactive.Exclude, FindObjectsSortMode.None).Length > 0;
-        var isLegacyScene = scene.name == LegacySceneName;
+        _sceneHookRegistered = true;
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        ScheduleSpawnForScene(SceneManager.GetActiveScene());
+    }
 
-        if (!hasSpawnMarkers && !isLegacyScene)
+    static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        _spawnedForSceneHandle = int.MinValue;
+        ScheduleSpawnForScene(scene);
+    }
+
+    static void ScheduleSpawnForScene(Scene scene)
+    {
+        if (!ShouldSpawnInScene(scene))
             return;
 
         var host = new GameObject(nameof(CartoonLowPolyCityLiteNpcBootstrap));
         host.AddComponent<CartoonLowPolyCityLiteNpcBootstrap>();
     }
 
-    private void Start()
+    static bool ShouldSpawnInScene(Scene scene)
     {
+        if (!scene.IsValid() || !scene.isLoaded)
+            return false;
+
+        if (RecomecoSceneNames.IsMenuScene(scene))
+            return false;
+
+        if (scene.name == RecomecoSceneNames.Cidade || scene.name == LegacySceneName)
+            return true;
+
+        return FindSpawnPointsInScene(scene).Length > 0;
+    }
+
+    void Start()
+    {
+        StartCoroutine(SpawnWhenReady());
+    }
+
+    IEnumerator SpawnWhenReady()
+    {
+        yield return null;
+        yield return null;
+
+        var scene = SceneManager.GetActiveScene();
+        if (!ShouldSpawnInScene(scene))
+        {
+            Destroy(gameObject);
+            yield break;
+        }
+
+        if (_spawnedForSceneHandle == scene.handle)
+        {
+            Destroy(gameObject);
+            yield break;
+        }
+
         var prefab = Resources.Load<GameObject>(NpcPrefabResourcePath);
         if (prefab == null)
         {
@@ -47,23 +95,31 @@ public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
                 $"{nameof(CartoonLowPolyCityLiteNpcBootstrap)}: prefab não encontrado. Confirme que existe o ficheiro " +
                 $"Assets/Prefabs/NPC/Resources/{NpcPrefabResourcePath}.prefab (Resources.Load usa o nome sem extensão).");
             Destroy(gameObject);
-            return;
+            yield break;
         }
 
-        var spawnPoints = FindObjectsByType<SidewalkNpcSpawnPoint>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        ClearRuntimeNpcsInScene(scene);
+
+        var npcRoot = new GameObject(RuntimeNpcRootName);
+        SceneManager.MoveGameObjectToScene(npcRoot, scene);
+
+        var spawnPoints = FindSpawnPointsInScene(scene);
         Array.Sort(spawnPoints, (a, b) => string.CompareOrdinal(a.gameObject.name, b.gameObject.name));
 
         if (spawnPoints.Length > 0)
         {
-            Debug.Log($"[NPC] A spawnar {spawnPoints.Length} NPC(s) em '{SceneManager.GetActiveScene().name}'.");
+            Debug.Log($"[NPC] A spawnar {spawnPoints.Length} NPC(s) em '{scene.name}'.");
 
             for (var i = 0; i < spawnPoints.Length; i++)
             {
                 var sp = spawnPoints[i];
+                if (sp == null || !sp.isActiveAndEnabled)
+                    continue;
+
                 var dir = sp.GetPatrolWorldDirection();
                 var rot = dir.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(dir, Vector3.up) : Quaternion.identity;
                 var spawnPos = SnapSpawnToGround(sp.transform.position);
-                var instance = Instantiate(prefab, spawnPos, rot);
+                var instance = Instantiate(prefab, spawnPos, rot, npcRoot.transform);
                 instance.name = $"SidewalkNpc_{i + 1}";
 
                 ConfigureNpcInstance(instance, i, dir, sp.PatrolHalfLength, sp.WalkSpeed);
@@ -81,14 +137,45 @@ public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
                 var dir = spec.PatrolDirection;
                 dir.y = 0f;
                 var rot = dir.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(dir.normalized, Vector3.up) : Quaternion.identity;
-                var instance = Instantiate(prefab, spec.Position, rot);
+                var instance = Instantiate(prefab, spec.Position, rot, npcRoot.transform);
                 instance.name = $"SidewalkNpc_{i + 1} (fallback)";
 
                 ConfigureNpcInstance(instance, i, spec.PatrolDirection, spec.HalfLength, spec.Speed);
             }
         }
 
+        _spawnedForSceneHandle = scene.handle;
         Destroy(gameObject);
+    }
+
+    static SidewalkNpcSpawnPoint[] FindSpawnPointsInScene(Scene scene)
+    {
+        if (!scene.IsValid() || !scene.isLoaded)
+            return Array.Empty<SidewalkNpcSpawnPoint>();
+
+        var list = new List<SidewalkNpcSpawnPoint>();
+        foreach (var root in scene.GetRootGameObjects())
+        {
+            foreach (var sp in root.GetComponentsInChildren<SidewalkNpcSpawnPoint>(true))
+            {
+                if (sp != null)
+                    list.Add(sp);
+            }
+        }
+
+        return list.Count > 0 ? list.ToArray() : Array.Empty<SidewalkNpcSpawnPoint>();
+    }
+
+    static void ClearRuntimeNpcsInScene(Scene scene)
+    {
+        if (!scene.IsValid())
+            return;
+
+        foreach (var root in scene.GetRootGameObjects())
+        {
+            if (root != null && root.name == RuntimeNpcRootName)
+                Destroy(root);
+        }
     }
 
     static Vector3 SnapSpawnToGround(Vector3 position)
@@ -104,9 +191,9 @@ public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
         return position;
     }
 
-    private static void ConfigureNpcInstance(GameObject instance, int index, Vector3 patrolDir, float halfLength, float speed)
+    static void ConfigureNpcInstance(GameObject instance, int index, Vector3 patrolDir, float halfLength, float speed)
     {
-        var worldScale = GetPlayerWorldScale();
+        var worldScale = GetNpcWorldScale();
         instance.transform.localScale = Vector3.one * worldScale;
 
         var walker = instance.GetComponent<SidewalkNpcWalker>();
@@ -121,16 +208,20 @@ public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
         }
     }
 
-    /// <summary>Escala dos NPCs igual à do jogador (ex.: Player scale 0.3).</summary>
-    static float GetPlayerWorldScale()
+    static float GetNpcWorldScale()
     {
+        var settings = RecomecoGameplaySettings.Instance;
+        if (settings != null)
+            return Mathf.Max(0.15f, settings.GetPlayerScaleForActiveScene());
+
         var player = GameObject.FindGameObjectWithTag("Player");
         if (player == null)
             return 1f;
+
         return Mathf.Max(0.15f, player.transform.lossyScale.y);
     }
 
-    private readonly struct NpcSpawnSpec
+    readonly struct NpcSpawnSpec
     {
         public readonly Vector3 Position;
         public readonly Vector3 PatrolDirection;

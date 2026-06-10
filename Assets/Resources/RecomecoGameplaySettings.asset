@@ -14,10 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementController: {fileID: 9100000, guid: fac54571ff27f2b46b28cd6d82cd3c4c, type: 2}
   playerAvatar: {fileID: 9000000, guid: ad472b939cd48144e9521d873c2e3018, type: 3}
+  animBodyMesh: {fileID: -8545447256379345787, guid: 5dbb2366974668d48a42568690792034, type: 3}
+  faceMesh: {fileID: -7927354642031663450, guid: 819bbc3929ae14e43b0d8405d65589f9, type: 3}
+  hairMesh: {fileID: -8820499275058686143, guid: c00be380054f3aa469720cb9cd40ef14, type: 3}
+  outwearMesh: {fileID: 9053217031431064551, guid: 5a531847cd74a654b97ef249cb9306d5, type: 3}
+  pantsMesh: {fileID: -4396149814923931179, guid: 67dfe8b1e1ed9b34c985396c6282c820, type: 3}
   referencePlayerScale: 0.2
   walkSpeed: 5
   runSpeed: 15
   rotateSpeed: 200
   jumpHeight: 5
+  footstepLibrary: {fileID: 11400000, guid: e64fa8cdcde97bc4f9fe8f7f5ac0f019, type: 2}
   playerScaleCity: 0.2
   playerScaleFerroVelho: 0.2

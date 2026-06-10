@@ -91,6 +91,12 @@ public class MainMenuArtLayout : MonoBehaviour
         RefreshButtonVisuals();
     }
 
+    public void SetLogoVisible(bool visible)
+    {
+        if (logoObject != null)
+            logoObject.SetActive(visible);
+    }
+
     void AutoWireReferences()
     {
         if (logoObject == null)
@@ -408,6 +414,9 @@ public class MainMenuArtLayout : MonoBehaviour
         if (creditsPanel == null)
             creditsPanel = transform.Find("Panel_Creditos")?.gameObject;
 
+        var levelSelectPanel = transform.Find("Panel_EscolherCena")?.gameObject;
+        if (levelSelectPanel != null)
+            levelSelectPanel.transform.SetAsLastSibling();
         if (optionsPanel != null)
             optionsPanel.transform.SetAsLastSibling();
         if (creditsPanel != null)

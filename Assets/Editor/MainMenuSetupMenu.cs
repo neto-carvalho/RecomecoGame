@@ -74,6 +74,8 @@ public static class MainMenuSetupMenu
 
     const string ButtonsFolder = MenuArtFolder + "/Buttons";
     const string ButtonSetAssetPath = "Assets/Resources/MainMenuButtonSet.asset";
+    const string MenuMusicResourcesPath = "Assets/Resources/Audio/musica_recomeco.mp3";
+    const string MenuMusicSourcePath = "Assets/Audio/Menu/musica_recomeco.mp3";
 
     enum ArtLayoutMode
     {
@@ -227,6 +229,11 @@ public static class MainMenuSetupMenu
 
         ApplyBackgroundToScene(scene, bgSprite);
         ConfigureArtLayoutOnMenu(menu, mode);
+        if (menu != null)
+        {
+            EnsureLevelSelectPanel(menu);
+            EnsureMenuMusic(menu.gameObject);
+        }
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         EditorUtility.DisplayDialog("Recomeco", successMessage, "OK");
@@ -296,6 +303,7 @@ public static class MainMenuSetupMenu
         var scaler = canvasGo.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920, 1080);
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Shrink;
         scaler.matchWidthOrHeight = 0.5f;
         canvasGo.AddComponent<GraphicRaycaster>();
 
@@ -327,9 +335,11 @@ public static class MainMenuSetupMenu
             "OPÇÕES\n\nEm breve: volume, qualidade gráfica e controles.");
         var creditsPanel = CreateSubPanel(canvasGo.transform, "Panel_Creditos", RecomecoCredits.MenuBody, 540f);
 
+        EnsureLevelSelectPanel(menu);
         WireMenu(menu, btnPlay, btnOpt, btnCred, btnQuit, buttonsPanel, optionsPanel, creditsPanel);
         ConfigureArtLayoutOnMenu(menu, ArtLayoutMode.FullArtInvisible, logo.gameObject, buttonsPanel,
             btnPlay, btnOpt, btnCred, btnQuit);
+        EnsureMenuMusic(canvasGo);
 
         return canvasGo;
     }
@@ -404,6 +414,8 @@ public static class MainMenuSetupMenu
             menu.transform.Find("Panel_Opcoes")?.gameObject;
         so.FindProperty("creditsPanel").objectReferenceValue =
             menu.transform.Find("Panel_Creditos")?.gameObject;
+        so.FindProperty("levelSelectPanel").objectReferenceValue =
+            menu.transform.Find("Panel_EscolherCena")?.gameObject;
         so.FindProperty("menuButtons").arraySize = 4;
         so.FindProperty("menuButtons").GetArrayElementAtIndex(0).objectReferenceValue = btnPlay;
         so.FindProperty("menuButtons").GetArrayElementAtIndex(1).objectReferenceValue = btnOpt;
@@ -593,10 +605,11 @@ public static class MainMenuSetupMenu
         GameObject creditsPanel)
     {
         var so = new SerializedObject(menu);
-        so.FindProperty("gameplaySceneName").stringValue = RecomecoSceneNames.Cidade;
         so.FindProperty("mainButtonsPanel").objectReferenceValue = buttonsPanel;
         so.FindProperty("optionsPanel").objectReferenceValue = optionsPanel;
         so.FindProperty("creditsPanel").objectReferenceValue = creditsPanel;
+        so.FindProperty("levelSelectPanel").objectReferenceValue =
+            menu.transform.Find("Panel_EscolherCena")?.gameObject;
         so.FindProperty("mainMenuButtons").arraySize = 4;
         so.FindProperty("mainMenuButtons").GetArrayElementAtIndex(0).objectReferenceValue = btnPlay;
         so.FindProperty("mainMenuButtons").GetArrayElementAtIndex(1).objectReferenceValue = btnOpt;
@@ -611,10 +624,13 @@ public static class MainMenuSetupMenu
 
         var closeOpt = FindBackButton(optionsPanel);
         var closeCred = FindBackButton(creditsPanel);
+        var closeLevel = FindBackButton(menu.transform.Find("Panel_EscolherCena")?.gameObject);
         if (closeOpt != null)
             UnityEventTools.AddPersistentListener(closeOpt.onClick, menu.OnCloseSubPanelClicked);
         if (closeCred != null)
             UnityEventTools.AddPersistentListener(closeCred.onClick, menu.OnCloseSubPanelClicked);
+        if (closeLevel != null)
+            UnityEventTools.AddPersistentListener(closeLevel.onClick, menu.OnCloseSubPanelClicked);
 
         AddHighlight(btnPlay, menu, 0);
         AddHighlight(btnOpt, menu, 1);
@@ -824,6 +840,77 @@ public static class MainMenuSetupMenu
             path += ".png";
 
         return path.Replace('\\', '/');
+    }
+
+    static void EnsureLevelSelectPanel(MainMenuController menu)
+    {
+        if (menu == null)
+            return;
+
+        var existing = menu.transform.Find("Panel_EscolherCena");
+        GameObject panelGo;
+        MainMenuLevelSelect levelSelect;
+
+        if (existing != null)
+        {
+            panelGo = existing.gameObject;
+            levelSelect = panelGo.GetComponent<MainMenuLevelSelect>()
+                ?? panelGo.AddComponent<MainMenuLevelSelect>();
+        }
+        else
+        {
+            panelGo = new GameObject("Panel_EscolherCena");
+            panelGo.transform.SetParent(menu.transform, false);
+            var rect = panelGo.AddComponent<RectTransform>();
+            StretchFull(rect);
+            levelSelect = panelGo.AddComponent<MainMenuLevelSelect>();
+        }
+
+        levelSelect.BuildIfNeeded();
+        panelGo.SetActive(false);
+
+        var so = new SerializedObject(menu);
+        so.FindProperty("levelSelectPanel").objectReferenceValue = panelGo;
+        so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    static void EnsureMenuMusic(GameObject canvas)
+    {
+        if (canvas == null)
+            return;
+
+        EnsureMenuMusicImport(MenuMusicResourcesPath);
+        EnsureMenuMusicImport(MenuMusicSourcePath);
+
+        var music = canvas.GetComponent<MainMenuMusic>();
+        if (music == null)
+            music = canvas.AddComponent<MainMenuMusic>();
+
+        var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(MenuMusicResourcesPath)
+            ?? AssetDatabase.LoadAssetAtPath<AudioClip>(MenuMusicSourcePath);
+
+        var so = new SerializedObject(music);
+        if (clip != null)
+            so.FindProperty("menuMusic").objectReferenceValue = clip;
+        so.FindProperty("volume").floatValue = 0.65f;
+        so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    static void EnsureMenuMusicImport(string assetPath)
+    {
+        if (!File.Exists(assetPath))
+            return;
+
+        var importer = AssetImporter.GetAtPath(assetPath) as UnityEditor.AudioImporter;
+        if (importer == null)
+            return;
+
+        var settings = importer.defaultSampleSettings;
+        settings.loadType = UnityEngine.AudioClipLoadType.Streaming;
+        importer.defaultSampleSettings = settings;
+        importer.forceToMono = true;
+        importer.loadInBackground = true;
+        importer.SaveAndReimport();
     }
 
     public static void PutMenuFirstInBuildSettings()

@@ -45,6 +45,7 @@ public static class GameplaySceneRuntimeSetup
             return;
 
         FerroVelhoWalkableGround.EnsureInActiveScene();
+        GameplayHudBootstrap.Ensure();
 
         var player = FindPlayer();
         if (player == null)
@@ -63,24 +64,33 @@ public static class GameplaySceneRuntimeSetup
                 player.AddComponent<FerroVelhoPlayerGuard>();
         }
 
+        PlayerAppearanceSetup.Apply(player);
         EnsurePlayerComponents(player);
+        EnsureGameplayCamera(player);
         PlayerAnimatorSetup.RefreshLocomotion(player);
+        GameSession.ApplyToPlayer(player);
+        GameplayHudBootstrap.WirePlayerInventory(player);
+        SceneTransitionPlayerSetup.AfterSceneLoad(player);
+    }
+
+    static void EnsureGameplayCamera(GameObject player)
+    {
+        if (player == null)
+            return;
 
         var playerCamera = PlayerScenePersistence.GetTravelingCamera();
         if (playerCamera == null)
             playerCamera = Object.FindFirstObjectByType<PlayerCamera>();
+
         if (playerCamera == null)
         {
             playerCamera = CreateFollowCamera(player.transform);
             if (playerCamera != null)
-                PlayerScenePersistence.WireCameraAfterLoad(player);
-        }
-        else
-        {
-            PlayerScenePersistence.WireCameraAfterLoad(player);
+                PlayerScenePersistence.RegisterRuntimeCamera(playerCamera, player);
         }
 
-        SceneTransitionPlayerSetup.AfterSceneLoad(player);
+        if (playerCamera != null)
+            PlayerScenePersistence.WireCameraAfterLoad(player);
     }
 
     static GameObject FindPlayer()
@@ -107,6 +117,33 @@ public static class GameplaySceneRuntimeSetup
             if (mover != null)
                 settings.ApplyToMover(mover, player.transform);
         }
+
+        EnsureFootstepAudio(player, settings);
+    }
+
+    static void EnsureFootstepAudio(GameObject player, RecomecoGameplaySettings settings)
+    {
+        if (player.GetComponent<CharacterController>() == null)
+            return;
+
+        var library = settings != null ? settings.footstepLibrary : null;
+
+        var footsteps = player.GetComponent<FootstepAudio>();
+        if (footsteps == null)
+        {
+            if (library == null)
+            {
+                Debug.LogWarning(
+                    "GameplaySceneRuntimeSetup: player sem FootstepAudio e sem footstepLibrary em " +
+                    "RecomecoGameplaySettings — passos ficam sem som nesta cena.");
+                return;
+            }
+
+            footsteps = player.AddComponent<FootstepAudio>();
+        }
+
+        if (library != null)
+            footsteps.SetSurfaceLibrary(library);
     }
 
     static PlayerCamera CreateFollowCamera(Transform player)

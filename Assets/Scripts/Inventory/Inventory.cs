@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
-    [Tooltip("Nùmero de slots do inventùrio")]
+    [Tooltip("N?mero de slots do invent?rio")]
     public int slotCount = 12;
 
-    [Tooltip("Quantidade mùxima do mesmo item por slot (stack)")]
+    [Tooltip("Quantidade m?xima do mesmo item por slot (stack)")]
     public int maxStackPerSlot = 20;
 
     public InventorySlot[] slots;
@@ -17,10 +17,10 @@ public class Inventory : MonoBehaviour
         for (int i = 0; i < slotCount; i++)
             slots[i] = new InventorySlot();
 
-        // Se slotUIs nùo foi preenchido no Inspector, tenta achar no painel do inventùrio
+        // Se slotUIs n?o foi preenchido no Inspector, tenta achar no painel do invent?rio
         if (slotUIs == null || slotUIs.Length == 0)
         {
-            InventoryUI invUI = FindFirstObjectByType<InventoryUI>();
+            InventoryUI invUI = GameplayHudBootstrap.ResolveInventoryUi();
             if (invUI != null && invUI.inventoryPanel != null)
             {
                 SlotUI[] found = GetSlotUIsInOrder(invUI.inventoryPanel.transform);
@@ -41,10 +41,17 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    /// <summary>Atualiza a exibiùùo de todos os slots na UI. Chamar ao abrir o inventùrio.</summary>
+    /// <summary>Reconecta os slots da UI ap?s o painel ser criado em runtime.</summary>
+    public void ReconnectUi()
+    {
+        BindSlotUIsFromActiveInventoryUi();
+        RefreshAllSlots();
+    }
+
+    /// <summary>Atualiza a exibi??o de todos os slots na UI. Chamar ao abrir o invent?rio.</summary>
     public void RefreshAllSlots()
     {
-        TryFindSlotUIsIfMissing();
+        EnsureSlotUiBinding();
         int n = GetSlotCount();
         if (n == 0) return;
         for (int i = 0; i < n; i++)
@@ -57,29 +64,65 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    void TryFindSlotUIsIfMissing()
+    void EnsureSlotUiBinding()
     {
-        if (slotUIs != null && slotUIs.Length > 0) return;
-        InventoryUI invUI = FindFirstObjectByType<InventoryUI>();
-        if (invUI == null || invUI.inventoryPanel == null) return;
+        if (AreSlotUIsBoundToActiveInventoryUi())
+            return;
+
+        BindSlotUIsFromActiveInventoryUi();
+    }
+
+    bool AreSlotUIsBoundToActiveInventoryUi()
+    {
+        if (slotUIs == null || slotUIs.Length == 0)
+            return false;
+
+        InventoryUI invUI = GameplayHudBootstrap.ResolveInventoryUi();
+        if (invUI == null || invUI.inventoryPanel == null)
+            return false;
+
+        Transform panel = invUI.inventoryPanel.transform;
+        foreach (SlotUI slotUi in slotUIs)
+        {
+            if (slotUi == null || !slotUi.gameObject.activeInHierarchy)
+                return false;
+            if (!slotUi.transform.IsChildOf(panel))
+                return false;
+        }
+
+        return true;
+    }
+
+    void BindSlotUIsFromActiveInventoryUi()
+    {
+        InventoryUI invUI = GameplayHudBootstrap.ResolveInventoryUi();
+        if (invUI == null || invUI.inventoryPanel == null)
+            return;
+
         SlotUI[] found = GetSlotUIsInOrder(invUI.inventoryPanel.transform);
-        if (found == null || found.Length == 0) return;
-        slotCount = Mathf.Min(slotCount, found.Length);
-        slotUIs = new SlotUI[slotCount];
-        for (int i = 0; i < slotCount; i++)
+        if (found == null || found.Length == 0)
+            return;
+
+        int uiCount = found.Length;
+        slotUIs = new SlotUI[uiCount];
+        for (int i = 0; i < uiCount; i++)
             slotUIs[i] = found[i];
-        if (slots == null || slots.Length < slotCount)
+
+        if (slots == null || slots.Length < uiCount)
         {
             InventorySlot[] old = slots;
-            slots = new InventorySlot[slotCount];
-            for (int i = 0; i < slotCount; i++)
+            slots = new InventorySlot[uiCount];
+            for (int i = 0; i < uiCount; i++)
                 slots[i] = (old != null && i < old.Length) ? old[i] : new InventorySlot();
         }
+
+        slotCount = Mathf.Min(slotCount, uiCount);
     }
 
     public bool AddItem(ItemData item)
     {
         if (item == null) return false;
+        EnsureSlotUiBinding();
         int n = GetSlotCount();
         if (n == 0) return false;
 
@@ -96,7 +139,7 @@ public class Inventory : MonoBehaviour
             return true;
         }
 
-        // 2) Usar um slot vazio (quando o primeiro estù cheio ou para novo tipo de item)
+        // 2) Usar um slot vazio (quando o primeiro est? cheio ou para novo tipo de item)
         for (int i = 0; i < n; i++)
         {
             if (!slots[i].IsEmpty()) continue;
@@ -120,7 +163,7 @@ public class Inventory : MonoBehaviour
         return Mathf.Min(slots.Length, slotUIs.Length);
     }
 
-    /// <summary>Obtùm os SlotUIs na ordem exata dos filhos do painel (Slot, Slot (1), Slot (2)...).</summary>
+    /// <summary>Obt?m os SlotUIs na ordem exata dos filhos do painel (Slot, Slot (1), Slot (2)...).</summary>
     static SlotUI[] GetSlotUIsInOrder(Transform panel)
     {
         if (panel == null) return null;
@@ -133,7 +176,7 @@ public class Inventory : MonoBehaviour
         return list.Count > 0 ? list.ToArray() : null;
     }
 
-    /// <summary>Retorna a quantidade total de itens com o nome dado no inventùrio.</summary>
+    /// <summary>Retorna a quantidade total de itens com o nome dado no invent?rio.</summary>
     public int GetItemCount(string itemName)
     {
         if (string.IsNullOrEmpty(itemName)) return 0;
@@ -146,7 +189,7 @@ public class Inventory : MonoBehaviour
         return total;
     }
 
-    /// <summary>Remove atù 'amount' itens com o nome dado. Retorna quantos foram removidos.</summary>
+    /// <summary>Remove at? 'amount' itens com o nome dado. Retorna quantos foram removidos.</summary>
     public int RemoveItem(string itemName, int amount)
     {
         if (string.IsNullOrEmpty(itemName) || amount <= 0) return 0;
