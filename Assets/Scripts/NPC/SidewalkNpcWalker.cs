@@ -223,8 +223,52 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
         return root.transform.childCount > 0;
     }
 
+    Transform _interactionFaceTarget;
+
+    /// <summary>Pausado para interação (venda). O NPC para e olha para o jogador.</summary>
+    public bool InteractionPaused { get; private set; }
+
+    public void PauseForInteraction(Transform faceTarget)
+    {
+        InteractionPaused = true;
+        _interactionFaceTarget = faceTarget;
+    }
+
+    public void ResumeFromInteraction()
+    {
+        InteractionPaused = false;
+        _interactionFaceTarget = null;
+    }
+
+    void UpdatePausedInteraction()
+    {
+        if (_interactionFaceTarget != null)
+            ApplyYawDegreesTowardsWorldDirection(
+                _interactionFaceTarget.position - transform.position, rotateSpeedDegrees);
+
+        if (_controller.isGrounded && _verticalVelocity < 0f)
+            _verticalVelocity = -2f;
+        _verticalVelocity += gravity * Time.deltaTime;
+        _controller.Move(Vector3.up * (_verticalVelocity * Time.deltaTime));
+
+        if (_animator == null)
+            return;
+
+        var dt = Time.deltaTime;
+        if (_hasHor)
+            _animator.SetFloat("Hor", Mathf.MoveTowards(_animator.GetFloat("Hor"), 0f, 6f * dt));
+        if (_hasVert)
+            _animator.SetFloat("Vert", Mathf.MoveTowards(_animator.GetFloat("Vert"), 0f, 6f * dt));
+    }
+
     private void Update()
     {
+        if (InteractionPaused)
+        {
+            UpdatePausedInteraction();
+            return;
+        }
+
         var planar = transform.position - _patrolOrigin;
         planar.y = 0f;
         var along = Vector3.Dot(planar, _moveDir);

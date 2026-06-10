@@ -33,6 +33,10 @@ public class RecomecoGameplaySettings : ScriptableObject
     [Tooltip("Biblioteca de sons de passos por superfície (Assets/Audio/FootstepSurfaceLibrary.asset)")]
     public FootstepSurfaceLibrary footstepLibrary;
 
+    [Header("Coleta")]
+    [Tooltip("Prefab da latinha coletável (Assets/Latinha.prefab)")]
+    public GameObject latinhaPrefab;
+
     [Header("Escala do player por cena (portal / DontDestroyOnLoad)")]
     [Tooltip("Escala uniforme (X=Y=Z) na cidade. Use a mesma da Hierarchy do Player na cena Cidade.")]
     public float playerScaleCity = 0.2f;

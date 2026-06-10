@@ -1366,8 +1366,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpawnManager
   latinhaPrefab: {fileID: 3454898247569233799, guid: 5fe784add6879af458f2afb89ae8407c, type: 3}
-  quantidadeInicial: 10
-  areaSpawn: 20
+  quantidadeInicial: 50
+  areaSpawn: 35
+  tempoRespawn: 8
+  snapToGround: 1
+  raycastStartHeight: 120
+  raycastMaxDistance: 250
+  heightAboveGround: 0.04
+  groundLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  maxGroundSlope: 42
+  maxAttemptsPerSpawn: 16
   tempoRespawn: 30
 --- !u!4 &382196682
 Transform:

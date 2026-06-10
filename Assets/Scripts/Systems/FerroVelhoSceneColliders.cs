@@ -11,7 +11,7 @@ public static class FerroVelhoSceneColliders
 
     public static int EnsureColliders(Scene scene)
     {
-        if (!scene.IsValid())
+        if (!scene.IsValid() || !FerroVelhoWalkableGround.IsFerroVelhoScene(scene))
             return 0;
 
         var count = 0;

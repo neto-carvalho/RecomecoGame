@@ -123,9 +123,12 @@ public static class PlayerScenePersistence
             Object.Destroy(_travelingPlayer);
         if (_travelingCamera != null)
             Object.Destroy(_travelingCamera.gameObject);
+        if (_travelingUiRoot != null)
+            Object.Destroy(_travelingUiRoot);
 
         _travelingPlayer = null;
         _travelingCamera = null;
+        _travelingUiRoot = null;
     }
 
     public static void RegisterRuntimeCamera(PlayerCamera camera, GameObject player)

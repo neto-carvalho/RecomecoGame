@@ -35,6 +35,12 @@ public class MoneyManager : MonoBehaviour
         }
     }
 
+    void OnDestroy()
+    {
+        if (instance == this)
+            instance = null;
+    }
+
     /// <summary>Adiciona valor ao dinheiro atual.</summary>
     public void AddMoney(int amount)
     {

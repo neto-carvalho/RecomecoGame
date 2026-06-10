@@ -34,7 +34,7 @@ public static class FerroVelhoSceneGround
     /// <summary>Adiciona MeshCollider no terreno da cena. Retorna quantos colliders foram garantidos.</summary>
     public static int EnsureSceneGroundColliders(Scene scene)
     {
-        if (!scene.IsValid())
+        if (!scene.IsValid() || !FerroVelhoWalkableGround.IsFerroVelhoScene(scene))
             return 0;
 
         var count = 0;

@@ -206,6 +206,9 @@ public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
             CharacterGroundSnap.FitControllerToWorldScale(cc, 2f, new Vector3(0f, 1f, 0f), 0.35f, 0.25f, 0.08f);
             CharacterGroundSnap.TrySnap(instance.transform, cc);
         }
+
+        if (instance.GetComponent<NpcSellInteraction>() == null)
+            instance.AddComponent<NpcSellInteraction>();
     }
 
     static float GetNpcWorldScale()

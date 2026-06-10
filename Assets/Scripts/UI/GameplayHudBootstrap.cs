@@ -48,6 +48,21 @@ public static class GameplayHudBootstrap
         Object.DontDestroyOnLoad(go);
     }
 
+    public static void ResetForMenu()
+    {
+        if (_persistentHudRoot != null)
+        {
+            Object.Destroy(_persistentHudRoot);
+            _persistentHudRoot = null;
+        }
+        else
+        {
+            var existing = GameObject.Find(HudRootName);
+            if (existing != null)
+                Object.Destroy(existing);
+        }
+    }
+
     public static GameObject GetHudRoot()
     {
         if (_persistentHudRoot != null && !_persistentHudRoot)

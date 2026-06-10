@@ -84,6 +84,13 @@ public static class GameSession
         inv.RefreshAllSlots();
     }
 
+    public static void Reset()
+    {
+        _slots = null;
+        _money = -1;
+        _hasInventory = false;
+    }
+
     static ItemData FindItemByName(string itemName)
     {
         var all = Resources.FindObjectsOfTypeAll<ItemData>();
