@@ -84,13 +84,11 @@ public class SlotUI : MonoBehaviour
 
         if (quantityText != null)
         {
-            quantityText.color = new Color(0.1f, 0.1f, 0.1f, 1f);
+            quantityText.color = Color.white;
+            quantityText.fontStyle = TMPro.FontStyles.Bold;
             if (quantityText.gameObject.activeSelf == false)
                 quantityText.gameObject.SetActive(true);
-            if (quantity > 1)
-                quantityText.text = quantity.ToString();
-            else
-                quantityText.text = "";
+            quantityText.text = quantity.ToString();
         }
     }
 }

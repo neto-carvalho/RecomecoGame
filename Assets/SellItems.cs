@@ -11,8 +11,8 @@ public class SellItems : MonoBehaviour
     [Tooltip("Nome do item vendido (ex: Latinha). Deve bater com ItemData.itemName.")]
     public string itemName = "Latinha";
 
-    [Tooltip("Valor em dinheiro por unidade vendida")]
-    public int pricePerUnit = 2;
+    [Tooltip("Valor por unidade vendida, em CENTAVOS (200 = R$ 2,00)")]
+    public int pricePerUnit = 200;
 
     [Tooltip("Mensagem exibida quando o jogador está perto (ex.: Aperte E para vender)")]
     public string messageNear = "Aperte E para vender";
@@ -59,6 +59,6 @@ public class SellItems : MonoBehaviour
         int removed = inv.RemoveItem(itemName, count);
         int total = removed * pricePerUnit;
         MoneyManager.instance.AddMoney(total);
-        UnityEngine.Debug.Log("Vendido: " + removed + " x " + itemName + " = R$ " + total);
+        UnityEngine.Debug.Log("Vendido: " + removed + " x " + itemName + " = " + MoneyManager.FormatBRL(total));
     }
 }

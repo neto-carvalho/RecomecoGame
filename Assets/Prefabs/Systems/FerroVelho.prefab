@@ -123,5 +123,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SellItems
   sellDistance: 3
   itemName: Latinha
-  pricePerUnit: 2
+  pricePerUnit: 200
   messageNear: Aperte E para vender

@@ -8,8 +8,8 @@ using TMPro;
 [RequireComponent(typeof(TextMeshProUGUI))]
 public class MoneyUI : MonoBehaviour
 {
-    [Tooltip("Prefixo exibido antes do valor (ex: \"Dinheiro: R$\")")]
-    public string prefix = "R$ ";
+    [Tooltip("Prefixo exibido antes do valor formatado (ex: \"Dinheiro: \")")]
+    public string prefix = "";
 
     private TextMeshProUGUI textField;
 
@@ -21,11 +21,7 @@ public class MoneyUI : MonoBehaviour
     void Update()
     {
         if (textField == null) return;
-        if (MoneyManager.instance == null)
-        {
-            textField.text = prefix + "0";
-            return;
-        }
-        textField.text = prefix + MoneyManager.instance.GetMoney().ToString();
+        int cents = MoneyManager.instance != null ? MoneyManager.instance.GetMoney() : 0;
+        textField.text = prefix + MoneyManager.FormatBRL(cents);
     }
 }

@@ -44,7 +44,7 @@ public static class GameplayHudBootstrap
 
         var go = new GameObject("MoneyManager");
         var manager = go.AddComponent<MoneyManager>();
-        manager.initialMoney = 420;
+        manager.initialMoney = 42000;
         Object.DontDestroyOnLoad(go);
     }
 
@@ -273,8 +273,9 @@ public static class GameplayHudBootstrap
         var qtyText = qtyGo.AddComponent<TextMeshProUGUI>();
         if (TMP_Settings.defaultFontAsset != null)
             qtyText.font = TMP_Settings.defaultFontAsset;
-        qtyText.fontSize = 16f;
-        qtyText.color = new Color(0.1f, 0.1f, 0.1f, 1f);
+        qtyText.fontSize = 18f;
+        qtyText.color = Color.white;
+        qtyText.fontStyle = FontStyles.Bold;
         qtyText.alignment = TextAlignmentOptions.BottomRight;
         qtyText.raycastTarget = false;
 

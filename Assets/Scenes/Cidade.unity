@@ -736,7 +736,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3a8a951266e39248b5b5b7901dd42ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MoneyManager
-  initialMoney: 420
+  initialMoney: 42000
 --- !u!114 &6488361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -209147,6 +209147,122 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4141237277118282, guid: b397840dccff1eb4eb52954b9e41d3d2, type: 3}
   m_PrefabInstance: {fileID: 1957928380}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1958832253
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1104469224843184, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+      propertyPath: m_Name
+      value: Lojinha
+      objectReference: {fileID: 0}
+    - target: {fileID: 1104469224843184, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 4525366277066712, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+      propertyPath: m_RootOrder
+      value: 19
+      objectReference: {fileID: 0}
+    - target: {fileID: 4525366277066712, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4525366277066712, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4525366277066712, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4525366277066712, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -7.88
+      objectReference: {fileID: 0}
+    - target: {fileID: 4525366277066712, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 4525366277066712, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -23.76
+      objectReference: {fileID: 0}
+    - target: {fileID: 4525366277066712, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.940003
+      objectReference: {fileID: 0}
+    - target: {fileID: 4525366277066712, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4525366277066712, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.34116647
+      objectReference: {fileID: 0}
+    - target: {fileID: 4525366277066712, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4525366277066712, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -39.896
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1104469224843184, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1958832255}
+  m_SourcePrefab: {fileID: 100100000, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+--- !u!1 &1958832254 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1104469224843184, guid: 4c701139b81d9c140b18bb741804c1ec, type: 3}
+  m_PrefabInstance: {fileID: 1958832253}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1958832255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1958832254}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6dacc4426840724c9529ef02a8b1e5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactDistance: 4
+  shopTitle: LOJINHA
+  products:
+  - item: {fileID: 11400000, guid: cf6413bfbe28dfb4684d47975aea70c5, type: 2}
+    unitsPerPack: 10
+    packPriceCents: 500
+    packLabel: "Pote de pa\xE7oca"
+  - item: {fileID: 11400000, guid: 1ce5e6db2ca08034abae97f4eaca31a6, type: 2}
+    unitsPerPack: 10
+    packPriceCents: 150
+    packLabel: Pacote de chiclete
+  - item: {fileID: 11400000, guid: d7a7108ea900e9844aee55dff4f52748, type: 2}
+    unitsPerPack: 20
+    packPriceCents: 250
+    packLabel: Pacote de biscoito
+  - item: {fileID: 11400000, guid: ea4b381ed5f089640a4ac6c3ed5ef39c, type: 2}
+    unitsPerPack: 6
+    packPriceCents: 900
+    packLabel: "Fardo de \xE1gua"
+  - item: {fileID: 11400000, guid: 8d58d239ac89e0841910cd6e955e72ae, type: 2}
+    unitsPerPack: 20
+    packPriceCents: 400
+    packLabel: Saco de bala de goma
+  - item: {fileID: 11400000, guid: 4afaa354bc108c34da2b28ba3b2722a3, type: 2}
+    unitsPerPack: 8
+    packPriceCents: 1200
+    packLabel: Bandeja de cocada
 --- !u!1001 &1959080683
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -227834,3 +227950,4 @@ SceneRoots:
   - {fileID: 130660569}
   - {fileID: 1695904122}
   - {fileID: 550633966}
+  - {fileID: 1958832253}

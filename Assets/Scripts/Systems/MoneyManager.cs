@@ -2,14 +2,22 @@ using UnityEngine;
 
 /// <summary>
 /// Sistema central de dinheiro do jogador (Fase 5 do roadmap).
-/// Singleton: use MoneyManager.instance para acessar.
+/// Valores em CENTAVOS (R$ 4,20 = 420). Singleton: use MoneyManager.instance.
 /// </summary>
 public class MoneyManager : MonoBehaviour
 {
     public static MoneyManager instance;
 
-    [Tooltip("Dinheiro inicial do jogador (ex: 420 conforme GDD)")]
-    public int initialMoney = 420;
+    [Tooltip("Dinheiro inicial em CENTAVOS (ex: 42000 = R$ 420,00)")]
+    public int initialMoney = 42000;
+
+    /// <summary>Formata centavos como moeda (ex.: 550 → "R$ 5,50").</summary>
+    public static string FormatBRL(int cents)
+    {
+        var sign = cents < 0 ? "-" : "";
+        cents = Mathf.Abs(cents);
+        return $"{sign}R$ {cents / 100},{cents % 100:00}";
+    }
 
     private int money;
 

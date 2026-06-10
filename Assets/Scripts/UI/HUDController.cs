@@ -13,6 +13,6 @@ public class HUDController : MonoBehaviour
     void Update()
     {
         int dinheiro = MoneyManager.instance != null ? MoneyManager.instance.GetMoney() : 0;
-        hudText.text = "Dinheiro: R$ " + dinheiro;
+        hudText.text = "Dinheiro: " + MoneyManager.FormatBRL(dinheiro);
     }
 }
