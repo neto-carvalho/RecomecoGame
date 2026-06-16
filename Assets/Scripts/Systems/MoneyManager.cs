@@ -8,8 +8,8 @@ public class MoneyManager : MonoBehaviour
 {
     public static MoneyManager instance;
 
-    [Tooltip("Dinheiro inicial em CENTAVOS (ex: 42000 = R$ 420,00)")]
-    public int initialMoney = 42000;
+    [Tooltip("Dinheiro inicial em CENTAVOS (ex: 420 = R$ 4,20)")]
+    public int initialMoney = 420;
 
     /// <summary>Formata centavos como moeda (ex.: 550 → "R$ 5,50").</summary>
     public static string FormatBRL(int cents)

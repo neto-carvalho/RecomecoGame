@@ -4172,11 +4172,11 @@ PrefabInstance:
     - target: {fileID: 4782574884810741865, guid: 5736e576bae68ca4393c5441179cace9, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: -8820499275058686143, guid: c00be380054f3aa469720cb9cd40ef14, type: 3}
+      objectReference: {fileID: -4695107088515116087, guid: 49afccecce4f7b446a34b4e3223cf8ff, type: 3}
     - target: {fileID: 6923680714298563140, guid: 5736e576bae68ca4393c5441179cace9, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 9053217031431064551, guid: 5a531847cd74a654b97ef249cb9306d5, type: 3}
+      objectReference: {fileID: 1617087265200637012, guid: e79b799a85000cd4ea6d2332153cbd7b, type: 3}
     - target: {fileID: 6930185701218107432, guid: 5736e576bae68ca4393c5441179cace9, type: 3}
       propertyPath: m_Avatar
       value: 
@@ -4338,11 +4338,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f75db5b538eef814b9775d744f05e3b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_WalkSpeed: 5
-  m_RunSpeed: 10
-  m_RotateSpeed: 90
+  m_WalkSpeed: 3
+  m_RunSpeed: 8
+  m_RotateSpeed: 200
   m_Space: 1
-  m_JumpHeight: 5
+  m_JumpHeight: 2.5
   m_HorizontalID: Hor
   m_VerticalID: Vert
   m_StateID: State
@@ -9301,7 +9301,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3a8a951266e39248b5b5b7901dd42ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initialMoney: 42000
+  initialMoney: 420
 --- !u!4 &1346573204
 Transform:
   m_ObjectHideFlags: 0

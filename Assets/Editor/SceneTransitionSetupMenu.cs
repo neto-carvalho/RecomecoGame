@@ -543,8 +543,9 @@ public static class SceneTransitionSetupMenu
         settings.movementController =
             AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(MovementControllerPath);
         settings.playerAvatar = FindPlayerAvatar();
-        settings.walkSpeed = 5f;
-        settings.runSpeed = 15f;
+        settings.walkSpeed = 3f;
+        settings.runSpeed = 8f;
+        settings.jumpHeight = 2.5f;
         settings.rotateSpeed = 200f;
 
         AssetDatabase.CreateAsset(settings, GameplaySettingsPath);

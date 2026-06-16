@@ -59,7 +59,9 @@ public class SceneSpawnPoint : MonoBehaviour
         if (settings != null)
             settings.ApplyPlayerScaleForScene(player, UnityEngine.SceneManagement.SceneManager.GetActiveScene());
 
-        var spawnPos = transform.position + positionOffset;
+        var spawnPos = SceneTransitionZone.ResolveSpawnOutsideZones(
+            transform.position + positionOffset,
+            transform.rotation);
         SpawnGroundUtility.PlacePlayerOnGround(player, spawnPos);
         player.transform.rotation = transform.rotation;
         GameSession.ApplyToPlayer(player);

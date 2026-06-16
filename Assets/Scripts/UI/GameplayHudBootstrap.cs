@@ -44,7 +44,7 @@ public static class GameplayHudBootstrap
 
         var go = new GameObject("MoneyManager");
         var manager = go.AddComponent<MoneyManager>();
-        manager.initialMoney = 42000;
+        manager.initialMoney = 420;
         Object.DontDestroyOnLoad(go);
     }
 
@@ -114,7 +114,138 @@ public static class GameplayHudBootstrap
         }
 
         RegisterHud(_persistentHudRoot);
+        EnsureMoneyDisplay(_persistentHudRoot);
         SuppressDuplicateGameplayUi();
+    }
+
+    static void EnsureMoneyDisplay(GameObject canvasRoot)
+    {
+        if (canvasRoot == null)
+            return;
+
+        var hudRoot = canvasRoot.transform.Find("HUD");
+        if (hudRoot == null)
+            return;
+
+        if (hudRoot.Find("MoneyRow") != null)
+        {
+            var existingController = hudRoot.GetComponent<HUDController>();
+            if (existingController == null)
+                existingController = hudRoot.gameObject.AddComponent<HUDController>();
+            ApplyMoneyRowLayout(hudRoot.Find("MoneyRow"), existingController);
+            return;
+        }
+
+        var legacyText = hudRoot.GetComponent<TextMeshProUGUI>();
+        if (legacyText != null)
+        {
+            if (Application.isPlaying)
+                Object.Destroy(legacyText);
+            else
+                Object.DestroyImmediate(legacyText);
+        }
+
+        var hudController = hudRoot.GetComponent<HUDController>();
+        if (hudController == null)
+            hudController = hudRoot.gameObject.AddComponent<HUDController>();
+
+        BuildMoneyRow(hudRoot, hudController);
+    }
+
+    static Sprite LoadMoneyIconSprite()
+    {
+        return Resources.Load<Sprite>("UI/icone_dinheiro");
+    }
+
+    static void BuildMoneyRow(Transform hudRoot, HUDController controller)
+    {
+        var rowGo = new GameObject("MoneyRow");
+        rowGo.transform.SetParent(hudRoot, false);
+        var rowRect = rowGo.AddComponent<RectTransform>();
+        rowRect.anchorMin = Vector2.zero;
+        rowRect.anchorMax = Vector2.one;
+        rowRect.offsetMin = Vector2.zero;
+        rowRect.offsetMax = Vector2.zero;
+
+        var layout = rowGo.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing = 12f;
+        layout.childAlignment = TextAnchor.MiddleLeft;
+        layout.childControlWidth = false;
+        layout.childControlHeight = false;
+        layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = false;
+
+        var iconGo = new GameObject("MoneyIcon");
+        iconGo.transform.SetParent(rowGo.transform, false);
+        iconGo.AddComponent<RectTransform>();
+        var iconLayout = iconGo.AddComponent<LayoutElement>();
+        iconLayout.preferredWidth = 96f;
+        iconLayout.preferredHeight = 96f;
+        var iconImage = iconGo.AddComponent<Image>();
+        iconImage.preserveAspect = true;
+        iconImage.raycastTarget = false;
+        iconImage.color = Color.white;
+
+        var amountGo = new GameObject("MoneyAmount");
+        amountGo.transform.SetParent(rowGo.transform, false);
+        amountGo.AddComponent<RectTransform>();
+        var amountLayout = amountGo.AddComponent<LayoutElement>();
+        amountLayout.preferredWidth = 300f;
+        amountLayout.preferredHeight = 56f;
+        var amountText = amountGo.AddComponent<TextMeshProUGUI>();
+        if (TMP_Settings.defaultFontAsset != null)
+            amountText.font = TMP_Settings.defaultFontAsset;
+        amountText.fontSize = 34f;
+        amountText.color = Color.white;
+        amountText.alignment = TextAlignmentOptions.MidlineLeft;
+        amountText.raycastTarget = false;
+        amountText.text = MoneyManager.FormatBRL(0);
+
+        ApplyMoneyRowLayout(rowGo.transform, controller, iconImage, amountText);
+    }
+
+    static void ApplyMoneyRowLayout(Transform moneyRow, HUDController controller, Image iconImage = null, TextMeshProUGUI amountText = null)
+    {
+        if (moneyRow == null || controller == null)
+            return;
+
+        if (moneyRow.parent is RectTransform hudRect)
+            hudRect.sizeDelta = new Vector2(420f, 96f);
+
+        var iconTransform = moneyRow.Find("MoneyIcon");
+        if (iconTransform != null)
+        {
+            var iconLayout = iconTransform.GetComponent<LayoutElement>() ?? iconTransform.gameObject.AddComponent<LayoutElement>();
+            iconLayout.preferredWidth = 96f;
+            iconLayout.preferredHeight = 96f;
+            iconImage ??= iconTransform.GetComponent<Image>();
+            if (iconImage != null)
+            {
+                iconImage.preserveAspect = true;
+                iconImage.raycastTarget = false;
+                iconImage.color = Color.white;
+            }
+        }
+
+        var amountTransform = moneyRow.Find("MoneyAmount");
+        if (amountTransform != null)
+        {
+            var amountLayout = amountTransform.GetComponent<LayoutElement>() ?? amountTransform.gameObject.AddComponent<LayoutElement>();
+            amountLayout.preferredWidth = 300f;
+            amountLayout.preferredHeight = 56f;
+            amountText ??= amountTransform.GetComponent<TextMeshProUGUI>();
+            if (amountText != null)
+            {
+                if (TMP_Settings.defaultFontAsset != null && amountText.font == null)
+                    amountText.font = TMP_Settings.defaultFontAsset;
+                amountText.fontSize = 34f;
+                amountText.color = Color.white;
+                amountText.alignment = TextAlignmentOptions.MidlineLeft;
+                amountText.raycastTarget = false;
+            }
+        }
+
+        controller.ConfigureMoneyDisplay(amountText, iconImage, LoadMoneyIconSprite());
     }
 
     static void SuppressDuplicateGameplayUi()
@@ -181,16 +312,10 @@ public static class GameplayHudBootstrap
         hudRect.anchorMax = new Vector2(0f, 1f);
         hudRect.pivot = new Vector2(0f, 1f);
         hudRect.anchoredPosition = new Vector2(24f, -20f);
-        hudRect.sizeDelta = new Vector2(420f, 48f);
+        hudRect.sizeDelta = new Vector2(420f, 96f);
 
-        var hudText = hudGo.AddComponent<TextMeshProUGUI>();
-        if (TMP_Settings.defaultFontAsset != null)
-            hudText.font = TMP_Settings.defaultFontAsset;
-        hudText.fontSize = 28f;
-        hudText.color = Color.white;
-        hudText.alignment = TextAlignmentOptions.TopLeft;
-        hudText.raycastTarget = false;
-        hudGo.AddComponent<HUDController>();
+        var hudController = hudGo.AddComponent<HUDController>();
+        BuildMoneyRow(hudGo.transform, hudController);
 
         var interactionGo = new GameObject("InteractionText");
         interactionGo.transform.SetParent(canvasGo.transform, false);

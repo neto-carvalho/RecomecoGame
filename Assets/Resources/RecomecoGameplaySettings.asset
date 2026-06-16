@@ -20,10 +20,10 @@ MonoBehaviour:
   outwearMesh: {fileID: 9053217031431064551, guid: 5a531847cd74a654b97ef249cb9306d5, type: 3}
   pantsMesh: {fileID: -4396149814923931179, guid: 67dfe8b1e1ed9b34c985396c6282c820, type: 3}
   referencePlayerScale: 0.2
-  walkSpeed: 5
-  runSpeed: 15
+  walkSpeed: 3
+  runSpeed: 8
   rotateSpeed: 200
-  jumpHeight: 5
+  jumpHeight: 2.5
   footstepLibrary: {fileID: 11400000, guid: e64fa8cdcde97bc4f9fe8f7f5ac0f019, type: 2}
   latinhaPrefab: {fileID: 3454898247569233799, guid: 5fe784add6879af458f2afb89ae8407c, type: 3}
   playerScaleCity: 0.2

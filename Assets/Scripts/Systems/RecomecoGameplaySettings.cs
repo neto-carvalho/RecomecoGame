@@ -22,12 +22,12 @@ public class RecomecoGameplaySettings : ScriptableObject
     public float referencePlayerScale = 0.2f;
 
     [Tooltip("Velocidades do CharacterMover (km/h no Inspector do CharacterMover; aqui em unidades do pack)")]
-    public float walkSpeed = 5f;
-    public float runSpeed = 15f;
+    public float walkSpeed = 3f;
+    public float runSpeed = 8f;
     public float rotateSpeed = 200f;
 
     [Tooltip("Altura do pulo em metros (CharacterMover.m_JumpHeight) na referencePlayerScale")]
-    public float jumpHeight = 5f;
+    public float jumpHeight = 2.5f;
 
     [Header("Áudio")]
     [Tooltip("Biblioteca de sons de passos por superfície (Assets/Audio/FootstepSurfaceLibrary.asset)")]

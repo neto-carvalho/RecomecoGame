@@ -52,7 +52,9 @@ public static class SceneTransitionState
         if (settings != null)
             settings.ApplyPlayerScaleForScene(player, SceneManager.GetActiveScene());
 
-        var pos = matched.transform.position + matched.positionOffset;
+        var pos = SceneTransitionZone.ResolveSpawnOutsideZones(
+            matched.transform.position + matched.positionOffset,
+            matched.transform.rotation);
         SpawnGroundUtility.PlacePlayerOnGround(player, pos);
         player.transform.rotation = matched.transform.rotation;
 

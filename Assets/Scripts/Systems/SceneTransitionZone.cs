@@ -18,6 +18,8 @@ public class SceneTransitionZone : MonoBehaviour
 
     public KeyCode interactKey = KeyCode.E;
 
+    const float InsideEpsilon = 0.04f;
+
     Collider _trigger;
     bool _playerInside;
 
@@ -30,6 +32,16 @@ public class SceneTransitionZone : MonoBehaviour
     void Reset()
     {
         EnsureTriggerSetup();
+    }
+
+    void OnDisable()
+    {
+        SetInside(false);
+    }
+
+    void OnDestroy()
+    {
+        InteractionUI.HideMessage(this);
     }
 
     void OnTriggerEnter(Collider other)
@@ -45,8 +57,7 @@ public class SceneTransitionZone : MonoBehaviour
         if (!IsPlayerCollider(other))
             return;
 
-        if (!IsPlayerPhysicallyInside())
-            SetInside(false);
+        SetInside(false);
     }
 
     void LateUpdate()
@@ -55,7 +66,7 @@ public class SceneTransitionZone : MonoBehaviour
         if (inside != _playerInside)
             SetInside(inside);
 
-        if (!_playerInside || !inside || !Input.GetKeyDown(interactKey))
+        if (!_playerInside || !Input.GetKeyDown(interactKey))
             return;
 
         TryLoadTargetScene();
@@ -107,24 +118,60 @@ public class SceneTransitionZone : MonoBehaviour
         if (player == null)
             return false;
 
-        var bounds = _trigger.bounds;
+        if (IsPointInsideTrigger(player.transform.position))
+            return true;
+
         var cc = player.GetComponent<CharacterController>();
+        if (cc == null)
+            return false;
 
-        if (cc != null)
+        return IsPointInsideTrigger(player.transform.TransformPoint(cc.center));
+    }
+
+    bool IsPointInsideTrigger(Vector3 worldPoint)
+    {
+        var closest = _trigger.ClosestPoint(worldPoint);
+        return (closest - worldPoint).sqrMagnitude <= InsideEpsilon * InsideEpsilon;
+    }
+
+    /// <summary>
+    /// Evita spawn dentro de um portal (ex.: EntradaCidade no mesmo ponto que Portal_FerroVelho).
+    /// </summary>
+    public static Vector3 ResolveSpawnOutsideZones(Vector3 position, Quaternion rotation)
+    {
+        const float step = 3f;
+        const int maxAttempts = 4;
+
+        for (var attempt = 0; attempt < maxAttempts; attempt++)
         {
-            var feet = player.transform.position + player.transform.TransformVector(cc.center);
-            feet.y -= cc.height * 0.5f * Mathf.Abs(player.transform.lossyScale.y);
-            var head = feet + Vector3.up * cc.height * Mathf.Abs(player.transform.lossyScale.y);
+            var insideZone = false;
+            foreach (var zone in Object.FindObjectsByType<SceneTransitionZone>(FindObjectsSortMode.None))
+            {
+                if (zone == null || !zone.isActiveAndEnabled)
+                    continue;
 
-            if (bounds.Contains(feet) || bounds.Contains(head) || bounds.Contains(player.transform.position))
-                return true;
+                var trigger = zone.GetComponent<Collider>();
+                if (trigger == null || !trigger.enabled || !trigger.isTrigger)
+                    continue;
 
-            return bounds.Intersects(new Bounds(
-                player.transform.position + player.transform.TransformVector(cc.center),
-                new Vector3(cc.radius * 2f, cc.height, cc.radius * 2f) * player.transform.lossyScale.y));
+                if (!zone.IsPointInsideTrigger(position))
+                    continue;
+
+                insideZone = true;
+                break;
+            }
+
+            if (!insideZone)
+                return position;
+
+            var forward = rotation * Vector3.forward;
+            forward.y = 0f;
+            if (forward.sqrMagnitude < 0.0001f)
+                forward = Vector3.forward;
+            position += forward.normalized * step;
         }
 
-        return bounds.Contains(player.transform.position);
+        return position;
     }
 
     static GameObject FindPlayerRoot()
@@ -141,16 +188,15 @@ public class SceneTransitionZone : MonoBehaviour
         if (other == null)
             return false;
 
-        if (other.CompareTag("Player"))
+        var root = other.attachedRigidbody != null
+            ? other.attachedRigidbody.transform.root
+            : other.transform.root;
+
+        if (root.CompareTag("Player"))
             return true;
 
-        if (other.GetComponent<CharacterController>() != null)
-            return true;
-
-        if (other.GetComponentInParent<CharacterController>() != null)
-            return true;
-
-        return other.transform.root.CompareTag("Player");
+        var traveling = PlayerScenePersistence.TravelingPlayer;
+        return traveling != null && root.gameObject == traveling;
     }
 
     void EnsureTriggerSetup()
