@@ -152,7 +152,7 @@ public class MainMenuController : MonoBehaviour
         MainMenuMusic.StopIfPlaying();
         GameplayReturnToMenu.ResetPersistentGameplayState();
         PlayerScenePersistence.ResetForMenuGameplayStart();
-        SceneManager.LoadScene(sceneName);
+        GameplayIntroVideo.PlayThenLoadScene(sceneName);
     }
 
     public void OnOptionsClicked()

@@ -26,13 +26,22 @@ public class MoneyManager : MonoBehaviour
         if (instance == null)
         {
             instance = this;
-            money = initialMoney;
+            money = ResolveInitialMoneyCents();
             DontDestroyOnLoad(gameObject);
         }
         else if (instance != this)
         {
             Destroy(gameObject);
         }
+    }
+
+    static int ResolveInitialMoneyCents()
+    {
+        var settings = RecomecoGameplaySettings.Instance;
+        if (settings != null)
+            return Mathf.Max(0, settings.initialMoneyCents);
+
+        return 420;
     }
 
     void OnDestroy()

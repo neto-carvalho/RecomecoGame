@@ -29459,6 +29459,7 @@ Transform:
   - {fileID: 1125089515}
   - {fileID: 1670031478}
   - {fileID: 466159429}
+  - {fileID: 1797121494}
   - {fileID: 1366178169}
   - {fileID: 1464201169}
   - {fileID: 415044415}
@@ -29541,7 +29542,6 @@ Transform:
   - {fileID: 303406232}
   - {fileID: 2081578921}
   - {fileID: 1645601265}
-  - {fileID: 1005766041}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &283495324
@@ -74372,7 +74372,7 @@ MonoBehaviour:
   m_Script: {fileID: 365290288, guid: f56d46228aee4734f9114056c53bb57e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  projectid: 177876500126766
+  projectid: 
   updateInt: 10
   newSplatMapRestoreCode: 0
   toolbarInt: 0
@@ -94849,7 +94849,7 @@ MonoBehaviour:
   m_RunSpeed: 15
   m_RotateSpeed: 200
   m_Space: 1
-  m_JumpHeight: 2.5
+  m_JumpHeight: 5
   m_HorizontalID: Hor
   m_VerticalID: Vert
   m_StateID: State
@@ -111476,11 +111476,6 @@ MonoBehaviour:
   markerStartUVY: 0.024104118
   customPoints: []
   handleObject: {fileID: 0}
---- !u!4 &1005766041 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4556416579682462, guid: c35ed3f03ecbe1347b55041fa4c30574, type: 3}
-  m_PrefabInstance: {fileID: 2041450264}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1007196484
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -190692,6 +190687,11 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 4686857676719606, guid: ef9674bbeff69404699ea6f9ef05e3c5, type: 3}
   m_PrefabInstance: {fileID: 1795990326}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1797121494 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4556416579682462, guid: c35ed3f03ecbe1347b55041fa4c30574, type: 3}
+  m_PrefabInstance: {fileID: 2041450264}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1798117735
 PrefabInstance:

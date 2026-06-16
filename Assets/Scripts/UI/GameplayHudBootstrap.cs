@@ -43,8 +43,7 @@ public static class GameplayHudBootstrap
             return;
 
         var go = new GameObject("MoneyManager");
-        var manager = go.AddComponent<MoneyManager>();
-        manager.initialMoney = 420;
+        go.AddComponent<MoneyManager>();
         Object.DontDestroyOnLoad(go);
     }
 

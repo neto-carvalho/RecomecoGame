@@ -1,6 +1,7 @@
 using Controller;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Video;
 
 /// <summary>
 /// Referências partilhadas para montar gameplay em qualquer cena (Resources/RecomecoGameplaySettings).
@@ -36,6 +37,13 @@ public class RecomecoGameplaySettings : ScriptableObject
     [Header("Coleta")]
     [Tooltip("Prefab da latinha coletável (Assets/Latinha.prefab)")]
     public GameObject latinhaPrefab;
+
+    [Header("Menu")]
+    [Tooltip("Vídeo intro após escolher Ferro Velho ou Cidade (arraste Assets/Resources/Video/recomeco_intro.mp4)")]
+    public VideoClip introVideoClip;
+
+    [Tooltip("Dinheiro inicial em centavos ao começar partida (420 = R$ 4,20)")]
+    public int initialMoneyCents = 420;
 
     [Header("Escala do player por cena (portal / DontDestroyOnLoad)")]
     [Tooltip("Escala uniforme (X=Y=Z) na cidade. Use a mesma da Hierarchy do Player na cena Cidade.")]

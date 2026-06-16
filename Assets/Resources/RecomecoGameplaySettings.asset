@@ -26,5 +26,7 @@ MonoBehaviour:
   jumpHeight: 2.5
   footstepLibrary: {fileID: 11400000, guid: e64fa8cdcde97bc4f9fe8f7f5ac0f019, type: 2}
   latinhaPrefab: {fileID: 3454898247569233799, guid: 5fe784add6879af458f2afb89ae8407c, type: 3}
+  introVideoClip: {fileID: 32900000, guid: b8e4f1a23c5d47e8901ab2c3d4e5f607, type: 3}
+  initialMoneyCents: 420
   playerScaleCity: 0.2
   playerScaleFerroVelho: 0.2
