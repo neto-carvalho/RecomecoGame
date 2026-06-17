@@ -1,8 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Encosta os pés visuais ao chão (raycast). Ajusta o CharacterController quando a escala do transform ≠ 1.
-/// </summary>
 [RequireComponent(typeof(CharacterController))]
 public sealed class CharacterGroundSnap : MonoBehaviour
 {

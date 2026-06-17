@@ -3,9 +3,6 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-/// <summary>
-/// Corrige o zoom da aba Game (ex.: 5x) que impede ver o menu inteiro no Play Mode.
-/// </summary>
 [InitializeOnLoad]
 static class MainMenuGameViewFix
 {

@@ -2,9 +2,6 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-/// <summary>
-/// Efeito subaquático na câmara (filtro azul URP Volume + névoa global). Ligado por <see cref="LakeWaterZone"/>.
-/// </summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Camera))]
 public sealed class UnderwaterCameraEffect : MonoBehaviour

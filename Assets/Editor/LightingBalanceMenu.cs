@@ -4,9 +4,6 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Corrige cenas onde um lado fica preto: sol único + ambiente fraco no URP.
-/// </summary>
 public static class LightingBalanceMenu
 {
     const string FillLightName = "Fill Light (Ambient)";
@@ -32,7 +29,6 @@ public static class LightingBalanceMenu
 
     public static void ApplyAmbientFill()
     {
-        // Trilight funciona de forma fiável no URP (skybox Built-in nem sempre enche sombras).
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
         RenderSettings.ambientSkyColor = new Color(0.78f, 0.84f, 0.96f);
         RenderSettings.ambientEquatorColor = new Color(0.64f, 0.68f, 0.74f);
@@ -49,7 +45,6 @@ public static class LightingBalanceMenu
         if (sun == null)
             return;
 
-        // Sol mais "ao meio-dia" — ilumina mais faces; menos um lado preto ao girar a câmara.
         sun.transform.rotation = Quaternion.Euler(50f, -35f, 0f);
         sun.intensity = 1.1f;
         sun.shadowStrength = 0.62f;
@@ -77,7 +72,6 @@ public static class LightingBalanceMenu
         fill.shadows = LightShadows.None;
         fill.renderMode = LightRenderMode.ForcePixel;
 
-        // Luz de preenchimento vinda do lado oposto ao sol.
         fillGo.transform.rotation = Quaternion.Euler(50f, 145f, 0f);
         EditorUtility.SetDirty(fillGo);
     }

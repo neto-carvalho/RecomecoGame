@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Colliders físicos nos meshes do junkyard (Props/Buildings) — o pack vem só com MeshRenderer.
-/// </summary>
 public static class FerroVelhoSceneColliders
 {
     const string GeometryName = "Geometry";

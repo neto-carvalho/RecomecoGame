@@ -1,8 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Música de fundo em loop apenas na cena MenuInicial.
-/// </summary>
 [DisallowMultipleComponent]
 public class MainMenuMusic : MonoBehaviour
 {

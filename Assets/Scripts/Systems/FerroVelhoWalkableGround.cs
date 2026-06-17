@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Piso físico invisível na FerroVelho (junkyard sem colliders no chão).
-/// </summary>
 public static class FerroVelhoWalkableGround
 {
     const string GroundName = "Chao_FerroVelho";
@@ -15,10 +12,8 @@ public static class FerroVelhoWalkableGround
 
     static Vector3 _groundCenter = new(201.9f, 7.29f, 0f);
 
-    /// <summary>Centro do BoxCollider do chão invisível.</summary>
     public static Vector3 Center => _groundCenter;
 
-    /// <summary>Topo do box collider do chão.</summary>
     public static float SurfaceY => _groundCenter.y + Size.y * 0.5f;
 
     public static bool IsFerroVelhoScene(Scene scene)
@@ -66,7 +61,6 @@ public static class FerroVelhoWalkableGround
         return hasFerroVelhoMarker || (hasGeometry && hasProps) || (hasProps && hasBuildings);
     }
 
-    /// <summary>Lê Spawn_EntradaFerroVelho na cena para alinhar chão e spawn.</summary>
     public static void RefreshFromSceneMarkers()
     {
         SceneSpawnPoint entrada = null;

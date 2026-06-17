@@ -1,8 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Zona de venda (ex.: ferro velho). Vende itens do inventário e adiciona dinheiro pelo MoneyManager.
-/// </summary>
 public class SellItems : MonoBehaviour
 {
     [Tooltip("Distância máxima para o jogador poder vender (E)")]
@@ -17,27 +14,72 @@ public class SellItems : MonoBehaviour
     [Tooltip("Mensagem exibida quando o jogador está perto (ex.: Aperte E para vender)")]
     public string messageNear = "Aperte E para vender";
 
-    private bool playerWasInRange;
+    bool _playerWasInRange;
+    float _feedbackTimer;
 
     void Update()
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        bool playerInRange = player != null && Vector3.Distance(player.transform.position, transform.position) < sellDistance;
+        var player = FindPlayer();
+        var inRange = player != null &&
+                      Vector3.Distance(player.transform.position, transform.position) < sellDistance;
 
-        // Mostra ou esconde a mensagem ao se aproximar/afastar
-        if (playerInRange && !playerWasInRange)
-            InteractionUI.ShowMessage(messageNear, this);
-        if (!playerInRange && playerWasInRange)
+        if (!inRange && _playerWasInRange)
             InteractionUI.HideMessage(this);
-        playerWasInRange = playerInRange;
 
-        if (!playerInRange || player == null) return;
+        if (inRange && player != null)
+        {
+            if (_feedbackTimer > 0f)
+            {
+                _feedbackTimer -= Time.deltaTime;
+            }
+            else if (!_playerWasInRange || _feedbackTimer <= 0f)
+            {
+                ShowOffer(player);
+            }
 
-        if (!Input.GetKeyDown(KeyCode.E)) return;
+            if (Input.GetKeyDown(KeyCode.E))
+                TrySell(player);
+        }
 
-        Inventory inv = player.GetComponent<Inventory>();
-        if (inv == null) inv = FindFirstObjectByType<Inventory>();
-        if (inv == null)
+        _playerWasInRange = inRange;
+    }
+
+    static GameObject FindPlayer()
+    {
+        var traveling = PlayerScenePersistence.TravelingPlayer;
+        if (traveling != null)
+            return traveling;
+
+        return GameObject.FindGameObjectWithTag("Player");
+    }
+
+    void ShowOffer(GameObject player)
+    {
+        var inventory = player.GetComponent<Inventory>();
+        if (inventory == null)
+            inventory = FindFirstObjectByType<Inventory>();
+
+        var count = inventory != null ? inventory.GetItemCount(itemName) : 0;
+        if (count <= 0)
+        {
+            InteractionUI.ShowMessage(
+                messageNear + " — você não tem " + itemName + " no inventário.",
+                this);
+            return;
+        }
+
+        InteractionUI.ShowMessage(
+            messageNear + " " + count + "x " + itemName + " — " +
+            MoneyManager.FormatBRL(pricePerUnit) + " cada",
+            this);
+    }
+
+    void TrySell(GameObject player)
+    {
+        var inventory = player.GetComponent<Inventory>();
+        if (inventory == null)
+            inventory = FindFirstObjectByType<Inventory>();
+        if (inventory == null)
         {
             UnityEngine.Debug.LogWarning("SellItems: Inventário não encontrado.");
             return;
@@ -49,16 +91,21 @@ public class SellItems : MonoBehaviour
             return;
         }
 
-        int count = inv.GetItemCount(itemName);
+        var count = inventory.GetItemCount(itemName);
         if (count <= 0)
         {
-            UnityEngine.Debug.Log("Nenhum item para vender.");
+            InteractionUI.ShowMessage("Sem " + itemName + " para vender.", this);
+            _feedbackTimer = 1.5f;
             return;
         }
 
-        int removed = inv.RemoveItem(itemName, count);
-        int total = removed * pricePerUnit;
+        var removed = inventory.RemoveItem(itemName, count);
+        var total = removed * pricePerUnit;
         MoneyManager.instance.AddMoney(total);
-        UnityEngine.Debug.Log("Vendido: " + removed + " x " + itemName + " = " + MoneyManager.FormatBRL(total));
+
+        InteractionUI.ShowMessage(
+            "Vendeu " + removed + "x " + itemName + " por " + MoneyManager.FormatBRL(total) + "!",
+            this);
+        _feedbackTimer = 1.5f;
     }
 }

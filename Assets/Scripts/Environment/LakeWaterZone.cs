@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Define a superfície do lago e aplica efeito subaquático quando a câmara do jogador fica abaixo da água.
-/// Coloca num objeto com collider trigger (caixa) que cubra o volume do lago.
-/// </summary>
 [DisallowMultipleComponent]
 public sealed class LakeWaterZone : MonoBehaviour
 {

@@ -3,9 +3,6 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-/// <summary>
-/// Adiciona SpawnManager na cena sem alterar o terreno.
-/// </summary>
 public static class LatinhaSpawnSetupMenu
 {
     const string MenuRoot = "Recomeco/Latinhas/";

@@ -1,11 +1,6 @@
 using System.Text;
 using UnityEngine;
 
-/// <summary>
-/// Loja onde o jogador compra pacotes de itens (ex.: Lojinha).
-/// Perto da loja, as teclas 1..9 compram o pacote correspondente;
-/// o preço sai do MoneyManager (centavos) e as unidades entram no Inventory.
-/// </summary>
 public class ShopZone : MonoBehaviour
 {
     [System.Serializable]

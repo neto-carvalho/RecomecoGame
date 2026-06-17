@@ -1,8 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Zona de ambiente (trigger). Coloque no terreno natureza ou num volume à volta do lago.
-/// </summary>
 [RequireComponent(typeof(Collider))]
 public sealed class AmbientZone : MonoBehaviour
 {

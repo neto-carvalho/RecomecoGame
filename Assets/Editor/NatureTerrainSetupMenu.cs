@@ -3,9 +3,6 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-/// <summary>
-/// Cria um terreno base (mato + camada de estrada de terra + depressão para lago) usando TerrainSampleAssets do projeto.
-/// </summary>
 public static class NatureTerrainSetupMenu
 {
     const string OutputFolder = "Assets/Terrain/NatureZone";
@@ -117,7 +114,6 @@ public static class NatureTerrainSetupMenu
         data.SetHeights(0, 0, heights);
     }
 
-    /// <summary>Base: quase tudo relva; faixa central com terra (estrada) — refinás com o pincel.</summary>
     static void ApplyBasePaint(TerrainData data, int layerCount)
     {
         var aw = data.alphamapWidth;
@@ -131,7 +127,6 @@ public static class NatureTerrainSetupMenu
                 var u = x / (float)(aw - 1);
                 var v = y / (float)(ah - 1);
 
-                // Estrada de terra: faixa ao longo de Z (ajusta no editor se quiseres)
                 var roadCenter = 0.5f;
                 var roadHalfWidth = 0.06f;
                 var onRoad = Mathf.Abs(u - roadCenter) < roadHalfWidth;

@@ -3,9 +3,6 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Video;
 
-/// <summary>
-/// Liga o MP4 de intro ao RecomecoGameplaySettings.
-/// </summary>
 public static class IntroVideoSetupMenu
 {
     const string MenuRoot = "Recomeco/Menu/";

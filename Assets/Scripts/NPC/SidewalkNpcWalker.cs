@@ -1,11 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// NPC que patrulha em linha reta (vaivém) na calçada. Usa CharacterController + animação
-/// compatível com Character_Movement (Hor / Vert / State / IsJump), se existir no filho.
-/// Variante visual: opcionalmente substitui toda a hierarquia visual por prefabs (como o jogador);
-/// caso contrário aplica textura/cor via MaterialPropertyBlock nos materiais URP Lit.
-/// </summary>
 [RequireComponent(typeof(CharacterController))]
 public sealed class SidewalkNpcWalker : MonoBehaviour
 {
@@ -138,7 +132,7 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
             if (p.name == "IsJump") _hasIsJump = true;
         }
 
-        // Garante estado de locomotion (evita ficar no idle do import Mixamo / defaults).
+       
         if (_hasHor || _hasVert)
         {
             _animator.Play("Movement", 0, 0f);
@@ -146,7 +140,6 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
         }
     }
 
-    /// <summary>Mixamo/FBX podem ter vários Animators; usa o que tem Character_Movement (Hor/Vert).</summary>
     private Animator FindLocomotionAnimator()
     {
         Animator fallback = null;
@@ -171,7 +164,6 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
         return fallback ?? GetComponentInChildren<Animator>(true);
     }
 
-    /// <summary>Remove o modelo embebido e instancia o prefab de skin (síncrono para o Animator apanhar o novo rig).</summary>
     private bool TryReplaceCharacterRig(int variantIndex)
     {
         if (optionalFullCharacterRigPrefabs == null || optionalFullCharacterRigPrefabs.Length == 0)
@@ -225,7 +217,6 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
 
     Transform _interactionFaceTarget;
 
-    /// <summary>Pausado para interação (venda). O NPC para e olha para o jogador.</summary>
     public bool InteractionPaused { get; private set; }
 
     public void PauseForInteraction(Transform faceTarget)
@@ -326,7 +317,6 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
         UpdateAnimator();
     }
 
-    /// <summary>Inverte o sentido da patrulha e repõe a origem para evitar oscilação no limite (flip-flop em 2 frames).</summary>
     private void FlipPatrolDirection()
     {
         _moveDir = -_moveDir;
@@ -338,7 +328,6 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
         }
     }
 
-    /// <summary>Rotação só no eixo Y mundial (pivô nos pés), sem arco lateral da animação.</summary>
     private void ApplyYawDegreesTowardsWorldDirection(Vector3 worldDirXZ, float maxDegreesPerSecond)
     {
         worldDirXZ.y = 0f;
@@ -431,7 +420,7 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
         var horTarget = walkingAnim ? local.x : 0f;
         var vertTarget = walkingAnim ? local.z : 0f;
 
-        // Resposta mais rápida ao começar a andar (evita parecer idle enquanto já se desloca).
+       
         var blendStep = walkingAnim ? 12f * dt : 4.5f * dt;
         if (_hasHor)
             _animator.SetFloat("Hor", Mathf.MoveTowards(_animator.GetFloat("Hor"), horTarget, blendStep));
@@ -439,7 +428,7 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
             _animator.SetFloat("Vert", Mathf.MoveTowards(_animator.GetFloat("Vert"), vertTarget, blendStep));
         if (_hasState)
         {
-            // Character_Movement: State 0 = andar, State 1 = correr (NPCs só andam).
+           
             var stateTarget = 0f;
             _animator.SetFloat(
                 "State",
@@ -449,7 +438,6 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
             _animator.SetBool("IsJump", false);
     }
 
-    /// <summary>Chamado pelo bootstrap ao instanciar o prefab. <paramref name="skinVariantIndex"/> ≥ 0 define variante visual.</summary>
     public void ConfigurePatrol(in Vector3 worldDirection, float halfLength, float speed, int skinVariantIndex = -1)
     {
         patrolWorldDirection = worldDirection;

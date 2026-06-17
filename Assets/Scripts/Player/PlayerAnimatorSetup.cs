@@ -1,8 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Garante Character_Movement no Animator correto do jogador ithappy.
-/// </summary>
 public static class PlayerAnimatorSetup
 {
     const string MovementControllerPath =
@@ -138,7 +135,6 @@ public static class PlayerAnimatorSetup
 #endif
     }
 
-    /// <summary>Reaplica Character_Movement após troca de cena (player DontDestroyOnLoad).</summary>
     public static void RefreshLocomotion(GameObject player)
     {
         if (player == null)

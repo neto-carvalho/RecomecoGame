@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Estado partilhado entre carregamentos de cena (spawn + inventário/dinheiro).
-/// </summary>
 public static class SceneTransitionState
 {
     public static string PendingSpawnId { get; private set; }
@@ -20,9 +17,6 @@ public static class SceneTransitionState
         return id;
     }
 
-    /// <summary>
-    /// Teleporta o jogador ao spawn pendente (chamar logo após LoadScene).
-    /// </summary>
     public static bool TryApplyPendingSpawn()
     {
         if (string.IsNullOrEmpty(PendingSpawnId))

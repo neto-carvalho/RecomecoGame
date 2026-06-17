@@ -2,9 +2,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Garante HUD, inventário e texto de interação em qualquer cena de gameplay.
-/// </summary>
 public static class GameplayHudBootstrap
 {
     const string HudRootName = "Canvas_GameplayHud";

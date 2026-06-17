@@ -1,14 +1,25 @@
+using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
 public class InteractionUI : MonoBehaviour
 {
+    public const int PriorityNavigation = 0;
+    public const int PriorityGameplay = 10;
+
     public static InteractionUI instance;
 
+    static readonly Dictionary<object, MessageRequest> s_ActiveMessages = new();
     static object _messageOwner;
 
     public GameObject interactionTextObject;
     public TextMeshProUGUI interactionText;
+
+    struct MessageRequest
+    {
+        public string Message;
+        public int Priority;
+    }
 
     void Awake()
     {
@@ -45,7 +56,6 @@ public class InteractionUI : MonoBehaviour
             instance = ui;
     }
 
-    /// <summary>Usa UI da cena ativa ou a que viajou com DontDestroyOnLoad.</summary>
     public static void BindForActiveScene()
     {
         if (instance != null && instance.interactionText != null)
@@ -64,22 +74,66 @@ public class InteractionUI : MonoBehaviour
         }
     }
 
-    public static void ShowMessage(string message, object owner = null)
+    public static void ShowMessage(string message, object owner = null, int priority = PriorityGameplay)
     {
         BindForActiveScene();
-        _messageOwner = owner;
-        if (instance != null)
-            instance.ShowText(message);
+        if (owner == null)
+            owner = instance != null ? (object)instance : typeof(InteractionUI);
+
+        s_ActiveMessages[owner] = new MessageRequest
+        {
+            Message = message,
+            Priority = priority,
+        };
+
+        ApplyBestMessage();
     }
 
     public static void HideMessage(object owner = null)
     {
-        if (owner != null && _messageOwner != null && _messageOwner != owner)
+        if (owner == null)
+        {
+            s_ActiveMessages.Clear();
+            _messageOwner = null;
+            if (instance != null)
+                instance.HideText();
             return;
+        }
 
-        _messageOwner = null;
+        s_ActiveMessages.Remove(owner);
+        ApplyBestMessage();
+    }
+
+    static void ApplyBestMessage()
+    {
+        if (s_ActiveMessages.Count == 0)
+        {
+            _messageOwner = null;
+            if (instance != null)
+                instance.HideText();
+            return;
+        }
+
+        MessageRequest best = default;
+        object bestOwner = null;
+        var found = false;
+
+        foreach (var pair in s_ActiveMessages)
+        {
+            var request = pair.Value;
+            if (!found ||
+                request.Priority > best.Priority ||
+                (request.Priority == best.Priority && pair.Key == _messageOwner))
+            {
+                best = request;
+                bestOwner = pair.Key;
+                found = true;
+            }
+        }
+
+        _messageOwner = bestOwner;
         if (instance != null)
-            instance.HideText();
+            instance.ShowText(best.Message);
     }
 
     void TryAutoWire()
@@ -90,7 +144,6 @@ public class InteractionUI : MonoBehaviour
                 ?? interactionTextObject.GetComponentInChildren<TextMeshProUGUI>(true);
         }
 
-        // Sempre alinhar: quem aparece/some é o GameObject do TMP (evita arrastar o objeto errado no campo "Interaction Text Object").
         if (interactionText != null)
             interactionTextObject = interactionText.gameObject;
         else if (interactionTextObject != null)

@@ -3,9 +3,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Video;
 
-/// <summary>
-/// Referências partilhadas para montar gameplay em qualquer cena (Resources/RecomecoGameplaySettings).
-/// </summary>
 [CreateAssetMenu(fileName = "RecomecoGameplaySettings", menuName = "Recomeco/Gameplay Settings")]
 public class RecomecoGameplaySettings : ScriptableObject
 {

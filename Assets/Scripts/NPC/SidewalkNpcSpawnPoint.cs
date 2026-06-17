@@ -1,10 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Coloca um objeto vazio na calçada (posição + rotação) e adiciona este componente.
-/// O NPC nasce aqui; o eixo <b>forward</b> do objeto define a direção da patrulha (no plano XZ).
-/// Ajustes de viragem no chão estão no prefab <b>SidewalkNpc</b> (SidewalkNpcWalker), não neste objeto.
-/// </summary>
 [DisallowMultipleComponent]
 public sealed class SidewalkNpcSpawnPoint : MonoBehaviour
 {

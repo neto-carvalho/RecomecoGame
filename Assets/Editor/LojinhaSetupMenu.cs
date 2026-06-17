@@ -3,14 +3,10 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-/// <summary>
-/// Configura a Lojinha (compra de pacotes) e pontos de venda de rua com o catálogo padrão.
-/// </summary>
 public static class LojinhaSetupMenu
 {
     const string MenuRoot = "Recomeco/Loja/";
 
-    // (asset, rótulo do pacote, unidades por pacote, preço do pacote em centavos)
     static readonly (string assetName, string packLabel, int units, int packCents)[] Catalog =
     {
         ("Pacoca", "Pote de paçoca", 10, 500),
@@ -79,7 +75,6 @@ public static class LojinhaSetupMenu
         Selection.activeGameObject = target;
     }
 
-    // (asset do item, ficheiro do ícone em Assets/Items/Icons)
     static readonly (string assetName, string iconFile)[] ItemIcons =
     {
         ("Pacoca", "icon_pacoca.png"),

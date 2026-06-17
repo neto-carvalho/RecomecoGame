@@ -2,9 +2,6 @@
 using UnityEditor;
 using UnityEngine;
 
-/// <summary>
-/// Cria na cena aberta um grupo de marcadores <see cref="SidewalkNpcSpawnPoint"/> para posicionar NPCs na calçada.
-/// </summary>
 public static class CartoonLowPolyCityNpcSpawnMenu
 {
     const string MenuPath = "Recomeco/NPC/Criar marcadores de spawn (SidewalkNpcSpawnPoint)";

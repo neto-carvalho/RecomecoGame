@@ -1,9 +1,6 @@
 using Controller;
 using UnityEngine;
 
-/// <summary>
-/// Garante locomoção ithappy no Player (MovePlayerInput + CharacterMover, sem PlayerMovement antigo).
-/// </summary>
 [DefaultExecutionOrder(-200)]
 public class PlayerLocomotionBootstrap : MonoBehaviour
 {
@@ -41,7 +38,6 @@ public class PlayerLocomotionBootstrap : MonoBehaviour
         RefreshLocomotion();
     }
 
-    /// <summary>Chamado após portal / DontDestroyOnLoad (Start não repete em cenas novas).</summary>
     public void RefreshLocomotion()
     {
         if (!CompareTag("Player"))

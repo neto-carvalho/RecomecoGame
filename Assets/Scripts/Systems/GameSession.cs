@@ -1,9 +1,6 @@
 using System;
 using UnityEngine;
 
-/// <summary>
-/// Guarda inventário e dinheiro ao mudar de cena (o Player é recriado em cada cena).
-/// </summary>
 public static class GameSession
 {
     [Serializable]

@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-/// <summary>
-/// Destaca o botão do menu ao passar o mouse (estilo do mockup).
-/// </summary>
 public class MainMenuButtonHighlight : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] MainMenuController menu;

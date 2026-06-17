@@ -18,13 +18,13 @@ public class ItemPickup : MonoBehaviour
         {
             if (playerInventory == null)
             {
-                UnityEngine.Debug.LogError("Inventory não encontrado!");
+                UnityEngine.Debug.LogError("Inventory nï¿½o encontrado!");
                 return;
             }
 
             if (item == null)
             {
-                UnityEngine.Debug.LogError("ItemData não configurado!");
+                UnityEngine.Debug.LogError("ItemData nï¿½o configurado!");
                 return;
             }
 
@@ -40,7 +40,7 @@ public class ItemPickup : MonoBehaviour
             }
             else
             {
-                InteractionUI.ShowMessage("Inventário cheio!", this);
+                InteractionUI.ShowMessage("Inventï¿½rio cheio!", this);
             }
         }
     }

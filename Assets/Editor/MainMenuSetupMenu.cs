@@ -9,9 +9,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-/// <summary>
-/// Cria a cena MenuInicial (UI) e coloca como primeira em Build Settings.
-/// </summary>
 public static class MainMenuSetupMenu
 {
     const string MenuRoot = "Recomeco/";
@@ -125,8 +122,7 @@ public static class MainMenuSetupMenu
         }
 
         EditorUtility.DisplayDialog("Recomeco",
-            "Arte gerada em Assets/UI/Menu/\n\n" + output +
-            "\nPré-visualizações em Assets/UI/Menu/_preview/",
+            "Arte gerada em Assets/UI/Menu/\n\n" + output,
             "OK");
     }
 

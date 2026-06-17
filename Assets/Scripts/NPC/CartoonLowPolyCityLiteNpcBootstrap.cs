@@ -4,10 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Instancia NPCs decorativos quando a cena tem <see cref="SidewalkNpcSpawnPoint"/>.
-/// Funciona em Cidade, na cena legada do pack e em qualquer mapa com marcadores de spawn.
-/// </summary>
 public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
 {
     const string LegacySceneName = "CartoonLowPolyCityLite_01";
@@ -108,8 +104,6 @@ public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
 
         if (spawnPoints.Length > 0)
         {
-            Debug.Log($"[NPC] A spawnar {spawnPoints.Length} NPC(s) em '{scene.name}'.");
-
             for (var i = 0; i < spawnPoints.Length; i++)
             {
                 var sp = spawnPoints[i];

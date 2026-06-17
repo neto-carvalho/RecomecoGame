@@ -3,10 +3,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-/// <summary>
-/// Painel de escolha entre Ferro Velho e Cidade ao clicar em Jogar.
-/// Constrói a UI em runtime se ainda não existir na cena.
-/// </summary>
 [DisallowMultipleComponent]
 public class MainMenuLevelSelect : MonoBehaviour
 {

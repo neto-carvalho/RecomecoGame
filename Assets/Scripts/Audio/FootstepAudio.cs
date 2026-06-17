@@ -1,9 +1,6 @@
 using Controller;
 using UnityEngine;
 
-/// <summary>
-/// Passos por intervalo no chão. Com biblioteca de superfícies, o som muda conforme o collider (Asphalt, Grass, etc.).
-/// </summary>
 [RequireComponent(typeof(CharacterController))]
 public sealed class FootstepAudio : MonoBehaviour
 {

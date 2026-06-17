@@ -3,9 +3,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-/// <summary>
-/// Tela inicial: Jogar, Opções, Créditos, Sair.
-/// </summary>
 public class MainMenuController : MonoBehaviour
 {
     [Header("Painéis opcionais (filhos da UI)")]

@@ -2,9 +2,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Layout do menu com fundo limpo, logo e sprites de botão (normal / hover / selecionado).
-/// </summary>
 [DisallowMultipleComponent]
 public class MainMenuArtLayout : MonoBehaviour
 {

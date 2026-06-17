@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 
-/// <summary>Biblioteca de clips por superfície (andar / correr).</summary>
 [CreateAssetMenu(fileName = "FootstepSurfaceLibrary", menuName = "Recomeco/Audio/Footstep Surface Library")]
 public sealed class FootstepSurfaceLibrary : ScriptableObject
 {

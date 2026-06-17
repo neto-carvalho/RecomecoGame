@@ -17,7 +17,7 @@ public class Inventory : MonoBehaviour
         for (int i = 0; i < slotCount; i++)
             slots[i] = new InventorySlot();
 
-        // Se slotUIs n?o foi preenchido no Inspector, tenta achar no painel do invent?rio
+       
         if (slotUIs == null || slotUIs.Length == 0)
         {
             InventoryUI invUI = GameplayHudBootstrap.ResolveInventoryUi();
@@ -41,14 +41,12 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    /// <summary>Reconecta os slots da UI ap?s o painel ser criado em runtime.</summary>
     public void ReconnectUi()
     {
         BindSlotUIsFromActiveInventoryUi();
         RefreshAllSlots();
     }
 
-    /// <summary>Atualiza a exibi??o de todos os slots na UI. Chamar ao abrir o invent?rio.</summary>
     public void RefreshAllSlots()
     {
         EnsureSlotUiBinding();
@@ -126,7 +124,7 @@ public class Inventory : MonoBehaviour
         int n = GetSlotCount();
         if (n == 0) return false;
 
-        // 1) Tentar empilhar em slot existente (respeitando limite por slot)
+       
         for (int i = 0; i < n; i++)
         {
             if (slots[i].IsEmpty() || !slots[i].CanStack(item)) continue;
@@ -139,7 +137,7 @@ public class Inventory : MonoBehaviour
             return true;
         }
 
-        // 2) Usar um slot vazio (quando o primeiro est? cheio ou para novo tipo de item)
+       
         for (int i = 0; i < n; i++)
         {
             if (!slots[i].IsEmpty()) continue;
@@ -148,7 +146,6 @@ public class Inventory : MonoBehaviour
             if (slotUIs != null && i < slotUIs.Length && slotUIs[i] != null)
             {
                 slotUIs[i].SetItem(item, 1);
-                if (i > 0) UnityEngine.Debug.Log("[Inventario] Item no slot " + (i + 1) + ": " + item.itemName);
             }
             return true;
         }
@@ -163,7 +160,6 @@ public class Inventory : MonoBehaviour
         return Mathf.Min(slots.Length, slotUIs.Length);
     }
 
-    /// <summary>Obt?m os SlotUIs na ordem exata dos filhos do painel (Slot, Slot (1), Slot (2)...).</summary>
     static SlotUI[] GetSlotUIsInOrder(Transform panel)
     {
         if (panel == null) return null;
@@ -176,7 +172,6 @@ public class Inventory : MonoBehaviour
         return list.Count > 0 ? list.ToArray() : null;
     }
 
-    /// <summary>Retorna a quantidade total de itens com o nome dado no invent?rio.</summary>
     public int GetItemCount(string itemName)
     {
         if (string.IsNullOrEmpty(itemName)) return 0;
@@ -189,7 +184,6 @@ public class Inventory : MonoBehaviour
         return total;
     }
 
-    /// <summary>Remove at? 'amount' itens com o nome dado. Retorna quantos foram removidos.</summary>
     public int RemoveItem(string itemName, int amount)
     {
         if (string.IsNullOrEmpty(itemName) || amount <= 0) return 0;

@@ -5,18 +5,12 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-/// <summary>
-/// Minigame de venda na rua: arraste um item do inventário para o slot de oferta,
-/// escolha a quantidade e pare a barra de precisão na zona verde.
-/// Quanto maior a quantidade, mais rápida a barra (mais difícil).
-/// </summary>
 public class SellMinigameUI : MonoBehaviour
 {
-    // ----- Ajustes de dificuldade -----
-    const float BaseSpeed = 0.7f;           // ciclos por segundo com 1 unidade
-    const float SpeedPerExtraUnit = 0.2f;   // acréscimo por unidade extra
+    const float BaseSpeed = 0.7f;
+    const float SpeedPerExtraUnit = 0.2f;
     const float MaxSpeed = 2.8f;
-    const float BaseZoneHalfWidth = 0.11f;  // metade da zona verde (fração da barra)
+    const float BaseZoneHalfWidth = 0.11f;
     const float MinZoneHalfWidth = 0.06f;
     const float ZoneShrinkPerUnit = 0.004f;
 
@@ -40,7 +34,6 @@ public class SellMinigameUI : MonoBehaviour
     float _zoneHalfWidth;
     float _closeTimer;
 
-    // UI
     Canvas _canvas;
     Image _offerIcon;
     TextMeshProUGUI _offerHint;
@@ -54,7 +47,8 @@ public class SellMinigameUI : MonoBehaviour
 
     CursorLockMode _prevLock;
     bool _prevCursorVisible;
-    PlayerCamera _pausedCamera;
+    GameObject _ownedEventSystem;
+    bool _sessionRestored;
 
     public static void ForceCloseIfOpen()
     {
@@ -66,6 +60,8 @@ public class SellMinigameUI : MonoBehaviour
     {
         if (_instance != null || player == null)
             return;
+
+        GameplayPauseMenu.ForceCloseIfOpen();
 
         var go = new GameObject("SellMinigame");
         _instance = go.AddComponent<SellMinigameUI>();
@@ -97,15 +93,7 @@ public class SellMinigameUI : MonoBehaviour
 
     void OnDestroy()
     {
-        if (_instance == this)
-            _instance = null;
-
-        if (_npc != null)
-            _npc.ResumeFromInteraction();
-
-        SetPlayerControlEnabled(true);
-        Cursor.lockState = _prevLock;
-        Cursor.visible = _prevCursorVisible;
+        RestoreSession();
     }
 
     void SetPlayerControlEnabled(bool enabled)
@@ -121,17 +109,9 @@ public class SellMinigameUI : MonoBehaviour
         if (mover != null)
             mover.enabled = enabled;
 
-        if (!enabled)
-        {
-            _pausedCamera = FindFirstObjectByType<PlayerCamera>();
-            if (_pausedCamera != null)
-                _pausedCamera.enabled = false;
-        }
-        else if (_pausedCamera != null)
-        {
-            _pausedCamera.enabled = true;
-            _pausedCamera = null;
-        }
+        var camera = FindFirstObjectByType<PlayerCamera>();
+        if (camera != null)
+            camera.enabled = enabled;
 
         if (!enabled)
         {
@@ -148,20 +128,41 @@ public class SellMinigameUI : MonoBehaviour
         }
     }
 
+    void RestoreSession()
+    {
+        if (_sessionRestored)
+            return;
+
+        _sessionRestored = true;
+
+        if (_instance == this)
+            _instance = null;
+
+        if (_npc != null)
+            _npc.ResumeFromInteraction();
+
+        SetPlayerControlEnabled(true);
+        Cursor.lockState = _prevLock;
+        Cursor.visible = _prevCursorVisible;
+
+        if (!GameplayPauseMenu.IsPaused && Time.timeScale == 0f)
+            Time.timeScale = 1f;
+    }
+
     void Update()
     {
-        if (_state == State.Finished)
-        {
-            _closeTimer -= Time.deltaTime;
-            if (_closeTimer <= 0f)
-                Close();
-            return;
-        }
-
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             SuppressPauseThisFrame = true;
             Close();
+            return;
+        }
+
+        if (_state == State.Finished)
+        {
+            _closeTimer -= Time.unscaledDeltaTime;
+            if (_closeTimer <= 0f)
+                Close();
             return;
         }
 
@@ -185,10 +186,16 @@ public class SellMinigameUI : MonoBehaviour
 
     void Close()
     {
+        RestoreSession();
+
+        if (_ownedEventSystem != null)
+        {
+            Destroy(_ownedEventSystem);
+            _ownedEventSystem = null;
+        }
+
         Destroy(gameObject);
     }
-
-    // ----- Lógica do jogo -----
 
     void SelectItem(ItemData item)
     {
@@ -290,16 +297,14 @@ public class SellMinigameUI : MonoBehaviour
         _barMarker.anchoredPosition = Vector2.zero;
     }
 
-    // ----- Construção da UI -----
-
-    static void EnsureEventSystem()
+    void EnsureEventSystem()
     {
         if (FindFirstObjectByType<EventSystem>() != null)
             return;
 
-        var go = new GameObject("EventSystem");
-        go.AddComponent<EventSystem>();
-        go.AddComponent<StandaloneInputModule>();
+        _ownedEventSystem = new GameObject("EventSystem");
+        _ownedEventSystem.AddComponent<EventSystem>();
+        _ownedEventSystem.AddComponent<StandaloneInputModule>();
     }
 
     void BuildUi()
@@ -486,8 +491,6 @@ public class SellMinigameUI : MonoBehaviour
         return result;
     }
 
-    // ----- Helpers de UI -----
-
     static RectTransform CreatePanel(Transform parent, Vector2 size, Color color)
     {
         var go = new GameObject("Panel");
@@ -548,9 +551,6 @@ public class SellMinigameUI : MonoBehaviour
         return go;
     }
 
-    // ----- Drag & drop -----
-
-    /// <summary>Ícone arrastável da fileira de itens.</summary>
     class SellMinigameDragItem : MonoBehaviour,
         IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
     {
@@ -598,7 +598,6 @@ public class SellMinigameUI : MonoBehaviour
         }
     }
 
-    /// <summary>Slot de oferta: recebe o item arrastado.</summary>
     class SellMinigameDropSlot : MonoBehaviour, IDropHandler
     {
         SellMinigameUI _owner;

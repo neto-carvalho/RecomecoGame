@@ -22,11 +22,11 @@ public class SlotUI : MonoBehaviour
 
     void ResolveReferences()
     {
-        // Referência de outro Slot (copiada ao duplicar)? Descarta.
+       
         if (icon != null && icon.transform.parent != transform) icon = null;
         if (quantityText != null && quantityText.transform.parent != transform) quantityText = null;
 
-        // Sempre pega Icon e Quantity dos filhos DESTE Slot (por tipo, não por nome)
+       
         if (icon == null || quantityText == null)
         {
             for (int i = 0; i < transform.childCount; i++)
@@ -44,7 +44,7 @@ public class SlotUI : MonoBehaviour
                 }
             }
         }
-        // Fallback: GetComponentsInChildren (inclui o Image do próprio Slot se for fundo)
+       
         if (icon == null)
         {
             Image[] images = GetComponentsInChildren<Image>(true);

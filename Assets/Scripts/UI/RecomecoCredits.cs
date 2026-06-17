@@ -1,7 +1,3 @@
-/// <summary>
-/// Texto exibido no painel de créditos do menu inicial.
-/// Lista apenas assets de terceiros referenciados nas cenas de gameplay.
-/// </summary>
 public static class RecomecoCredits
 {
     public const string MenuBody =

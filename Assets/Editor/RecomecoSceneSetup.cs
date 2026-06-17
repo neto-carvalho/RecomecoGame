@@ -4,9 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>
-/// Menu rápido para montar inventário, mensagens de interação e ferro velho em cenas novas.
-/// </summary>
 public static class RecomecoSceneSetup
 {
     const string MenuRoot = "Recomeco/";

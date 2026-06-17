@@ -1,6 +1,5 @@
 using UnityEngine;
 
-/// <summary>Detecta superfície a partir do raycast (Terrain splat, marcador ou nome do objeto).</summary>
 public static class FootstepSurfaceResolver
 {
     public static FootstepSurfaceType Resolve(in RaycastHit hit)

@@ -1,8 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Coloca a latinha sobre o chão e alinha a base do modelo 3D ao solo.
-/// </summary>
 [DisallowMultipleComponent]
 public class LatinhaPlacement : MonoBehaviour
 {

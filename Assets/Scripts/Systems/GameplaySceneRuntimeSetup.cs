@@ -3,9 +3,6 @@ using Controller;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Garante câmera third-person e Animator do player em cenas sem setup completo (ex.: FerroVelho).
-/// </summary>
 public static class GameplaySceneRuntimeSetup
 {
     static bool _sceneHookRegistered;
@@ -206,7 +203,6 @@ public static class GameplaySceneRuntimeSetup
     }
 }
 
-/// <summary>Executa o setup após Awake/Start de todos os objetos da cena.</summary>
 sealed class GameplaySceneSetupRunner : MonoBehaviour
 {
     void Awake()

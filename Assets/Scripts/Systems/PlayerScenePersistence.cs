@@ -1,9 +1,6 @@
 using Controller;
 using UnityEngine;
 
-/// <summary>
-/// Mantém o mesmo Player (visual, câmera, inventário) ao mudar de cena.
-/// </summary>
 public static class PlayerScenePersistence
 {
     static GameObject _travelingPlayer;

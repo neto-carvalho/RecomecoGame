@@ -1,10 +1,6 @@
 using System;
 using UnityEngine;
 
-/// <summary>
-/// Aplica a skin padrão do jogador (mesma da cena Cidade) quando a cena usa Base_Mesh sem customização.
-/// Respeita peças já configuradas manualmente na Hierarchy (cabelo, roupa, etc.).
-/// </summary>
 public static class PlayerAppearanceSetup
 {
     public enum AppearanceSlot
@@ -61,7 +57,6 @@ public static class PlayerAppearanceSetup
         }
     }
 
-    /// <summary>Personagem já customizado na cena (não é o default Outwear_050).</summary>
     static bool NeedsDefaultAppearance(GameObject player)
     {
         foreach (var smr in player.GetComponentsInChildren<SkinnedMeshRenderer>(true))

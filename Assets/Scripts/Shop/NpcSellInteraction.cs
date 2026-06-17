@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Permite vender para o NPC: perto dele, E abre o minigame de precisão (SellMinigameUI).
-/// Adicionado em runtime pelo CartoonLowPolyCityLiteNpcBootstrap.
-/// </summary>
 public class NpcSellInteraction : MonoBehaviour
 {
     [Tooltip("Distância máxima para interagir")]
@@ -19,7 +15,7 @@ public class NpcSellInteraction : MonoBehaviour
 
     void Update()
     {
-        if (SellMinigameUI.IsOpen)
+        if (SellMinigameUI.IsOpen || GameplayPauseMenu.IsPaused)
             return;
 
         var player = GameObject.FindGameObjectWithTag("Player");

@@ -1,8 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Evita queda no void na cena FerroVelho — reposiciona no chão se necessário.
-/// </summary>
 [DefaultExecutionOrder(-5000)]
 public class FerroVelhoPlayerGuard : MonoBehaviour
 {

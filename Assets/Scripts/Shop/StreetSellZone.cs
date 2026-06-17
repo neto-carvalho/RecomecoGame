@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Ponto de venda na rua: aperte E para vender 1 unidade por vez.
-/// O preço unitário vem de ItemData.unitSellPriceCents (itens com 0 não vendem).
-/// </summary>
 public class StreetSellZone : MonoBehaviour
 {
     [Tooltip("Distância máxima para vender")]

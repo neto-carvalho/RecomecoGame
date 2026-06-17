@@ -5,12 +5,10 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-/// <summary>
-/// Menu de pausa (ESC) durante gameplay: continuar ou voltar ao menu inicial.
-/// </summary>
 public class GameplayPauseMenu : MonoBehaviour
 {
     public static GameplayPauseMenu Instance { get; private set; }
+    public static bool IsPaused => Instance != null && Instance._isOpen;
 
     bool _isOpen;
     GameObject _panelRoot;

@@ -5,9 +5,6 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-/// <summary>
-/// Marca onde o jogador aparece ao entrar na cena (id deve coincidir com o portal de origem).
-/// </summary>
 [DefaultExecutionOrder(500)]
 public class SceneSpawnPoint : MonoBehaviour
 {

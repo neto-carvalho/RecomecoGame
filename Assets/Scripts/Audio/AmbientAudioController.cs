@@ -1,9 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Toca ambiente em loop e faz crossfade conforme <see cref="AmbientZone"/>.
-/// </summary>
 public sealed class AmbientAudioController : MonoBehaviour
 {
     public static AmbientAudioController Instance { get; private set; }

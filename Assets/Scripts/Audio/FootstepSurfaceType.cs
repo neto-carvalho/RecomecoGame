@@ -1,4 +1,3 @@
-/// <summary>Tipo de chão para passos (alinha com pastas do pack Footsteps - Essentials).</summary>
 public enum FootstepSurfaceType
 {
     Default = 0,

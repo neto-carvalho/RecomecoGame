@@ -9,10 +9,6 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
-/// <summary>
-/// Reproduz o vídeo de introdução após escolher Ferro Velho ou Cidade no menu.
-/// Espaço pula; ao terminar carrega a cena de gameplay.
-/// </summary>
 public static class GameplayIntroVideo
 {
     const string VideoFileName = "recomeco_intro.mp4";
@@ -154,14 +150,12 @@ sealed class GameplayIntroVideoRunner : MonoBehaviour
         {
             _player.source = VideoSource.VideoClip;
             _player.clip = clip;
-            Debug.Log("GameplayIntroVideo: reproduzindo '" + clip.name + "' (" + clip.length.ToString("0.0") + "s).");
         }
         else
         {
             var url = GameplayIntroVideo.BuildFileUrl(filePath);
             _player.source = VideoSource.Url;
             _player.url = url;
-            Debug.Log("GameplayIntroVideo: reproduzindo URL " + url);
         }
 
         BuildSkipHint(canvasGo.transform);

@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Zona que leva o jogador a outra cena (ex.: cidade → ferro velho). Aperte E dentro do trigger.
-/// </summary>
 [RequireComponent(typeof(Collider))]
 public class SceneTransitionZone : MonoBehaviour
 {
@@ -79,7 +76,7 @@ public class SceneTransitionZone : MonoBehaviour
 
         _playerInside = inside;
         if (inside)
-            InteractionUI.ShowMessage(messageNear, this);
+            InteractionUI.ShowMessage(messageNear, this, InteractionUI.PriorityNavigation);
         else
             InteractionUI.HideMessage(this);
     }
@@ -134,9 +131,6 @@ public class SceneTransitionZone : MonoBehaviour
         return (closest - worldPoint).sqrMagnitude <= InsideEpsilon * InsideEpsilon;
     }
 
-    /// <summary>
-    /// Evita spawn dentro de um portal (ex.: EntradaCidade no mesmo ponto que Portal_FerroVelho).
-    /// </summary>
     public static Vector3 ResolveSpawnOutsideZones(Vector3 position, Quaternion rotation)
     {
         const float step = 3f;

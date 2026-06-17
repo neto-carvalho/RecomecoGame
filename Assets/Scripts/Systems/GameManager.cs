@@ -30,7 +30,5 @@ public class GameManager : MonoBehaviour
 
         dinheiro += valor;
         latinhas = 0;
-
-        UnityEngine.Debug.Log("Dinheiro total: $" + dinheiro);
     }
 }

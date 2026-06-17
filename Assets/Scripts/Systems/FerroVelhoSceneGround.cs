@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Garante colliders no terreno visual (Geometry/Terrain/default) da FerroVelho.
-/// </summary>
 public static class FerroVelhoSceneGround
 {
     const string GeometryName = "Geometry";
@@ -31,7 +28,6 @@ public static class FerroVelhoSceneGround
         return HasWalkableSceneGround(SceneManager.GetActiveScene());
     }
 
-    /// <summary>Adiciona MeshCollider no terreno da cena. Retorna quantos colliders foram garantidos.</summary>
     public static int EnsureSceneGroundColliders(Scene scene)
     {
         if (!scene.IsValid() || !FerroVelhoWalkableGround.IsFerroVelhoScene(scene))

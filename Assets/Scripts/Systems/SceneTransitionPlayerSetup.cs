@@ -1,9 +1,6 @@
 using Controller;
 using UnityEngine;
 
-/// <summary>
-/// Reativa movimento, câmera e cursor após carregar cena (portal cidade ↔ ferro velho).
-/// </summary>
 public static class SceneTransitionPlayerSetup
 {
     public static void AfterSceneLoad(GameObject player)

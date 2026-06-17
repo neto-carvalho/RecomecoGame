@@ -1,6 +1,5 @@
 using UnityEngine;
 
-/// <summary>Loops de ambiente (Free General Ambience Sounds ou outros).</summary>
 [CreateAssetMenu(fileName = "AmbientAudioProfile", menuName = "Recomeco/Audio/Ambient Audio Profile")]
 public sealed class AmbientAudioProfile : ScriptableObject
 {

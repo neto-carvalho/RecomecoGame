@@ -6,9 +6,6 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Cena separada do ferro velho (junkyard) + portais + Build Settings.
-/// </summary>
 public static class SceneTransitionSetupMenu
 {
     const string MenuRoot = "Recomeco/";

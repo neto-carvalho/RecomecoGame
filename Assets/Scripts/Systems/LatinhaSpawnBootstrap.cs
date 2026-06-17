@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Garante SpawnManager em cenas de gameplay quando não existe na Hierarchy.
-/// </summary>
 public static class LatinhaSpawnBootstrap
 {
     static bool _hooked;

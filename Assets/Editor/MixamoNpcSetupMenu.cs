@@ -3,10 +3,6 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-/// <summary>
-/// Atalhos para importar personagens Mixamo e criar prefabs visuais para <see cref="SidewalkNpcWalker"/>.
-/// O prefab tem de incluir a hierarquia completa do FBX (ossos + mesh), não só o SkinnedMeshRenderer.
-/// </summary>
 public static class MixamoNpcSetupMenu
 {
     const string MixamoFolder = "Assets/Characters/Mixamo";
@@ -142,7 +138,6 @@ public static class MixamoNpcSetupMenu
     [MenuItem("Recomeco/NPC/Mixamo/Reparar prefab(s) de skin selecionado(s)", true)]
     static bool RepairSelectedSkinPrefabsValidate() => Selection.objects.Length > 0;
 
-    /// <summary>Instancia o modelo completo do FBX, configura Animator e grava prefab.</summary>
     static bool TrySaveSkinPrefabFromFbx(string fbxPath, string savePath, out string error)
     {
         error = null;
@@ -204,7 +199,6 @@ public static class MixamoNpcSetupMenu
         animator.applyRootMotion = false;
     }
 
-    /// <summary>Prefab “partido” = só mesh no root, ossos ainda apontam para o FBX mas não existem na hierarquia.</summary>
     static bool HasBonesInHierarchy(GameObject root)
     {
         foreach (var smr in root.GetComponentsInChildren<SkinnedMeshRenderer>(true))
@@ -297,7 +291,6 @@ public static class MixamoNpcSetupMenu
 
         importer.animationType = ModelImporterAnimationType.Human;
         importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
-        // Sem clips embutidos do Mixamo — locomotion vem do Character_Movement (retarget Humanoid).
         importer.importAnimation = false;
         importer.materialImportMode = ModelImporterMaterialImportMode.ImportStandard;
 

@@ -4,9 +4,6 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// O Flat Style Vehicles Pack usa materiais Built-in (Standard). No URP ficam rosa/magenta.
-/// </summary>
 public static class FlatStyleVehiclesUrpFixMenu
 {
     const string PackRoot = "Assets/Flat_Style_Vehicles";
@@ -48,9 +45,6 @@ public static class FlatStyleVehiclesUrpFixMenu
         Debug.Log("[Flat Style Vehicles] Cidade: iluminação e materiais ajustados.");
     }
 
-    /// <summary>
-    /// Lightmapping.lightingSettings lança exceção se não houver asset atribuído na cena.
-    /// </summary>
     static void DisableBakedGiForActiveScene()
     {
         LightingSettings settings = null;

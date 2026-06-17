@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Limpa estado persistente de gameplay e carrega o menu inicial.
-/// </summary>
 public static class GameplayReturnToMenu
 {
     public static void ResetPersistentGameplayState()
