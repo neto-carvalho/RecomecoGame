@@ -102,6 +102,7 @@ public class SellItems : MonoBehaviour
         var removed = inventory.RemoveItem(itemName, count);
         var total = removed * pricePerUnit;
         MoneyManager.instance.AddMoney(total);
+        MissionProgress.NotifyJunkyardSale(removed);
 
         InteractionUI.ShowMessage(
             "Vendeu " + removed + "x " + itemName + " por " + MoneyManager.FormatBRL(total) + "!",

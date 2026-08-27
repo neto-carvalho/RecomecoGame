@@ -37,5 +37,8 @@ public static class SceneTransitionPlayerSetup
             input.RefreshCameraBinding();
 
         PlayerAnimatorSetup.RefreshLocomotion(player);
+
+        if (RecomecoSceneNames.AllowsLatinhaSpawn(UnityEngine.SceneManagement.SceneManager.GetActiveScene()))
+            LatinhaSpawnBootstrap.EnsureInActiveScene();
     }
 }

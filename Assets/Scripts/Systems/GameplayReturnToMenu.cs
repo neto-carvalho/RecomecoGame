@@ -7,6 +7,7 @@ public static class GameplayReturnToMenu
     {
         GameplayHudBootstrap.ResetForMenu();
         GameSession.Reset();
+        MissionProgress.Reset();
 
         if (MoneyManager.instance != null)
             Object.Destroy(MoneyManager.instance.gameObject);

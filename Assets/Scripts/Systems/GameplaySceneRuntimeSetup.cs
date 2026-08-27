@@ -43,6 +43,7 @@ public static class GameplaySceneRuntimeSetup
 
         FerroVelhoWalkableGround.EnsureInActiveScene();
         GameplayHudBootstrap.Ensure();
+        MissionProgress.NotifyEnteredScene(SceneManager.GetActiveScene().name);
 
         var player = FindPlayer();
         if (player == null)

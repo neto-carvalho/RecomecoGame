@@ -111,7 +111,159 @@ public static class GameplayHudBootstrap
 
         RegisterHud(_persistentHudRoot);
         EnsureMoneyDisplay(_persistentHudRoot);
+        EnsureMissionPanel(_persistentHudRoot);
         SuppressDuplicateGameplayUi();
+    }
+
+    static void EnsureMissionPanel(GameObject canvasRoot)
+    {
+        if (canvasRoot == null)
+            return;
+
+        if (canvasRoot.GetComponentInChildren<MissionPanelUI>(true) != null)
+            return;
+
+        BuildMissionPanel(canvasRoot.transform);
+    }
+
+    static void BuildMissionPanel(Transform canvasRoot)
+    {
+        var panelGo = new GameObject("MissionPanel");
+        panelGo.transform.SetParent(canvasRoot, false);
+
+        var panelRect = panelGo.AddComponent<RectTransform>();
+        panelRect.anchorMin = new Vector2(1f, 1f);
+        panelRect.anchorMax = new Vector2(1f, 1f);
+        panelRect.pivot = new Vector2(1f, 1f);
+        panelRect.anchoredPosition = new Vector2(-24f, -20f);
+        panelRect.sizeDelta = new Vector2(420f, 148f);
+
+        var panelBg = panelGo.AddComponent<Image>();
+        panelBg.color = new Color(0.08f, 0.08f, 0.1f, 0.88f);
+        panelBg.raycastTarget = false;
+
+        var titleGo = new GameObject("Title");
+        titleGo.transform.SetParent(panelGo.transform, false);
+        var titleRect = titleGo.AddComponent<RectTransform>();
+        titleRect.anchorMin = new Vector2(0f, 1f);
+        titleRect.anchorMax = new Vector2(1f, 1f);
+        titleRect.pivot = new Vector2(0.5f, 1f);
+        titleRect.anchoredPosition = new Vector2(0f, -12f);
+        titleRect.sizeDelta = new Vector2(-24f, 28f);
+        var titleText = titleGo.AddComponent<TextMeshProUGUI>();
+        if (TMP_Settings.defaultFontAsset != null)
+            titleText.font = TMP_Settings.defaultFontAsset;
+        titleText.fontSize = 22f;
+        titleText.fontStyle = FontStyles.Bold;
+        titleText.color = new Color(0.95f, 0.78f, 0.15f, 1f);
+        titleText.alignment = TextAlignmentOptions.TopLeft;
+        titleText.raycastTarget = false;
+        titleText.text = "MISSÃO";
+
+        var flashGo = new GameObject("CompleteFlash");
+        flashGo.transform.SetParent(panelGo.transform, false);
+        var flashRect = flashGo.AddComponent<RectTransform>();
+        flashRect.anchorMin = new Vector2(0f, 1f);
+        flashRect.anchorMax = new Vector2(1f, 1f);
+        flashRect.pivot = new Vector2(0.5f, 1f);
+        flashRect.anchoredPosition = new Vector2(0f, -40f);
+        flashRect.sizeDelta = new Vector2(-24f, 24f);
+        var flashText = flashGo.AddComponent<TextMeshProUGUI>();
+        if (TMP_Settings.defaultFontAsset != null)
+            flashText.font = TMP_Settings.defaultFontAsset;
+        flashText.fontSize = 18f;
+        flashText.fontStyle = FontStyles.Bold;
+        flashText.color = new Color(0.35f, 1f, 0.45f, 1f);
+        flashText.alignment = TextAlignmentOptions.TopLeft;
+        flashText.raycastTarget = false;
+        flashGo.SetActive(false);
+
+        var descriptionGo = new GameObject("Description");
+        descriptionGo.transform.SetParent(panelGo.transform, false);
+        var descriptionRect = descriptionGo.AddComponent<RectTransform>();
+        descriptionRect.anchorMin = new Vector2(0f, 1f);
+        descriptionRect.anchorMax = new Vector2(1f, 1f);
+        descriptionRect.pivot = new Vector2(0.5f, 1f);
+        descriptionRect.anchoredPosition = new Vector2(0f, -44f);
+        descriptionRect.sizeDelta = new Vector2(-24f, 44f);
+        var descriptionText = descriptionGo.AddComponent<TextMeshProUGUI>();
+        if (TMP_Settings.defaultFontAsset != null)
+            descriptionText.font = TMP_Settings.defaultFontAsset;
+        descriptionText.fontSize = 18f;
+        descriptionText.color = Color.white;
+        descriptionText.alignment = TextAlignmentOptions.TopLeft;
+        descriptionText.raycastTarget = false;
+        descriptionText.text = "Carregando...";
+
+        var hintGo = new GameObject("Hint");
+        hintGo.transform.SetParent(panelGo.transform, false);
+        var hintRect = hintGo.AddComponent<RectTransform>();
+        hintRect.anchorMin = new Vector2(0f, 1f);
+        hintRect.anchorMax = new Vector2(1f, 1f);
+        hintRect.pivot = new Vector2(0.5f, 1f);
+        hintRect.anchoredPosition = new Vector2(0f, -88f);
+        hintRect.sizeDelta = new Vector2(-24f, 32f);
+        var hintText = hintGo.AddComponent<TextMeshProUGUI>();
+        if (TMP_Settings.defaultFontAsset != null)
+            hintText.font = TMP_Settings.defaultFontAsset;
+        hintText.fontSize = 14f;
+        hintText.fontStyle = FontStyles.Italic;
+        hintText.color = new Color(0.82f, 0.82f, 0.82f, 1f);
+        hintText.alignment = TextAlignmentOptions.TopLeft;
+        hintText.raycastTarget = false;
+        hintGo.SetActive(false);
+
+        var progressGo = new GameObject("Progress");
+        progressGo.transform.SetParent(panelGo.transform, false);
+        var progressRect = progressGo.AddComponent<RectTransform>();
+        progressRect.anchorMin = new Vector2(0f, 0f);
+        progressRect.anchorMax = new Vector2(1f, 0f);
+        progressRect.pivot = new Vector2(0.5f, 0f);
+        progressRect.anchoredPosition = new Vector2(0f, 16f);
+        progressRect.sizeDelta = new Vector2(-24f, 24f);
+
+        var progressTextGo = new GameObject("ProgressText");
+        progressTextGo.transform.SetParent(progressGo.transform, false);
+        var progressTextRect = progressTextGo.AddComponent<RectTransform>();
+        progressTextRect.anchorMin = new Vector2(1f, 0.5f);
+        progressTextRect.anchorMax = new Vector2(1f, 0.5f);
+        progressTextRect.pivot = new Vector2(1f, 0.5f);
+        progressTextRect.anchoredPosition = new Vector2(0f, 0f);
+        progressTextRect.sizeDelta = new Vector2(72f, 24f);
+        var progressText = progressTextGo.AddComponent<TextMeshProUGUI>();
+        if (TMP_Settings.defaultFontAsset != null)
+            progressText.font = TMP_Settings.defaultFontAsset;
+        progressText.fontSize = 18f;
+        progressText.fontStyle = FontStyles.Bold;
+        progressText.color = Color.white;
+        progressText.alignment = TextAlignmentOptions.MidlineRight;
+        progressText.raycastTarget = false;
+
+        var barBgGo = new GameObject("BarBackground");
+        barBgGo.transform.SetParent(progressGo.transform, false);
+        var barBgRect = barBgGo.AddComponent<RectTransform>();
+        barBgRect.anchorMin = new Vector2(0f, 0.5f);
+        barBgRect.anchorMax = new Vector2(1f, 0.5f);
+        barBgRect.pivot = new Vector2(0.5f, 0.5f);
+        barBgRect.anchoredPosition = new Vector2(-40f, 0f);
+        barBgRect.sizeDelta = new Vector2(-80f, 10f);
+        var barBg = barBgGo.AddComponent<Image>();
+        barBg.color = new Color(0.2f, 0.2f, 0.22f, 1f);
+        barBg.raycastTarget = false;
+
+        var barFillGo = new GameObject("BarFill");
+        barFillGo.transform.SetParent(barBgGo.transform, false);
+        var barFillRect = barFillGo.AddComponent<RectTransform>();
+        barFillRect.anchorMin = Vector2.zero;
+        barFillRect.anchorMax = new Vector2(0f, 1f);
+        barFillRect.offsetMin = Vector2.zero;
+        barFillRect.offsetMax = Vector2.zero;
+        var barFill = barFillGo.AddComponent<Image>();
+        barFill.color = new Color(0.95f, 0.78f, 0.15f, 1f);
+        barFill.raycastTarget = false;
+
+        var missionUi = panelGo.AddComponent<MissionPanelUI>();
+        missionUi.Wire(titleText, descriptionText, hintText, progressText, flashText, barFill);
     }
 
     static void EnsureMoneyDisplay(GameObject canvasRoot)
@@ -336,6 +488,7 @@ public static class GameplayHudBootstrap
         interactionUi.interactionTextObject = interactionGo;
 
         BuildInventoryUi(canvasGo.transform);
+        BuildMissionPanel(canvasGo.transform);
         return canvasGo;
     }
 

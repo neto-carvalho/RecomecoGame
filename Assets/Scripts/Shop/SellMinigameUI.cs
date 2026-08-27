@@ -277,6 +277,8 @@ public class SellMinigameUI : MonoBehaviour
             if (MoneyManager.instance != null)
                 MoneyManager.instance.AddMoney(total);
 
+            MissionProgress.NotifyResell();
+
             _feedback.text = "VENDIDO! " + removed + "x " + _selectedItem.itemName +
                              "  +" + MoneyManager.FormatBRL(total);
             _feedback.color = new Color(0.35f, 1f, 0.45f);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SpawnManager : MonoBehaviour
 {
@@ -36,11 +37,26 @@ public class SpawnManager : MonoBehaviour
 
     void Awake()
     {
+        if (!RecomecoSceneNames.AllowsLatinhaSpawn(SceneManager.GetActiveScene()))
+        {
+            enabled = false;
+            return;
+        }
+
         instance = this;
+    }
+
+    void OnDestroy()
+    {
+        if (instance == this)
+            instance = null;
     }
 
     void Start()
     {
+        if (!enabled)
+            return;
+
         StartCoroutine(SpawnInitialBatch());
     }
 
@@ -75,6 +91,9 @@ public class SpawnManager : MonoBehaviour
 
     public bool SpawnLatinha()
     {
+        if (!RecomecoSceneNames.AllowsLatinhaSpawn(SceneManager.GetActiveScene()))
+            return false;
+
         if (latinhaPrefab == null)
         {
             UnityEngine.Debug.LogWarning("SpawnManager.SpawnLatinha: Latinha Prefab não configurado.");

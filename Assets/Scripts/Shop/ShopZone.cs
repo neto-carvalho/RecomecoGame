@@ -120,6 +120,8 @@ public class ShopZone : MonoBehaviour
         for (var i = 0; i < product.unitsPerPack; i++)
             inventory.AddItem(product.item);
 
+        MissionProgress.NotifyShopPurchase();
+
         ShowFeedback(
             "Comprou " + product.DisplayName + " (" + product.unitsPerPack + " un) por " +
             MoneyManager.FormatBRL(product.packPriceCents));
