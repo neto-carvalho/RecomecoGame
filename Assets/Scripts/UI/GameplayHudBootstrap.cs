@@ -112,7 +112,62 @@ public static class GameplayHudBootstrap
         RegisterHud(_persistentHudRoot);
         EnsureMoneyDisplay(_persistentHudRoot);
         EnsureMissionPanel(_persistentHudRoot);
+        EnsureMissionDirectionIndicator(_persistentHudRoot);
         SuppressDuplicateGameplayUi();
+    }
+
+    static void EnsureMissionDirectionIndicator(GameObject canvasRoot)
+    {
+        if (canvasRoot == null)
+            return;
+
+        if (canvasRoot.GetComponentInChildren<MissionDirectionIndicatorUI>(true) != null)
+            return;
+
+        BuildMissionDirectionIndicator(canvasRoot.transform);
+    }
+
+    static void BuildMissionDirectionIndicator(Transform canvasRoot)
+    {
+        var rootGo = new GameObject("MissionDirectionIndicator");
+        rootGo.transform.SetParent(canvasRoot, false);
+        var rootRect = rootGo.AddComponent<RectTransform>();
+        rootRect.anchorMin = Vector2.zero;
+        rootRect.anchorMax = Vector2.one;
+        rootRect.offsetMin = Vector2.zero;
+        rootRect.offsetMax = Vector2.zero;
+
+        var arrowGo = new GameObject("Arrow");
+        arrowGo.transform.SetParent(rootGo.transform, false);
+        var arrowRect = arrowGo.AddComponent<RectTransform>();
+        arrowRect.sizeDelta = new Vector2(36f, 36f);
+        var arrowText = arrowGo.AddComponent<TextMeshProUGUI>();
+        if (TMP_Settings.defaultFontAsset != null)
+            arrowText.font = TMP_Settings.defaultFontAsset;
+        arrowText.text = "\u25b2";
+        arrowText.fontSize = 28f;
+        arrowText.fontStyle = FontStyles.Bold;
+        arrowText.color = new Color(0.95f, 0.78f, 0.15f, 1f);
+        arrowText.alignment = TextAlignmentOptions.Center;
+        arrowText.raycastTarget = false;
+        arrowGo.SetActive(false);
+
+        var labelGo = new GameObject("DistanceLabel");
+        labelGo.transform.SetParent(rootGo.transform, false);
+        var labelRect = labelGo.AddComponent<RectTransform>();
+        labelRect.sizeDelta = new Vector2(320f, 32f);
+        var labelText = labelGo.AddComponent<TextMeshProUGUI>();
+        if (TMP_Settings.defaultFontAsset != null)
+            labelText.font = TMP_Settings.defaultFontAsset;
+        labelText.fontSize = 20f;
+        labelText.fontStyle = FontStyles.Bold;
+        labelText.color = new Color(0.95f, 0.92f, 0.85f, 1f);
+        labelText.alignment = TextAlignmentOptions.Center;
+        labelText.raycastTarget = false;
+        labelGo.SetActive(false);
+
+        var indicator = rootGo.AddComponent<MissionDirectionIndicatorUI>();
+        indicator.Wire(arrowRect, arrowText, labelRect, labelText);
     }
 
     static void EnsureMissionPanel(GameObject canvasRoot)
@@ -489,6 +544,7 @@ public static class GameplayHudBootstrap
 
         BuildInventoryUi(canvasGo.transform);
         BuildMissionPanel(canvasGo.transform);
+        BuildMissionDirectionIndicator(canvasGo.transform);
         return canvasGo;
     }
 
