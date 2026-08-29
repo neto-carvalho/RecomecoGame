@@ -95,6 +95,169 @@ public static class SceneTransitionSetupMenu
             "OK");
     }
 
+    [MenuItem(MenuRoot + "Cidade/Configurar spawn moradia inicial (Lugar abandonado)")]
+    static void EnsureMoradiaInitialSpawn()
+    {
+        var scene = SceneManager.GetActiveScene();
+        if (scene.name != RecomecoSceneNames.Cidade)
+        {
+            if (!File.Exists(CidadeScenePath))
+            {
+                EditorUtility.DisplayDialog("Recomeco",
+                    "Cena Cidade não encontrada em:\n" + CidadeScenePath,
+                    "OK");
+                return;
+            }
+
+            if (!EditorUtility.DisplayDialog("Recomeco",
+                    "Abra a cena Cidade para colocar o spawn na moradia inicial?",
+                    "Abrir Cidade", "Cancelar"))
+                return;
+
+            scene = EditorSceneManager.OpenScene(CidadeScenePath, OpenSceneMode.Single);
+        }
+
+        var lugar = GameObject.Find("Lugar abandonado");
+        if (lugar == null)
+        {
+            EditorUtility.DisplayDialog("Recomeco",
+                "Não encontrei o objeto \"Lugar abandonado\" na Hierarchy.\n\n" +
+                "Crie a pasta com esse nome onde montou os props e tente de novo.",
+                "OK");
+            return;
+        }
+
+        SceneSpawnPoint existing = null;
+        foreach (var sp in Object.FindObjectsByType<SceneSpawnPoint>(FindObjectsSortMode.None))
+        {
+            if (sp != null && sp.spawnId == RecomecoSceneNames.MoradiaInicial)
+            {
+                existing = sp;
+                break;
+            }
+        }
+
+        GameObject spawnGo;
+        if (existing != null)
+        {
+            spawnGo = existing.gameObject;
+        }
+        else
+        {
+            spawnGo = new GameObject("Spawn_" + RecomecoSceneNames.MoradiaInicial);
+            Undo.RegisterCreatedObjectUndo(spawnGo, "Create moradia spawn");
+            var point = Undo.AddComponent<SceneSpawnPoint>(spawnGo);
+            point.spawnId = RecomecoSceneNames.MoradiaInicial;
+        }
+
+        Undo.SetTransformParent(spawnGo.transform, lugar.transform, "Parent moradia spawn");
+        spawnGo.transform.localPosition = Vector3.zero;
+        spawnGo.transform.localRotation = Quaternion.identity;
+
+        Selection.activeGameObject = spawnGo;
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorUtility.DisplayDialog("Recomeco",
+            "Spawn da moradia inicial configurado em \"Lugar abandonado\".\n\n" +
+            "• Mova o filho Spawn_MoradiaInicial para o ponto exato onde o jogador deve aparecer.\n" +
+            "• Gire a seta (eixo azul) para a direção inicial da câmera.\n" +
+            "• Salve a cena (Ctrl+S).\n\n" +
+            "Ao iniciar o jogo pela Cidade, o player nasce aqui.",
+            "OK");
+    }
+
+    [MenuItem(MenuRoot + "Cidade/Ajustar moradia (escala + colisão)")]
+    static void FixMoradiaScaleAndColliders()
+    {
+        var scene = SceneManager.GetActiveScene();
+        if (scene.name != RecomecoSceneNames.Cidade)
+        {
+            if (!File.Exists(CidadeScenePath))
+            {
+                EditorUtility.DisplayDialog("Recomeco",
+                    "Cena Cidade não encontrada em:\n" + CidadeScenePath,
+                    "OK");
+                return;
+            }
+
+            if (!EditorUtility.DisplayDialog("Recomeco",
+                    "Abra a cena Cidade para ajustar a moradia inicial?",
+                    "Abrir Cidade", "Cancelar"))
+                return;
+
+            scene = EditorSceneManager.OpenScene(CidadeScenePath, OpenSceneMode.Single);
+        }
+
+        var lugar = GameObject.Find(StreetPropsSceneColliders.MoradiaRootName);
+        if (lugar == null)
+        {
+            EditorUtility.DisplayDialog("Recomeco",
+                "Não encontrei \"Lugar abandonado\" na Hierarchy.",
+                "OK");
+            return;
+        }
+
+        var settings = AssetDatabase.LoadAssetAtPath<RecomecoGameplaySettings>(GameplaySettingsPath);
+        var scale = settings != null ? settings.playerScaleCity : 0.2f;
+
+        Undo.RecordObject(lugar.transform, "Scale moradia");
+        lugar.transform.localScale = Vector3.one * scale;
+
+        var colliders = EnsureMoradiaCollidersWithUndo(lugar.transform);
+        EditorSceneManager.MarkSceneDirty(scene);
+
+        EditorUtility.DisplayDialog("Recomeco",
+            $"Moradia ajustada.\n\n" +
+            $"• Escala de \"Lugar abandonado\": {scale:0.##}\n" +
+            $"• Mesh Collider adicionado em {colliders} objeto(s)\n\n" +
+            "Salve a cena (Ctrl+S) e teste no Play.",
+            "OK");
+    }
+
+    static int EnsureMoradiaCollidersWithUndo(Transform root)
+    {
+        var count = 0;
+        foreach (var filter in root.GetComponentsInChildren<MeshFilter>(true))
+        {
+            if (filter == null || filter.sharedMesh == null)
+                continue;
+
+            var go = filter.gameObject;
+            if (go.GetComponent<MeshRenderer>() == null)
+                continue;
+            if (go.GetComponent<SceneSpawnPoint>() != null)
+                continue;
+
+            var hasSolid = false;
+            foreach (var col in go.GetComponents<Collider>())
+            {
+                if (col != null && col.enabled && !col.isTrigger)
+                {
+                    hasSolid = true;
+                    break;
+                }
+            }
+
+            if (hasSolid)
+                continue;
+
+            var collider = go.GetComponent<MeshCollider>();
+            if (collider == null)
+                collider = Undo.AddComponent<MeshCollider>(go);
+            else
+                Undo.RecordObject(collider, "Update moradia collider");
+
+            collider.sharedMesh = filter.sharedMesh;
+            collider.convex = false;
+            collider.isTrigger = false;
+            collider.enabled = true;
+            Undo.RecordObject(go, "Mark moradia prop static");
+            go.isStatic = true;
+            count++;
+        }
+
+        return count;
+    }
+
     [MenuItem(MenuRoot + "Cenas/Portal voltar à cidade (cena FerroVelho)")]
     static void AddReturnPortalInFerroVelho()
     {

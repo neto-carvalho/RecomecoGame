@@ -7,6 +7,10 @@ public static class RecomecoSceneNames
     public const string FerroVelho = "FerroVelho";
     public const string Cidade = "Cidade";
 
+    public const string MoradiaInicial = "MoradiaInicial";
+    public const string EntradaCidade = "EntradaCidade";
+    public const string EntradaFerroVelho = "EntradaFerroVelho";
+
     public static bool IsMenuScene(Scene scene)
     {
         if (!scene.IsValid())

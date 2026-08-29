@@ -51,6 +51,11 @@ public static class GameplaySceneRuntimeSetup
 
         if (!string.IsNullOrEmpty(SceneTransitionState.PendingSpawnId))
             SceneTransitionState.TryApplyPendingSpawn();
+        else
+            MoradiaInitialSpawnBootstrap.TryApplyForDirectPlay();
+
+        if (SceneManager.GetActiveScene().name == RecomecoSceneNames.Cidade)
+            StreetPropsSceneColliders.EnsureMoradiaColliders();
 
         var settings = RecomecoGameplaySettings.Instance;
         if (settings != null)

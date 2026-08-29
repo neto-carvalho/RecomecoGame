@@ -150,6 +150,10 @@ public class MainMenuController : MonoBehaviour
         GameplayReturnToMenu.ResetPersistentGameplayState();
         PlayerScenePersistence.ResetForMenuGameplayStart();
         MissionProgress.BeginNewGame(sceneName);
+
+        if (sceneName == RecomecoSceneNames.Cidade)
+            SceneTransitionState.SetNextSpawn(RecomecoSceneNames.MoradiaInicial);
+
         GameplayIntroVideo.PlayThenLoadScene(sceneName);
     }
 

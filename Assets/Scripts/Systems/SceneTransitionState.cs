@@ -22,22 +22,24 @@ public static class SceneTransitionState
         if (string.IsNullOrEmpty(PendingSpawnId))
             return false;
 
-        var spawnId = PendingSpawnId;
+        return ApplySpawn(PendingSpawnId, consumePending: true);
+    }
+
+    public static bool TryApplySpawn(string spawnId)
+    {
+        if (string.IsNullOrEmpty(spawnId))
+            return false;
+
+        return ApplySpawn(spawnId, consumePending: false);
+    }
+
+    static bool ApplySpawn(string spawnId, bool consumePending)
+    {
         var player = PlayerScenePersistence.ResolvePlayerInLoadedScene();
         if (player == null)
             return false;
 
-        SceneSpawnPoint matched = null;
-        foreach (var sp in Object.FindObjectsByType<SceneSpawnPoint>(FindObjectsSortMode.None))
-        {
-            if (sp != null && sp.spawnId == spawnId)
-            {
-                matched = sp;
-                break;
-            }
-        }
-
-        if (matched == null)
+        if (!TryResolveSpawn(spawnId, out var position, out var rotation))
             return false;
 
         FerroVelhoWalkableGround.EnsureInActiveScene();
@@ -46,15 +48,46 @@ public static class SceneTransitionState
         if (settings != null)
             settings.ApplyPlayerScaleForScene(player, SceneManager.GetActiveScene());
 
-        var pos = SceneTransitionZone.ResolveSpawnOutsideZones(
-            matched.transform.position + matched.positionOffset,
-            matched.transform.rotation);
+        var pos = SceneTransitionZone.ResolveSpawnOutsideZones(position, rotation);
         SpawnGroundUtility.PlacePlayerOnGround(player, pos);
-        player.transform.rotation = matched.transform.rotation;
+        player.transform.rotation = rotation;
 
-        ConsumeSpawnId();
+        if (consumePending)
+            ConsumeSpawnId();
+
+        MoradiaInitialSpawnBootstrap.MarkApplied();
         GameSession.ApplyToPlayer(player);
         SceneTransitionPlayerSetup.AfterSceneLoad(player);
+        return true;
+    }
+
+    public static bool TryResolveSpawn(string spawnId, out Vector3 position, out Quaternion rotation)
+    {
+        position = default;
+        rotation = Quaternion.identity;
+
+        if (string.IsNullOrEmpty(spawnId))
+            return false;
+
+        foreach (var sp in Object.FindObjectsByType<SceneSpawnPoint>(FindObjectsSortMode.None))
+        {
+            if (sp == null || sp.spawnId != spawnId)
+                continue;
+
+            position = sp.transform.position + sp.positionOffset;
+            rotation = sp.transform.rotation;
+            return true;
+        }
+
+        if (spawnId != RecomecoSceneNames.MoradiaInicial)
+            return false;
+
+        var moradia = GameObject.Find(StreetPropsSceneColliders.MoradiaRootName);
+        if (moradia == null)
+            return false;
+
+        position = moradia.transform.position + moradia.transform.forward * 1.5f;
+        rotation = moradia.transform.rotation;
         return true;
     }
 }

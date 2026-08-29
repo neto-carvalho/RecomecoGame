@@ -44,24 +44,11 @@ public class SceneSpawnPoint : MonoBehaviour
             yield break;
         }
 
-        var pending = SceneTransitionState.ConsumeSpawnId();
-        if (string.IsNullOrEmpty(pending) || pending != spawnId)
+        if (string.IsNullOrEmpty(SceneTransitionState.PendingSpawnId) ||
+            SceneTransitionState.PendingSpawnId != spawnId)
             yield break;
 
-        var player = PlayerScenePersistence.ResolvePlayerInLoadedScene();
-        if (player == null)
-            yield break;
-
-        var settings = RecomecoGameplaySettings.Instance;
-        if (settings != null)
-            settings.ApplyPlayerScaleForScene(player, UnityEngine.SceneManagement.SceneManager.GetActiveScene());
-
-        var spawnPos = SceneTransitionZone.ResolveSpawnOutsideZones(
-            transform.position + positionOffset,
-            transform.rotation);
-        SpawnGroundUtility.PlacePlayerOnGround(player, spawnPos);
-        player.transform.rotation = transform.rotation;
-        GameSession.ApplyToPlayer(player);
-        SceneTransitionPlayerSetup.AfterSceneLoad(player);
+        if (SceneTransitionState.TryApplySpawn(spawnId))
+            SceneTransitionState.ConsumeSpawnId();
     }
 }

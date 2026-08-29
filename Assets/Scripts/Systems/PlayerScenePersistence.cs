@@ -9,6 +9,11 @@ public static class PlayerScenePersistence
 
     public static GameObject TravelingPlayer => _travelingPlayer;
 
+    public static bool HasTravelingPlayer()
+    {
+        return _travelingPlayer != null && _travelingPlayer;
+    }
+
     public static void PrepareForSceneLoad()
     {
         var player = GameObject.FindGameObjectWithTag("Player");
