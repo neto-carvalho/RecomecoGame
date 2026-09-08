@@ -67,6 +67,9 @@ public class MainMenuLevelSelect : MonoBehaviour
         subtitleRect.sizeDelta = new Vector2(1200f, 40f);
         subtitle.color = new Color(0.88f, 0.86f, 0.82f, 1f);
 
+        if (SaveGameManager.HasSave())
+            CreateContinueButton(box.transform);
+
         var cards = new GameObject("Cards");
         cards.transform.SetParent(box.transform, false);
         var cardsRect = cards.AddComponent<RectTransform>();
@@ -99,6 +102,32 @@ public class MainMenuLevelSelect : MonoBehaviour
             RecomecoSceneNames.Cidade);
 
         CreateBackButton(box.transform);
+    }
+
+    void CreateContinueButton(Transform parent)
+    {
+        var go = new GameObject("Btn_Continuar");
+        go.transform.SetParent(parent, false);
+        var rect = go.AddComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0.5f, 1f);
+        rect.anchorMax = new Vector2(0.5f, 1f);
+        rect.pivot = new Vector2(0.5f, 1f);
+        rect.anchoredPosition = new Vector2(0f, -140f);
+        rect.sizeDelta = new Vector2(420f, 56f);
+
+        var img = go.AddComponent<Image>();
+        img.color = new Color(0.22f, 0.18f, 0.1f, 1f);
+
+        var btn = go.AddComponent<Button>();
+        btn.targetGraphic = img;
+        btn.onClick.AddListener(() =>
+        {
+            if (_menu != null)
+                _menu.LoadFromSave();
+        });
+
+        var label = AddTmp(go.transform, "Text", "CONTINUAR JOGO SALVO", 24, FontStyles.Bold);
+        label.color = Gold;
     }
 
     void CreateLevelCard(

@@ -11,6 +11,12 @@ public static class RecomecoSceneNames
     public const string EntradaCidade = "EntradaCidade";
     public const string EntradaFerroVelho = "EntradaFerroVelho";
 
+    public const string InteriorCasaElegante = "Interior Casa elegante (player)";
+    public const string EntradaCasaElegante = "EntradaCasaElegante";
+    public const string SaidaCasaElegante = "SaidaCasaElegante";
+
+    public const string CasaEleganteRootName = "Casa elegante (player)";
+
     public static bool IsMenuScene(Scene scene)
     {
         if (!scene.IsValid())

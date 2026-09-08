@@ -16,12 +16,17 @@ public static class GameSession
 
     public static void SaveBeforeSceneLoad()
     {
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+            CaptureFromPlayer(player);
+        else if (MoneyManager.instance != null)
+            _money = MoneyManager.instance.GetMoney();
+    }
+
+    static void CaptureFromPlayer(GameObject player)
+    {
         if (MoneyManager.instance != null)
             _money = MoneyManager.instance.GetMoney();
-
-        var player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null)
-            return;
 
         var inv = player.GetComponent<Inventory>();
         if (inv == null || inv.slots == null)
@@ -86,6 +91,25 @@ public static class GameSession
         _slots = null;
         _money = -1;
         _hasInventory = false;
+    }
+
+    public static SlotSnapshot[] ExportInventorySnapshot()
+    {
+        if (!_hasInventory || _slots == null)
+            return null;
+
+        var copy = new SlotSnapshot[_slots.Length];
+        for (var i = 0; i < _slots.Length; i++)
+            copy[i] = _slots[i];
+
+        return copy;
+    }
+
+    public static void ImportSnapshot(int money, SlotSnapshot[] slots)
+    {
+        _money = money;
+        _slots = slots;
+        _hasInventory = slots != null && slots.Length > 0;
     }
 
     static ItemData FindItemByName(string itemName)

@@ -69,6 +69,12 @@ public static class SceneTransitionState
         if (string.IsNullOrEmpty(spawnId))
             return false;
 
+        if (InteriorSceneLayout.IsInteriorScene(SceneManager.GetActiveScene()) &&
+            InteriorSceneLayout.TryGetSafeSpawnPosition(spawnId, out position, out rotation))
+        {
+            return true;
+        }
+
         foreach (var sp in Object.FindObjectsByType<SceneSpawnPoint>(FindObjectsSortMode.None))
         {
             if (sp == null || sp.spawnId != spawnId)
@@ -79,15 +85,28 @@ public static class SceneTransitionState
             return true;
         }
 
-        if (spawnId != RecomecoSceneNames.MoradiaInicial)
-            return false;
+        if (spawnId == RecomecoSceneNames.MoradiaInicial)
+        {
+            var moradia = GameObject.Find(StreetPropsSceneColliders.MoradiaRootName);
+            if (moradia != null)
+            {
+                position = moradia.transform.position + moradia.transform.forward * 1.5f;
+                rotation = moradia.transform.rotation;
+                return true;
+            }
+        }
 
-        var moradia = GameObject.Find(StreetPropsSceneColliders.MoradiaRootName);
-        if (moradia == null)
-            return false;
+        if (spawnId == RecomecoSceneNames.SaidaCasaElegante)
+        {
+            var casa = GameObject.Find(RecomecoSceneNames.CasaEleganteRootName);
+            if (casa != null)
+            {
+                position = casa.transform.position + casa.transform.forward * 3f;
+                rotation = casa.transform.rotation;
+                return true;
+            }
+        }
 
-        position = moradia.transform.position + moradia.transform.forward * 1.5f;
-        rotation = moradia.transform.rotation;
-        return true;
+        return false;
     }
 }

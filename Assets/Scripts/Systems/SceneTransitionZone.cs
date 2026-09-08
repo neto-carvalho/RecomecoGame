@@ -15,8 +15,6 @@ public class SceneTransitionZone : MonoBehaviour
 
     public KeyCode interactKey = KeyCode.E;
 
-    const float InsideEpsilon = 0.04f;
-
     Collider _trigger;
     bool _playerInside;
 
@@ -59,11 +57,19 @@ public class SceneTransitionZone : MonoBehaviour
 
     void LateUpdate()
     {
-        var inside = IsPlayerPhysicallyInside();
+        var player = FindPlayerRoot();
+        var inside = player != null && InteractionProximity.IsInsideTrigger(_trigger, player.transform);
+
         if (inside != _playerInside)
             SetInside(inside);
 
-        if (!_playerInside || !Input.GetKeyDown(interactKey))
+        if (!_playerInside)
+        {
+            InteractionUI.HideMessage(this);
+            return;
+        }
+
+        if (!Input.GetKeyDown(interactKey))
             return;
 
         TryLoadTargetScene();
@@ -106,30 +112,12 @@ public class SceneTransitionZone : MonoBehaviour
         SceneManager.LoadScene(targetSceneName);
     }
 
-    bool IsPlayerPhysicallyInside()
+    public bool IsPointInsideTrigger(Vector3 worldPoint)
     {
-        if (_trigger == null || !_trigger.enabled || !_trigger.isTrigger)
-            return false;
-
-        var player = FindPlayerRoot();
-        if (player == null)
-            return false;
-
-        if (IsPointInsideTrigger(player.transform.position))
-            return true;
-
-        var cc = player.GetComponent<CharacterController>();
-        if (cc == null)
-            return false;
-
-        return IsPointInsideTrigger(player.transform.TransformPoint(cc.center));
+        return InteractionProximity.IsWorldPointInsideTrigger(_trigger, worldPoint);
     }
 
-    bool IsPointInsideTrigger(Vector3 worldPoint)
-    {
-        var closest = _trigger.ClosestPoint(worldPoint);
-        return (closest - worldPoint).sqrMagnitude <= InsideEpsilon * InsideEpsilon;
-    }
+    static GameObject FindPlayerRoot() => InteractionProximity.GetPlayer();
 
     public static Vector3 ResolveSpawnOutsideZones(Vector3 position, Quaternion rotation)
     {
@@ -166,15 +154,6 @@ public class SceneTransitionZone : MonoBehaviour
         }
 
         return position;
-    }
-
-    static GameObject FindPlayerRoot()
-    {
-        var traveling = PlayerScenePersistence.TravelingPlayer;
-        if (traveling != null)
-            return traveling;
-
-        return GameObject.FindGameObjectWithTag("Player");
     }
 
     static bool IsPlayerCollider(Collider other)

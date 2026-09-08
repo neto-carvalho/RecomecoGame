@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class InteractionUI : MonoBehaviour
@@ -11,6 +12,7 @@ public class InteractionUI : MonoBehaviour
 
     static readonly Dictionary<object, MessageRequest> s_ActiveMessages = new();
     static object _messageOwner;
+    static bool _sceneHookRegistered;
 
     public GameObject interactionTextObject;
     public TextMeshProUGUI interactionText;
@@ -19,6 +21,20 @@ public class InteractionUI : MonoBehaviour
     {
         public string Message;
         public int Priority;
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void RegisterSceneHook()
+    {
+        if (_sceneHookRegistered)
+            return;
+        _sceneHookRegistered = true;
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        ClearAllMessages();
     }
 
     void Awake()
@@ -93,19 +109,40 @@ public class InteractionUI : MonoBehaviour
     {
         if (owner == null)
         {
-            s_ActiveMessages.Clear();
-            _messageOwner = null;
-            if (instance != null)
-                instance.HideText();
+            ClearAllMessages();
             return;
         }
 
         s_ActiveMessages.Remove(owner);
+        PurgeDeadOwners();
         ApplyBestMessage();
+    }
+
+    static void ClearAllMessages()
+    {
+        s_ActiveMessages.Clear();
+        _messageOwner = null;
+        if (instance != null)
+            instance.HideText();
+    }
+
+    static void PurgeDeadOwners()
+    {
+        var dead = new List<object>();
+        foreach (var pair in s_ActiveMessages)
+        {
+            if (pair.Key is Object unityObject && unityObject == null)
+                dead.Add(pair.Key);
+        }
+
+        foreach (var key in dead)
+            s_ActiveMessages.Remove(key);
     }
 
     static void ApplyBestMessage()
     {
+        PurgeDeadOwners();
+
         if (s_ActiveMessages.Count == 0)
         {
             _messageOwner = null;
@@ -120,6 +157,9 @@ public class InteractionUI : MonoBehaviour
 
         foreach (var pair in s_ActiveMessages)
         {
+            if (pair.Key is Object unityObject && unityObject == null)
+                continue;
+
             var request = pair.Value;
             if (!found ||
                 request.Priority > best.Priority ||
@@ -129,6 +169,12 @@ public class InteractionUI : MonoBehaviour
                 bestOwner = pair.Key;
                 found = true;
             }
+        }
+
+        if (!found)
+        {
+            ClearAllMessages();
+            return;
         }
 
         _messageOwner = bestOwner;

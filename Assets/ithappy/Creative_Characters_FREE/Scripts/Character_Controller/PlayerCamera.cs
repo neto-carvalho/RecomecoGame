@@ -26,6 +26,14 @@ namespace Controller
         [SerializeField, Range(0, 90f)]
         private float m_MaxAngle = 50f;
 
+        [Header("Colisão com paredes")]
+        [SerializeField]
+        protected bool m_EnableWallCollision = true;
+        [SerializeField]
+        protected LayerMask m_WallCollisionMask = ~0;
+        [SerializeField, Range(1f, 6f)]
+        protected float m_CollisionPullSpeedMultiplier = 2.5f;
+
         protected Transform m_Target;
         protected Transform m_Transform;
 
@@ -65,6 +73,36 @@ namespace Controller
         {
             m_Player = player;
             EnsureTarget();
+        }
+
+        public void ApplyGameplaySettings(RecomecoGameplaySettings settings)
+        {
+            if (settings == null)
+                return;
+
+            m_EnableWallCollision = settings.cameraWallCollision;
+            m_CollisionPullSpeedMultiplier = settings.cameraCollisionPullSpeedMultiplier;
+        }
+
+        protected Vector3 ResolveCameraCollision(Vector3 pivot, Vector3 desiredCameraPos)
+        {
+            if (!m_EnableWallCollision)
+                return desiredCameraPos;
+
+            return CameraCollisionResolver.Resolve(
+                pivot,
+                desiredCameraPos,
+                m_Player,
+                GetPlayerScaleFactor(),
+                m_WallCollisionMask);
+        }
+
+        protected float GetCollisionMoveSpeed(float baseSpeed, Vector3 desiredCameraPos, Vector3 resolvedCameraPos)
+        {
+            if ((desiredCameraPos - resolvedCameraPos).sqrMagnitude <= 0.001f)
+                return baseSpeed;
+
+            return baseSpeed * m_CollisionPullSpeedMultiplier;
         }
 
         /// <summary>

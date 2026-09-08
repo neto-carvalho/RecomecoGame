@@ -168,6 +168,7 @@ public static class PlayerScenePersistence
         }
 
         cam.SetPlayer(player.transform);
+        cam.ApplyGameplaySettings(RecomecoGameplaySettings.Instance);
         input.BindPlayerCamera(cam);
         EnsureTravelingCameraActive();
         EnsureSingleAudioListener(cam.gameObject);

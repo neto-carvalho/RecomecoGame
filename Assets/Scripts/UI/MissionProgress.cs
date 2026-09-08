@@ -66,6 +66,27 @@ public static class MissionProgress
         NotifyChanged();
     }
 
+    public static MissionProgressSnapshot ExportSnapshot()
+    {
+        return new MissionProgressSnapshot
+        {
+            started = _started,
+            currentMission = (int)_current,
+            junkyardSoldCount = _junkyardSoldCount,
+            lastReportedCollectCount = _lastReportedCollectCount,
+        };
+    }
+
+    public static void ImportSnapshot(MissionProgressSnapshot snapshot)
+    {
+        _started = snapshot.started;
+        _current = (MissionId)Mathf.Clamp(snapshot.currentMission, 0, (int)MissionId.AllComplete);
+        _junkyardSoldCount = snapshot.junkyardSoldCount;
+        _lastReportedCollectCount = snapshot.lastReportedCollectCount;
+        _completionFlashUntil = 0f;
+        NotifyChanged();
+    }
+
     public static void NotifyEnteredScene(string sceneName)
     {
         EnsureStartedForScene(sceneName);

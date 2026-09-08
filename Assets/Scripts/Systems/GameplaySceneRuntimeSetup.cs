@@ -49,6 +49,14 @@ public static class GameplaySceneRuntimeSetup
         if (player == null)
             return;
 
+        if (InteriorSceneColliders.IsInteriorScene(SceneManager.GetActiveScene()))
+        {
+            InteriorSceneLayout.EnsureGameplayReady();
+            InteriorSceneColliders.EnsureColliders();
+            Physics.SyncTransforms();
+            InteriorSceneLayout.FinalizeMarkerPositions();
+        }
+
         if (!string.IsNullOrEmpty(SceneTransitionState.PendingSpawnId))
             SceneTransitionState.TryApplyPendingSpawn();
         else
@@ -71,6 +79,10 @@ public static class GameplaySceneRuntimeSetup
         EnsurePlayerComponents(player);
         EnsureGameplayCamera(player);
         PlayerAnimatorSetup.RefreshLocomotion(player);
+
+        if (SaveGameManager.HasPendingLoad)
+            SaveGameManager.ApplyPendingToGame();
+
         GameSession.ApplyToPlayer(player);
         GameplayHudBootstrap.WirePlayerInventory(player);
         SceneTransitionPlayerSetup.AfterSceneLoad(player);
@@ -93,7 +105,10 @@ public static class GameplaySceneRuntimeSetup
         }
 
         if (playerCamera != null)
+        {
+            playerCamera.ApplyGameplaySettings(RecomecoGameplaySettings.Instance);
             PlayerScenePersistence.WireCameraAfterLoad(player);
+        }
     }
 
     static GameObject FindPlayer()
@@ -165,6 +180,7 @@ public static class GameplaySceneRuntimeSetup
 
         var thirdPerson = camGo.AddComponent<ThirdPersonCamera>();
         thirdPerson.SetPlayer(player);
+        thirdPerson.ApplyGameplaySettings(RecomecoGameplaySettings.Instance);
 
         var scale = Mathf.Max(0.15f, player.lossyScale.y);
         camGo.transform.position = player.position + Vector3.up * (1.5f * scale) + Vector3.back * (4f * scale);

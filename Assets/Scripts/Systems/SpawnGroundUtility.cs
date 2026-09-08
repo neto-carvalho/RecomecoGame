@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public static class SpawnGroundUtility
 {
@@ -7,8 +8,42 @@ public static class SpawnGroundUtility
         FerroVelhoWalkableGround.EnsureInActiveScene();
 
         var origin = near + Vector3.up * rayUp;
-        if (Physics.Raycast(origin, Vector3.down, out var hit, rayUp + rayDown, ~0, QueryTriggerInteraction.Ignore))
-            return hit.point;
+        var hits = Physics.RaycastAll(origin, Vector3.down, rayUp + rayDown, ~0, QueryTriggerInteraction.Ignore);
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        var bestY = float.MinValue;
+        var found = false;
+
+        foreach (var hit in hits)
+        {
+            if (InteriorSceneLayout.IsInteriorScene(SceneManager.GetActiveScene()))
+            {
+                if (!InteriorSurfaceFilter.IsWalkableFloorHit(hit))
+                    continue;
+            }
+            else if (hit.normal.y < 0.35f)
+            {
+                continue;
+            }
+
+            if (hit.point.y > near.y + 3f)
+                continue;
+
+            if (hit.point.y <= bestY)
+                continue;
+
+            bestY = hit.point.y;
+            found = true;
+        }
+
+        if (found)
+            return new Vector3(near.x, bestY, near.z);
+
+        if (InteriorSceneLayout.IsInteriorScene(SceneManager.GetActiveScene()) &&
+            InteriorSceneLayout.TryGetFloorAt(near, out var interiorFloorY))
+        {
+            return new Vector3(near.x, interiorFloorY, near.z);
+        }
 
         if (FerroVelhoWalkableGround.IsFerroVelhoActive() && !FerroVelhoSceneGround.HasWalkableSceneGround())
         {
@@ -34,6 +69,9 @@ public static class SpawnGroundUtility
             CharacterGroundSnap.FitControllerToWorldScale(cc);
 
         var grounded = GetGroundPosition(position);
+
+        if (InteriorSceneLayout.IsInteriorScene(SceneManager.GetActiveScene()))
+            grounded.y += InteriorSceneLayout.GetSpawnHeightAboveFloor();
 
         if (cc != null)
             cc.enabled = false;

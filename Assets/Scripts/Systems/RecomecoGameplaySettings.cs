@@ -42,12 +42,30 @@ public class RecomecoGameplaySettings : ScriptableObject
     [Tooltip("Dinheiro inicial em centavos ao começar partida (420 = R$ 4,20)")]
     public int initialMoneyCents = 420;
 
+    [Header("Debug / testes (Editor e Development Build)")]
+    [Tooltip("Atalhos F9–F12 e dinheiro de teste ao iniciar partida")]
+    public bool enableDebugCheats = true;
+
+    [Tooltip("Se ativo, substitui initialMoneyCents ao começar nova partida")]
+    public bool useTestStartingMoney;
+
+    [Tooltip("Dinheiro ao iniciar com useTestStartingMoney (500000 = R$ 5.000)")]
+    public int testStartingMoneyCents = 500000;
+
     [Header("Escala do player por cena (portal / DontDestroyOnLoad)")]
     [Tooltip("Escala uniforme (X=Y=Z) na cidade. Use a mesma da Hierarchy do Player na cena Cidade.")]
     public float playerScaleCity = 0.2f;
 
     [Tooltip("Escala no ferro velho. Igual à cidade = prefira encolher o ambiente junkyard no editor.")]
     public float playerScaleFerroVelho = 0.2f;
+
+    [Header("Câmera")]
+    [Tooltip("Evita que a câmera atravesse paredes e objetos sólidos em qualquer cena de gameplay.")]
+    public bool cameraWallCollision = true;
+
+    [Tooltip("Quão rápido a câmera aproxima do personagem quando encosta em uma parede.")]
+    [Range(1f, 6f)]
+    public float cameraCollisionPullSpeedMultiplier = 2.5f;
 
     public float GetPlayerScaleForScene(Scene scene)
     {

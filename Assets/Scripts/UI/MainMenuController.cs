@@ -157,6 +157,33 @@ public class MainMenuController : MonoBehaviour
         GameplayIntroVideo.PlayThenLoadScene(sceneName);
     }
 
+    public void LoadFromSave()
+    {
+        var data = SaveGameManager.LoadFromDisk();
+        if (data == null)
+        {
+            Debug.LogWarning("MainMenuController: nenhum save encontrado.");
+            return;
+        }
+
+        if (string.IsNullOrEmpty(data.lastScene) ||
+            !Application.CanStreamedLevelBeLoaded(data.lastScene))
+        {
+            Debug.LogError("MainMenuController: cena do save inválida ou fora do Build Settings.");
+            return;
+        }
+
+        MainMenuMusic.StopIfPlaying();
+        GameplayReturnToMenu.ResetPersistentGameplayState();
+        PlayerScenePersistence.ResetForMenuGameplayStart();
+
+        SaveGameManager.StageForLoad(data);
+        if (!string.IsNullOrEmpty(data.lastSpawnId))
+            SceneTransitionState.SetNextSpawn(data.lastSpawnId);
+
+        GameplayIntroVideo.PlayThenLoadScene(data.lastScene);
+    }
+
     public void OnOptionsClicked()
     {
         OpenSubPanel(optionsPanel);

@@ -34,7 +34,13 @@ public class MoneyManager : MonoBehaviour
     {
         var settings = RecomecoGameplaySettings.Instance;
         if (settings != null)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (settings.useTestStartingMoney)
+                return Mathf.Max(0, settings.testStartingMoneyCents);
+#endif
             return Mathf.Max(0, settings.initialMoneyCents);
+        }
 
         return 420;
     }

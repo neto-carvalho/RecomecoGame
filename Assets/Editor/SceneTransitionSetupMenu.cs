@@ -634,6 +634,8 @@ public static class SceneTransitionSetupMenu
         if (existing != null)
         {
             existing.SetPlayer(player);
+            existing.ApplyGameplaySettings(
+                AssetDatabase.LoadAssetAtPath<RecomecoGameplaySettings>("Assets/Resources/RecomecoGameplaySettings.asset"));
             return existing;
         }
 
@@ -645,6 +647,8 @@ public static class SceneTransitionSetupMenu
         TryAddUrpCameraData(go);
         var thirdPerson = Undo.AddComponent<ThirdPersonCamera>(go);
         thirdPerson.SetPlayer(player);
+        thirdPerson.ApplyGameplaySettings(
+            AssetDatabase.LoadAssetAtPath<RecomecoGameplaySettings>("Assets/Resources/RecomecoGameplaySettings.asset"));
 
         var scale = Mathf.Max(0.15f, player.lossyScale.y);
         go.transform.position = player.position + Vector3.up * (1.5f * scale) + Vector3.back * (4f * scale);

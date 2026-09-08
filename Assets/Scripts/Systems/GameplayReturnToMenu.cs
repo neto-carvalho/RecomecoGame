@@ -8,6 +8,8 @@ public static class GameplayReturnToMenu
         GameplayHudBootstrap.ResetForMenu();
         GameSession.Reset();
         MissionProgress.Reset();
+        PlayerHousingState.Reset();
+        SaveGameManager.ClearPendingLoad();
 
         if (MoneyManager.instance != null)
             Object.Destroy(MoneyManager.instance.gameObject);

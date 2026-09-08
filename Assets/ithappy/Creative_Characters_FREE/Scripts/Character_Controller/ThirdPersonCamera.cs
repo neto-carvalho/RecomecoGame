@@ -11,6 +11,7 @@ namespace Controller
 
         private Vector3 m_LookPoint;
         private Vector3 m_TargetPos;
+        private Vector3 m_RawTargetPos;
 
         private void LateUpdate()
         {
@@ -27,7 +28,8 @@ namespace Controller
             var scale = GetPlayerScaleFactor();
             var playerPos = (m_Player == null) ? Vector3.zero : m_Player.position;
             m_LookPoint = playerPos + m_Offset * scale * Vector3.up;
-            m_TargetPos = m_LookPoint + rot * dir;
+            m_RawTargetPos = m_LookPoint + rot * dir;
+            m_TargetPos = ResolveCameraCollision(m_LookPoint, m_RawTargetPos);
         }
 
         private void Move(float deltaTime)
@@ -37,12 +39,14 @@ namespace Controller
 
             void camera()
             {
-                var direction = m_TargetPos - m_Transform.position;
-                var delta = m_CameraSpeed * deltaTime;
+                var desiredPos = ResolveCameraCollision(m_LookPoint, m_TargetPos);
+                var direction = desiredPos - m_Transform.position;
+                var moveSpeed = GetCollisionMoveSpeed(m_CameraSpeed, m_RawTargetPos, desiredPos);
+                var delta = moveSpeed * deltaTime;
 
                 if(delta * delta > direction.sqrMagnitude)
                 {
-                    m_Transform.position = m_TargetPos;
+                    m_Transform.position = desiredPos;
                 }
                 else
                 {
