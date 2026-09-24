@@ -53,16 +53,31 @@ public class MoneyManager : MonoBehaviour
 
     public void AddMoney(int amount)
     {
-        if (amount > 0)
-            money += amount;
+        if (amount == 0)
+            return;
+
+        money += amount;
     }
 
     public bool RemoveMoney(int amount)
     {
-        if (amount <= 0) return true;
-        if (money < amount) return false;
+        if (amount <= 0)
+            return true;
+
+        if (money < amount)
+            return false;
+
         money -= amount;
         return true;
+    }
+
+    /// <summary>Cobra mesmo sem saldo (permite ficar negativo).</summary>
+    public void ChargeAllowDebt(int amountCents)
+    {
+        if (amountCents <= 0)
+            return;
+
+        money -= amountCents;
     }
 
     public int GetMoney()
@@ -72,6 +87,6 @@ public class MoneyManager : MonoBehaviour
 
     public void SetMoney(int amount)
     {
-        money = Mathf.Max(0, amount);
+        money = amount;
     }
 }

@@ -78,6 +78,7 @@ public static class SaveGameManager
             ownedHouses = PlayerHousingState.ExportOwned(),
             storages = HomeStorage.ExportAll(),
             mission = MissionProgress.ExportSnapshot(),
+            needs = ExportNeedsSnapshot(),
             lastScene = SceneManager.GetActiveScene().name,
             lastSpawnId = !string.IsNullOrEmpty(spawnIdOverride)
                 ? spawnIdOverride
@@ -105,10 +106,50 @@ public static class SaveGameManager
         PlayerHousingState.ImportOwned(data.ownedHouses);
         MissionProgress.ImportSnapshot(data.mission);
         HomeStorage.ImportAll(data.storages);
+        ApplyNeedsSnapshot(data.needs);
 
         var player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
             GameSession.ApplyToPlayer(player);
+    }
+
+    static PlayerNeedsSnapshot ExportNeedsSnapshot()
+    {
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+            player = PlayerScenePersistence.TravelingPlayer;
+
+        var needs = player != null ? player.GetComponent<PlayerNeeds>() : null;
+        return needs != null ? needs.ExportSnapshot() : DefaultNeedsSnapshot();
+    }
+
+    static PlayerNeedsSnapshot DefaultNeedsSnapshot()
+    {
+        return new PlayerNeedsSnapshot
+        {
+            hunger = PlayerNeeds.MaxHunger,
+            health = PlayerNeeds.MaxHealth,
+            reputation = PlayerNeeds.MaxReputation,
+        };
+    }
+
+    static void ApplyNeedsSnapshot(PlayerNeedsSnapshot snapshot)
+    {
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+            player = PlayerScenePersistence.TravelingPlayer;
+
+        if (player == null)
+            return;
+
+        var needs = player.GetComponent<PlayerNeeds>();
+        if (needs == null)
+            needs = player.AddComponent<PlayerNeeds>();
+
+        if (snapshot.health <= 0f && snapshot.hunger <= 0f && snapshot.reputation <= 0f)
+            snapshot = DefaultNeedsSnapshot();
+
+        needs.ImportSnapshot(snapshot);
     }
 
     static string GuessSpawnIdForScene(string sceneName)

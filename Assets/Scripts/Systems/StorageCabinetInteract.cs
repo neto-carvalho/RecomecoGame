@@ -2,7 +2,7 @@ using System.Text;
 using UnityEngine;
 
 [RequireComponent(typeof(HomeStorage))]
-public class StorageCabinetInteract : MonoBehaviour
+public class StorageCabinetInteract : MonoBehaviour, IInteractionPromptOwner
 {
     public float interactDistance = 2.5f;
     public KeyCode interactKey = KeyCode.E;
@@ -10,6 +10,9 @@ public class StorageCabinetInteract : MonoBehaviour
     HomeStorage _storage;
     bool _open;
     float _feedbackTimer;
+    bool _playerInRange;
+
+    public bool IsInteractionPromptActive() => _playerInRange && isActiveAndEnabled;
 
     void Awake()
     {
@@ -28,6 +31,7 @@ public class StorageCabinetInteract : MonoBehaviour
         var player = InteractionProximity.GetPlayer();
         var playerTransform = player != null ? player.transform : null;
         var inRange = InteractionProximity.IsWithinRange(transform.position, interactDistance, playerTransform);
+        _playerInRange = inRange;
 
         if (!inRange)
         {

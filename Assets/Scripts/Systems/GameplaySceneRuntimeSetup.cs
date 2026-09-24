@@ -62,6 +62,9 @@ public static class GameplaySceneRuntimeSetup
         else
             MoradiaInitialSpawnBootstrap.TryApplyForDirectPlay();
 
+        if (PlayerFaintHandler.ConsumePendingHospitalWake())
+            PlayerFaintHandler.FinishHospitalWake(player);
+
         if (SceneManager.GetActiveScene().name == RecomecoSceneNames.Cidade)
             StreetPropsSceneColliders.EnsureMoradiaColliders();
 
@@ -137,6 +140,9 @@ public static class GameplaySceneRuntimeSetup
         }
 
         EnsureFootstepAudio(player, settings);
+
+        if (player.GetComponent<PlayerNeeds>() == null)
+            player.AddComponent<PlayerNeeds>();
     }
 
     static void EnsureFootstepAudio(GameObject player, RecomecoGameplaySettings settings)

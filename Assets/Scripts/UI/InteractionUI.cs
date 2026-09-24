@@ -55,6 +55,19 @@ public class InteractionUI : MonoBehaviour
             instance = null;
     }
 
+    void LateUpdate()
+    {
+        PurgeInactivePromptOwners();
+        if (s_ActiveMessages.Count == 0)
+        {
+            if (interactionText != null && interactionText.gameObject.activeSelf)
+                HideText();
+            return;
+        }
+
+        ApplyBestMessage();
+    }
+
     void RegisterIfValid()
     {
         if (interactionText != null)
@@ -76,6 +89,17 @@ public class InteractionUI : MonoBehaviour
     {
         if (instance != null && instance.interactionText != null)
             return;
+
+        var hudRoot = GameplayHudBootstrap.GetHudRoot();
+        if (hudRoot != null)
+        {
+            var hudUi = hudRoot.GetComponentInChildren<InteractionUI>(true);
+            if (hudUi != null && hudUi.interactionText != null)
+            {
+                Register(hudUi);
+                return;
+            }
+        }
 
         foreach (var ui in FindObjectsByType<InteractionUI>(FindObjectsSortMode.None))
         {
@@ -139,9 +163,23 @@ public class InteractionUI : MonoBehaviour
             s_ActiveMessages.Remove(key);
     }
 
+    static void PurgeInactivePromptOwners()
+    {
+        var inactive = new List<object>();
+        foreach (var pair in s_ActiveMessages)
+        {
+            if (pair.Key is IInteractionPromptOwner prompt && !prompt.IsInteractionPromptActive())
+                inactive.Add(pair.Key);
+        }
+
+        foreach (var key in inactive)
+            s_ActiveMessages.Remove(key);
+    }
+
     static void ApplyBestMessage()
     {
         PurgeDeadOwners();
+        PurgeInactivePromptOwners();
 
         if (s_ActiveMessages.Count == 0)
         {
@@ -158,6 +196,9 @@ public class InteractionUI : MonoBehaviour
         foreach (var pair in s_ActiveMessages)
         {
             if (pair.Key is Object unityObject && unityObject == null)
+                continue;
+
+            if (pair.Key is IInteractionPromptOwner prompt && !prompt.IsInteractionPromptActive())
                 continue;
 
             var request = pair.Value;
@@ -206,6 +247,7 @@ public class InteractionUI : MonoBehaviour
             return;
         }
 
+        SuppressStrayInteractionLabels();
         interactionText.gameObject.SetActive(true);
         interactionText.text = message;
     }
@@ -216,5 +258,21 @@ public class InteractionUI : MonoBehaviour
             interactionText.gameObject.SetActive(false);
         else if (interactionTextObject != null)
             interactionTextObject.SetActive(false);
+
+        SuppressStrayInteractionLabels();
+    }
+
+    static void SuppressStrayInteractionLabels()
+    {
+        foreach (var ui in FindObjectsByType<InteractionUI>(FindObjectsSortMode.None))
+        {
+            if (ui == null || ui == instance)
+                continue;
+
+            if (ui.interactionText != null)
+                ui.interactionText.gameObject.SetActive(false);
+            else if (ui.interactionTextObject != null)
+                ui.interactionTextObject.SetActive(false);
+        }
     }
 }

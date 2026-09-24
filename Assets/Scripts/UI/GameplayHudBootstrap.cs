@@ -113,6 +113,7 @@ public static class GameplayHudBootstrap
         EnsureMoneyDisplay(_persistentHudRoot);
         EnsureMissionPanel(_persistentHudRoot);
         EnsureMissionDirectionIndicator(_persistentHudRoot);
+        EnsurePlayerNeedsHud(_persistentHudRoot);
         SuppressDuplicateGameplayUi();
     }
 
@@ -458,6 +459,118 @@ public static class GameplayHudBootstrap
 
         SuppressComponentsOutsidePersistentHud<HUDController>();
         SuppressComponentsOutsidePersistentHud<InventoryUI>();
+        SuppressComponentsOutsidePersistentHud<InteractionUI>();
+        SuppressComponentsOutsidePersistentHud<PlayerNeedsHud>();
+    }
+
+    static void EnsurePlayerNeedsHud(GameObject canvasRoot)
+    {
+        if (canvasRoot == null)
+            return;
+
+        var existing = canvasRoot.GetComponentInChildren<PlayerNeedsHud>(true);
+        if (existing != null)
+        {
+            ApplyPlayerNeedsHudLayout(existing.GetComponent<RectTransform>());
+            return;
+        }
+
+        BuildPlayerNeedsHud(canvasRoot.transform);
+    }
+
+    static void ApplyPlayerNeedsHudLayout(RectTransform rootRect)
+    {
+        if (rootRect == null)
+            return;
+
+        // Canto inferior esquerdo — longe do painel de missão (topo direita) e do dinheiro (topo esquerda).
+        rootRect.anchorMin = new Vector2(0f, 0f);
+        rootRect.anchorMax = new Vector2(0f, 0f);
+        rootRect.pivot = new Vector2(0f, 0f);
+        rootRect.anchoredPosition = new Vector2(24f, 24f);
+        rootRect.sizeDelta = new Vector2(260f, 88f);
+
+        for (var i = 0; i < rootRect.childCount; i++)
+        {
+            var row = rootRect.GetChild(i);
+            var labelRect = row.Find("Label") as RectTransform;
+            if (labelRect != null)
+            {
+                labelRect.anchorMin = new Vector2(0f, 0f);
+                labelRect.anchorMax = new Vector2(0.42f, 1f);
+            }
+
+            var bgRect = row.Find("Background") as RectTransform;
+            if (bgRect != null)
+                bgRect.anchorMin = new Vector2(0.44f, 0.15f);
+        }
+    }
+
+    static void BuildPlayerNeedsHud(Transform canvasRoot)
+    {
+        var rootGo = new GameObject("PlayerNeedsHud");
+        rootGo.transform.SetParent(canvasRoot, false);
+        var rootRect = rootGo.AddComponent<RectTransform>();
+        ApplyPlayerNeedsHudLayout(rootRect);
+
+        var hud = rootGo.AddComponent<PlayerNeedsHud>();
+
+        var health = CreateNeedBar(rootGo.transform, "Vida", new Vector2(0f, 0f), new Color(0.85f, 0.25f, 0.25f));
+        var hunger = CreateNeedBar(rootGo.transform, "Fome", new Vector2(0f, -28f), new Color(0.95f, 0.65f, 0.15f));
+        var reputation = CreateNeedBar(rootGo.transform, "Rep.", new Vector2(0f, -56f), new Color(0.35f, 0.85f, 0.45f));
+
+        hud.Wire(health.fill, hunger.fill, reputation.fill, health.label, hunger.label, reputation.label);
+    }
+
+    static (Image fill, TextMeshProUGUI label) CreateNeedBar(Transform parent, string title, Vector2 anchoredPos, Color fillColor)
+    {
+        var row = new GameObject(title + "Bar");
+        row.transform.SetParent(parent, false);
+        var rowRect = row.AddComponent<RectTransform>();
+        rowRect.anchorMin = new Vector2(0f, 1f);
+        rowRect.anchorMax = new Vector2(1f, 1f);
+        rowRect.pivot = new Vector2(0f, 1f);
+        rowRect.anchoredPosition = anchoredPos;
+        rowRect.sizeDelta = new Vector2(0f, 22f);
+
+        var labelGo = new GameObject("Label");
+        labelGo.transform.SetParent(row.transform, false);
+        var labelRect = labelGo.AddComponent<RectTransform>();
+        labelRect.anchorMin = new Vector2(0f, 0f);
+        labelRect.anchorMax = new Vector2(0.42f, 1f);
+        labelRect.offsetMin = Vector2.zero;
+        labelRect.offsetMax = Vector2.zero;
+        var label = labelGo.AddComponent<TextMeshProUGUI>();
+        if (TMP_Settings.defaultFontAsset != null)
+            label.font = TMP_Settings.defaultFontAsset;
+        label.fontSize = 16f;
+        label.alignment = TextAlignmentOptions.MidlineLeft;
+        label.text = title;
+        label.color = Color.white;
+
+        var bgGo = new GameObject("Background");
+        bgGo.transform.SetParent(row.transform, false);
+        var bgRect = bgGo.AddComponent<RectTransform>();
+        bgRect.anchorMin = new Vector2(0.44f, 0.15f);
+        bgRect.anchorMax = new Vector2(1f, 0.85f);
+        bgRect.offsetMin = Vector2.zero;
+        bgRect.offsetMax = Vector2.zero;
+        var bgImage = bgGo.AddComponent<Image>();
+        bgImage.color = new Color(0f, 0f, 0f, 0.45f);
+
+        var fillGo = new GameObject("Fill");
+        fillGo.transform.SetParent(bgGo.transform, false);
+        var fillRect = fillGo.AddComponent<RectTransform>();
+        fillRect.anchorMin = Vector2.zero;
+        fillRect.anchorMax = Vector2.one;
+        fillRect.offsetMin = Vector2.zero;
+        fillRect.offsetMax = Vector2.zero;
+        var fill = fillGo.AddComponent<Image>();
+        fill.color = fillColor;
+        fill.type = Image.Type.Simple;
+        fill.raycastTarget = false;
+
+        return (fill, label);
     }
 
     static void SuppressComponentsOutsidePersistentHud<T>() where T : Component

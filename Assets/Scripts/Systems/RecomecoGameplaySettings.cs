@@ -59,6 +59,62 @@ public class RecomecoGameplaySettings : ScriptableObject
     [Tooltip("Escala no ferro velho. Igual à cidade = prefira encolher o ambiente junkyard no editor.")]
     public float playerScaleFerroVelho = 0.2f;
 
+    [Header("Vida / fome")]
+    [Tooltip("Fome perdida por minuto parado")]
+    public float hungerDrainPerMinute = 1.2f;
+
+    [Tooltip("Multiplicador de fome ao correr")]
+    public float hungerDrainRunMultiplier = 1.6f;
+
+    [Tooltip("Vida perdida por segundo com fome zerada")]
+    public float healthLossPerSecondWhenStarving = 2f;
+
+    [Tooltip("Vida recuperada por segundo quando fome acima do limiar")]
+    public float healthRegenPerSecond = 1.25f;
+
+    [Tooltip("Fome mínima para regenerar vida")]
+    public float healthRegenMinHunger = 25f;
+
+    [Header("Reputação")]
+    [Tooltip("Reputação perdida ao errar o minigame de venda na calçada")]
+    public float sellMissReputationLoss = 10f;
+
+    [Header("Hospital (desmaio)")]
+    [Tooltip("Conta hospital em centavos (8500 = R$ 85,00)")]
+    public int hospitalBillCents = 8500;
+
+    public float hospitalWakeHealth = 35f;
+    public float hospitalWakeHunger = 30f;
+
+    [Tooltip("Clip de queda (Death_Forward do Aminset_Basic). Use Recomeco → Player → Configurar animação de desmaio")]
+    public AnimationClip faintAnimationClip;
+
+    [Tooltip("Reserva: controller inteiro do ithappy (evite — é demo em sequência)")]
+    public RuntimeAnimatorController faintAnimatorController;
+
+    [Tooltip("Reserva se usar faintAnimatorController")]
+    public string faintAnimationState = "Death_Forward";
+
+    [Tooltip("Altura da câmera = altura do corpo × este valor (visão de cima, estilo GTA)")]
+    [Range(2f, 6f)]
+    public float faintOverheadBodyHeightMultiplier = 3.4f;
+
+    [Tooltip("Inclinação da câmera (graus) — ~88 = quase de cima, estilo GTA wasted")]
+    [Range(55f, 90f)]
+    public float faintOverheadPitch = 88f;
+
+    [Tooltip("Folga acima do chão ao alinhar o corpo caído (metros na escala do player)")]
+    public float faintGroundClearance = 0.12f;
+
+    [Tooltip("Tamanho do título \"Você desmaiou\" na tela")]
+    public float faintTitleFontSize = 76f;
+
+    [Tooltip("Segundos com a mensagem após a queda, antes do hospital")]
+    public float faintHoldAfterFallSeconds = 1.35f;
+
+    [Tooltip("Fade para preto antes de teleportar ao hospital")]
+    public float faintFadeOutSeconds = 0.45f;
+
     [Header("Câmera")]
     [Tooltip("Evita que a câmera atravesse paredes e objetos sólidos em qualquer cena de gameplay.")]
     public bool cameraWallCollision = true;

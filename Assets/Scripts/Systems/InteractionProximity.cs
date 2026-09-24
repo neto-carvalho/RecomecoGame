@@ -23,12 +23,37 @@ public static class InteractionProximity
 
     public static bool IsWithinRange(Vector3 targetPosition, float baseRange, Transform player)
     {
+        return IsWithinRange(targetPosition, baseRange, player, scaleWithPlayer: true);
+    }
+
+    public static bool IsWithinRange(
+        Vector3 targetPosition,
+        float baseRange,
+        Transform player,
+        bool scaleWithPlayer)
+    {
         if (player == null)
             return false;
 
-        var range = GetScaledRange(baseRange, player);
+        var range = scaleWithPlayer ? GetScaledRange(baseRange, player) : baseRange;
         var probe = GetPlayerProbe(player);
         return Vector3.Distance(probe, targetPosition) <= range;
+    }
+
+    public static bool IsWithinHorizontalRange(
+        Vector3 targetPosition,
+        float range,
+        Transform player,
+        bool scaleWithPlayer = false)
+    {
+        if (player == null)
+            return false;
+
+        var effectiveRange = scaleWithPlayer ? GetScaledRange(range, player) : range;
+        var probe = GetPlayerProbe(player);
+        var a = new Vector2(probe.x, probe.z);
+        var b = new Vector2(targetPosition.x, targetPosition.z);
+        return Vector2.Distance(a, b) <= effectiveRange;
     }
 
     public static bool IsInsideTrigger(Collider trigger, Transform player, float epsilon = 0.04f)

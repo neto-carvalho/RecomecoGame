@@ -253,6 +253,17 @@ public class SellMinigameUI : MonoBehaviour
         _quantity = Mathf.Clamp(_quantity, 1, _availableCount);
         _barSpeed = GetSpeedForQuantity(_quantity);
         _zoneHalfWidth = Mathf.Max(MinZoneHalfWidth, BaseZoneHalfWidth - ZoneShrinkPerUnit * (_quantity - 1));
+
+        var needs = _player != null ? _player.GetComponent<PlayerNeeds>() : null;
+        if (needs != null)
+        {
+            var repFactor = needs.Reputation / PlayerNeeds.MaxReputation;
+            if (repFactor <= 0f)
+                _zoneHalfWidth = 0f;
+            else
+                _zoneHalfWidth *= repFactor;
+        }
+
         _barTime = 0f;
 
         _barZone.anchorMin = new Vector2(0.5f - _zoneHalfWidth, 0f);
@@ -286,10 +297,26 @@ public class SellMinigameUI : MonoBehaviour
         }
         else
         {
+            ApplySellMissReputationLoss();
+
             _feedback.text = "Errou o tempo! O pedestre foi embora...";
             _feedback.color = new Color(1f, 0.4f, 0.35f);
             _closeTimer = 1.4f;
         }
+    }
+
+    void ApplySellMissReputationLoss()
+    {
+        if (_player == null)
+            return;
+
+        var needs = _player.GetComponent<PlayerNeeds>();
+        if (needs == null)
+            return;
+
+        var settings = RecomecoGameplaySettings.Instance;
+        var loss = settings != null ? settings.sellMissReputationLoss : 10f;
+        needs.AddReputation(-loss);
     }
 
     void SetMarkerPosition(float normalized)

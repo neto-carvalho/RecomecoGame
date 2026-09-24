@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BedSaveInteract : MonoBehaviour
+public class BedSaveInteract : MonoBehaviour, IInteractionPromptOwner
 {
     [Tooltip("Distância máxima para dormir/salvar")]
     public float interactDistance = 2.5f;
@@ -11,6 +11,9 @@ public class BedSaveInteract : MonoBehaviour
     public KeyCode interactKey = KeyCode.E;
 
     float _feedbackTimer;
+    bool _playerInRange;
+
+    public bool IsInteractionPromptActive() => _playerInRange && isActiveAndEnabled;
 
     void OnDisable()
     {
@@ -23,6 +26,7 @@ public class BedSaveInteract : MonoBehaviour
         var player = InteractionProximity.GetPlayer();
         var playerTransform = player != null ? player.transform : null;
         var inRange = InteractionProximity.IsWithinRange(transform.position, interactDistance, playerTransform);
+        _playerInRange = inRange;
 
         if (!inRange)
         {

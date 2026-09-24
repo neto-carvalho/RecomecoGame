@@ -107,6 +107,12 @@ public static class SceneTransitionState
             }
         }
 
+        if (spawnId == RecomecoSceneNames.HospitalEntrada &&
+            HospitalSpawnUtility.TryGetHospitalSpawn(out position, out rotation))
+        {
+            return true;
+        }
+
         return false;
     }
 }

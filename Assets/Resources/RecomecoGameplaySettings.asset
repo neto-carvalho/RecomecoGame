@@ -30,3 +30,23 @@ MonoBehaviour:
   initialMoneyCents: 420
   playerScaleCity: 0.2
   playerScaleFerroVelho: 0.2
+  hungerDrainPerMinute: 1.2
+  hungerDrainRunMultiplier: 1.6
+  healthLossPerSecondWhenStarving: 2
+  healthRegenPerSecond: 1.25
+  healthRegenMinHunger: 25
+  hospitalBillCents: 8500
+  hospitalWakeHealth: 35
+  hospitalWakeHunger: 30
+  sellMissReputationLoss: 10
+  faintAnimationClip: {fileID: 6182763086745782283, guid: 5dbb2366974668d48a42568690792034, type: 3}
+  faintAnimatorController: {fileID: 9100000, guid: d16a1e98254f09443afa6295c1c9948e, type: 2}
+  faintAnimationState: Death_Forward
+  faintOverheadBodyHeightMultiplier: 3.4
+  faintOverheadPitch: 88
+  faintGroundClearance: 0.18
+  faintTitleFontSize: 76
+  faintHoldAfterFallSeconds: 1.35
+  faintFadeOutSeconds: 0.45
+  cameraWallCollision: 1
+  cameraCollisionPullSpeedMultiplier: 2.5

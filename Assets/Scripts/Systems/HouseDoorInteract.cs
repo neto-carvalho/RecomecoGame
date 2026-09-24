@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Collider))]
-public class HouseDoorInteract : MonoBehaviour
+public class HouseDoorInteract : MonoBehaviour, IInteractionPromptOwner
 {
     [Tooltip("ID da moradia (ex.: casa_elegante)")]
     public string housingId = PlayerHousingState.CasaElegante;
@@ -19,11 +19,16 @@ public class HouseDoorInteract : MonoBehaviour
     [Tooltip("Spawn ao entrar no interior")]
     public string interiorSpawnId = RecomecoSceneNames.EntradaCasaElegante;
 
+    [Tooltip("Distância horizontal (XZ) para mostrar o prompt na cidade")]
+    public float promptDistance = 2.75f;
+
     public KeyCode interactKey = KeyCode.E;
 
     Collider _trigger;
-    bool _playerInside;
+    bool _playerInRange;
     float _feedbackTimer;
+
+    public bool IsInteractionPromptActive() => _playerInRange && isActiveAndEnabled;
 
     void Awake()
     {
@@ -34,7 +39,7 @@ public class HouseDoorInteract : MonoBehaviour
 
     void OnDisable()
     {
-        SetInside(false);
+        SetInRange(false);
     }
 
     void OnDestroy()
@@ -42,27 +47,17 @@ public class HouseDoorInteract : MonoBehaviour
         InteractionUI.HideMessage(this);
     }
 
-    void OnTriggerEnter(Collider other)
-    {
-        if (IsPlayerCollider(other))
-            SetInside(true);
-    }
-
-    void OnTriggerExit(Collider other)
-    {
-        if (IsPlayerCollider(other))
-            SetInside(false);
-    }
-
     void LateUpdate()
     {
-        var player = FindPlayerRoot();
-        var inside = player != null && InteractionProximity.IsInsideTrigger(_trigger, player.transform);
+        var player = InteractionProximity.GetPlayer();
+        var inRange = player != null &&
+                      InteractionProximity.IsWithinHorizontalRange(
+                          transform.position, promptDistance, player.transform, scaleWithPlayer: false);
 
-        if (inside != _playerInside)
-            SetInside(inside);
+        if (inRange != _playerInRange)
+            SetInRange(inRange);
 
-        if (!_playerInside)
+        if (!_playerInRange)
         {
             if (_feedbackTimer > 0f)
                 _feedbackTimer = 0f;
@@ -150,33 +145,15 @@ public class HouseDoorInteract : MonoBehaviour
         InteractionUI.ShowMessage(message, this, InteractionUI.PriorityNavigation);
     }
 
-    void SetInside(bool inside)
+    void SetInRange(bool inRange)
     {
-        if (_playerInside == inside)
+        if (_playerInRange == inRange)
             return;
 
-        _playerInside = inside;
-        if (inside)
+        _playerInRange = inRange;
+        if (inRange)
             ShowPrompt();
         else
             InteractionUI.HideMessage(this);
-    }
-
-    static GameObject FindPlayerRoot() => InteractionProximity.GetPlayer();
-
-    static bool IsPlayerCollider(Collider other)
-    {
-        if (other == null)
-            return false;
-
-        var root = other.attachedRigidbody != null
-            ? other.attachedRigidbody.transform.root
-            : other.transform.root;
-
-        if (root.CompareTag("Player"))
-            return true;
-
-        var traveling = PlayerScenePersistence.TravelingPlayer;
-        return traveling != null && root.gameObject == traveling;
     }
 }

@@ -16,6 +16,8 @@ public static class PlayerScenePersistence
 
     public static void PrepareForSceneLoad()
     {
+        GameplayHudBootstrap.Ensure();
+
         var player = GameObject.FindGameObjectWithTag("Player");
         if (player == null)
             return;
@@ -65,13 +67,24 @@ public static class PlayerScenePersistence
         if (_travelingUiRoot != null)
             return;
 
-        var ui = Object.FindFirstObjectByType<InteractionUI>();
-        if (ui == null)
+        var hudRoot = GameplayHudBootstrap.GetHudRoot();
+        if (hudRoot != null)
+        {
+            _travelingUiRoot = hudRoot;
+            Object.DontDestroyOnLoad(_travelingUiRoot);
+            var ui = hudRoot.GetComponentInChildren<InteractionUI>(true);
+            if (ui != null)
+                InteractionUI.Register(ui);
+            return;
+        }
+
+        var fallback = Object.FindFirstObjectByType<InteractionUI>();
+        if (fallback == null)
             return;
 
-        _travelingUiRoot = ui.transform.root.gameObject;
+        _travelingUiRoot = fallback.transform.root.gameObject;
         Object.DontDestroyOnLoad(_travelingUiRoot);
-        InteractionUI.Register(ui);
+        InteractionUI.Register(fallback);
     }
 
     public static void RefreshTravelingReferences()

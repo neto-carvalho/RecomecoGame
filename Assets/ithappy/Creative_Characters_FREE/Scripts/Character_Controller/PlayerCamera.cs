@@ -39,6 +39,25 @@ namespace Controller
 
         protected Vector2 m_Angles;
         protected float m_Distance;
+        protected float m_FaintDistanceMultiplier = 1f;
+
+        public float FaintDistanceMultiplier => m_FaintDistanceMultiplier;
+
+        public void SetFaintDistanceMultiplier(float multiplier)
+        {
+            m_FaintDistanceMultiplier = Mathf.Clamp(multiplier, 1f, 4f);
+        }
+
+        public void ResetFaintDistanceMultiplier()
+        {
+            m_FaintDistanceMultiplier = 1f;
+        }
+
+        protected float GetEffectiveDistance()
+        {
+            var baseDistance = (1f - m_Zoom) * (MAX_DISTANCE - MIN_DISTANCE) + MIN_DISTANCE;
+            return baseDistance * GetPlayerScaleFactor() * m_FaintDistanceMultiplier;
+        }
 
         public Vector3 Target
         {
@@ -128,8 +147,7 @@ namespace Controller
             m_Zoom += scroll * m_SensetivityZoom;
             m_Zoom = Mathf.Clamp01(m_Zoom);
 
-            var baseDistance = (1f - m_Zoom) * (MAX_DISTANCE - MIN_DISTANCE) + MIN_DISTANCE;
-            m_Distance = baseDistance * GetPlayerScaleFactor();
+            m_Distance = GetEffectiveDistance();
         }
     }
 }

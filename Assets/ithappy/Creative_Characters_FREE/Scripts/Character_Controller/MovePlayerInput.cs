@@ -101,6 +101,9 @@ namespace Controller
 
         private void Update()
         {
+            if (PlayerFaintSequence.IsPlaying)
+                return;
+
             GatherInput();
             SetInput();
         }
@@ -136,6 +139,8 @@ namespace Controller
                 m_Camera.SetPlayer(transform);
             m_CameraWarningLogged = false;
         }
+
+        public PlayerCamera PlayerCamera => m_Camera;
 
         public void SetInput()
         {

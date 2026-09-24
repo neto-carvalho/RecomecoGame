@@ -8,8 +8,17 @@ public class SaveGameData
     public string[] ownedHouses;
     public HomeStorageSnapshot[] storages;
     public MissionProgressSnapshot mission;
+    public PlayerNeedsSnapshot needs;
     public string lastScene;
     public string lastSpawnId;
+}
+
+[Serializable]
+public struct PlayerNeedsSnapshot
+{
+    public float hunger;
+    public float health;
+    public float reputation;
 }
 
 [Serializable]

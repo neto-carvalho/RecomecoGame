@@ -22,6 +22,13 @@ namespace Controller
         {
             base.SetInput(delta, scroll);
 
+            m_Distance = GetEffectiveDistance();
+            RefreshFollowTargets();
+        }
+
+        public void RefreshFollowTargets()
+        {
+            m_Distance = GetEffectiveDistance();
             var dir = new Vector3(0, 0, -m_Distance);
             var rot = Quaternion.Euler(m_Angles.x, m_Angles.y, 0f);
 

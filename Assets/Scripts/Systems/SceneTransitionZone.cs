@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Collider))]
-public class SceneTransitionZone : MonoBehaviour
+public class SceneTransitionZone : MonoBehaviour, IInteractionPromptOwner
 {
     [Tooltip("Nome da cena no Build Settings (ex.: FerroVelho)")]
     public string targetSceneName = RecomecoSceneNames.FerroVelho;
@@ -17,6 +17,8 @@ public class SceneTransitionZone : MonoBehaviour
 
     Collider _trigger;
     bool _playerInside;
+
+    public bool IsInteractionPromptActive() => _playerInside && isActiveAndEnabled;
 
     void Awake()
     {

@@ -17,6 +17,9 @@ public static class RecomecoSceneNames
 
     public const string CasaEleganteRootName = "Casa elegante (player)";
 
+    public const string HospitalEntrada = "HospitalEntrada";
+    public const string HospitalRootName = "Hospital_Cidade";
+
     public static bool IsMenuScene(Scene scene)
     {
         if (!scene.IsValid())
