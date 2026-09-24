@@ -115,6 +115,15 @@ public class RecomecoGameplaySettings : ScriptableObject
     [Tooltip("Fade para preto antes de teleportar ao hospital")]
     public float faintFadeOutSeconds = 0.45f;
 
+    [Header("Veículos (Cidade)")]
+    public bool enableCityTraffic = true;
+
+    [Tooltip("Limite de carros com IA de tráfego (filhos de \"Vehicles\").")]
+    public int maxTrafficVehicles = 48;
+
+    public float trafficMinSpeedKmh = 16f;
+    public float trafficMaxSpeedKmh = 38f;
+
     [Header("Câmera")]
     [Tooltip("Evita que a câmera atravesse paredes e objetos sólidos em qualquer cena de gameplay.")]
     public bool cameraWallCollision = true;

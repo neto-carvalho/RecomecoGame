@@ -9,14 +9,7 @@ public static class CartoonLowPolyCityNpcSpawnMenu
     [MenuItem(MenuPath)]
     static void CreateSpawnMarkers()
     {
-        var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-        if (!scene.isLoaded)
-        {
-            EditorUtility.DisplayDialog("NPC spawn", "Abre uma cena primeiro.", "OK");
-            return;
-        }
-
-        if (scene.rootCount > 0 && GameObject.Find("SidewalkNpcSpawns") != null)
+        if (GameObject.Find("SidewalkNpcSpawns") != null)
         {
             if (!EditorUtility.DisplayDialog("NPC spawn",
                     "Já existe um objeto chamado \"SidewalkNpcSpawns\" na cena. Criar outro grupo mesmo assim?",
@@ -24,8 +17,23 @@ public static class CartoonLowPolyCityNpcSpawnMenu
                 return;
         }
 
+        CreateSpawnMarkersInternal();
+    }
+
+    public static void CreateSpawnMarkersInternal()
+    {
+        var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+        if (!scene.isLoaded)
+            return;
+
+        if (GameObject.Find("SidewalkNpcSpawns") != null)
+            return;
+
         var pivot = Vector3.zero;
-        if (SceneView.lastActiveSceneView != null && SceneView.lastActiveSceneView.camera != null)
+        var lojinha = GameObject.Find("Lojinha");
+        if (lojinha != null)
+            pivot = lojinha.transform.position + new Vector3(-3f, 0f, 2f);
+        else if (SceneView.lastActiveSceneView != null && SceneView.lastActiveSceneView.camera != null)
             pivot = SceneView.lastActiveSceneView.camera.transform.position;
 
         var root = new GameObject("SidewalkNpcSpawns");
@@ -42,11 +50,8 @@ public static class CartoonLowPolyCityNpcSpawnMenu
             child.AddComponent<SidewalkNpcSpawnPoint>();
         }
 
-        Selection.activeGameObject = root;
+        Selection.activeObject = root;
         EditorGUIUtility.PingObject(root);
-        Debug.Log(
-            "[NPC] Criado \"SidewalkNpcSpawns\" com 4 filhos. Arrasta cada filho para a calçada, roda o objeto (Y) " +
-            "para o sentido da rua e ajusta Patrol Half Length no Inspector. Guarda a cena (Ctrl+S).");
     }
 }
 #endif

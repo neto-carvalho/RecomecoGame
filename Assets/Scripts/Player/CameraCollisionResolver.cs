@@ -74,6 +74,9 @@ namespace Controller
             if (col.CompareTag("Player"))
                 return true;
 
+            if (VehicleColliderUtility.ShouldCameraIgnoreCollider(col))
+                return true;
+
             return false;
         }
     }

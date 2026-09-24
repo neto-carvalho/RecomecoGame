@@ -28,6 +28,9 @@ MonoBehaviour:
   latinhaPrefab: {fileID: 3454898247569233799, guid: 5fe784add6879af458f2afb89ae8407c, type: 3}
   introVideoClip: {fileID: 32900000, guid: b8e4f1a23c5d47e8901ab2c3d4e5f607, type: 3}
   initialMoneyCents: 420
+  enableDebugCheats: 1
+  useTestStartingMoney: 0
+  testStartingMoneyCents: 500000
   playerScaleCity: 0.2
   playerScaleFerroVelho: 0.2
   hungerDrainPerMinute: 1.2
@@ -35,10 +38,10 @@ MonoBehaviour:
   healthLossPerSecondWhenStarving: 2
   healthRegenPerSecond: 1.25
   healthRegenMinHunger: 25
+  sellMissReputationLoss: 10
   hospitalBillCents: 8500
   hospitalWakeHealth: 35
   hospitalWakeHunger: 30
-  sellMissReputationLoss: 10
   faintAnimationClip: {fileID: 6182763086745782283, guid: 5dbb2366974668d48a42568690792034, type: 3}
   faintAnimatorController: {fileID: 9100000, guid: d16a1e98254f09443afa6295c1c9948e, type: 2}
   faintAnimationState: Death_Forward
@@ -48,5 +51,9 @@ MonoBehaviour:
   faintTitleFontSize: 76
   faintHoldAfterFallSeconds: 1.35
   faintFadeOutSeconds: 0.45
+  enableCityTraffic: 1
+  maxTrafficVehicles: 1000000
+  trafficMinSpeedKmh: 16
+  trafficMaxSpeedKmh: 38
   cameraWallCollision: 1
   cameraCollisionPullSpeedMultiplier: 2.5

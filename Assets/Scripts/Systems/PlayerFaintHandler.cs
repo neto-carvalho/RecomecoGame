@@ -38,6 +38,8 @@ public static class PlayerFaintHandler
 
         SellMinigameUI.ForceCloseIfOpen();
         ShopUI.ForceCloseIfOpen();
+        if (PlayerDrivableVehicle.Active != null)
+            PlayerDrivableVehicle.Active.ExitVehicle();
         GameplayPauseMenu.ForceCloseIfOpen();
         InteractionUI.HideMessage();
 

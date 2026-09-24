@@ -45,6 +45,12 @@ public static class GameplaySceneRuntimeSetup
         GameplayHudBootstrap.Ensure();
         MissionProgress.NotifyEnteredScene(SceneManager.GetActiveScene().name);
 
+        if (SceneManager.GetActiveScene().name == RecomecoSceneNames.Cidade)
+        {
+            StreetPropsSceneColliders.EnsureMoradiaColliders();
+            CityLivingBootstrap.EnsureForActiveScene();
+        }
+
         var player = FindPlayer();
         if (player == null)
             return;
@@ -64,9 +70,6 @@ public static class GameplaySceneRuntimeSetup
 
         if (PlayerFaintHandler.ConsumePendingHospitalWake())
             PlayerFaintHandler.FinishHospitalWake(player);
-
-        if (SceneManager.GetActiveScene().name == RecomecoSceneNames.Cidade)
-            StreetPropsSceneColliders.EnsureMoradiaColliders();
 
         var settings = RecomecoGameplaySettings.Instance;
         if (settings != null)
