@@ -14,4 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   itemName: Biscoito
   icon: {fileID: 21300000, guid: 29602a2d926926348a3794ce792c91b8, type: 3}
+  consumable: 0
+  hungerRestore: 0
+  healthRestore: 0
+  reputationRestore: 0
+  consumableHint: 
   unitSellPriceCents: 25

@@ -156,7 +156,8 @@ public class Inventory : MonoBehaviour
     int GetSlotCount()
     {
         if (slots == null) return 0;
-        if (slotUIs == null) return slots.Length;
+        if (slotUIs == null || slotUIs.Length == 0)
+            return slots.Length;
         return Mathf.Min(slots.Length, slotUIs.Length);
     }
 

@@ -62,7 +62,7 @@ public class GameplayPauseMenu : MonoBehaviour
         if (RecomecoSceneNames.IsMenuScene(SceneManager.GetActiveScene()))
             return;
 
-        if (SellMinigameUI.SuppressPauseThisFrame || SellMinigameUI.IsOpen)
+        if (SellMinigameUI.SuppressPauseThisFrame || SellMinigameUI.IsOpen || ShopUI.IsOpen)
             return;
 
         if (Input.GetKeyDown(KeyCode.Escape))

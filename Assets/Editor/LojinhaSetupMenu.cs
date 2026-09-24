@@ -58,14 +58,36 @@ public static class LojinhaSetupMenu
             });
         }
 
+        var interact = target.transform.Find("ShopInteractVolume");
+        if (interact == null)
+        {
+            var volumeGo = new GameObject("ShopInteractVolume");
+            Undo.RegisterCreatedObjectUndo(volumeGo, "Shop interact volume");
+            volumeGo.transform.SetParent(target.transform, false);
+            volumeGo.transform.localPosition = new Vector3(0f, 1.5f, 4f);
+            var box = volumeGo.AddComponent<BoxCollider>();
+            box.isTrigger = true;
+            box.size = new Vector3(6f, 3f, 6f);
+            interact = volumeGo.transform;
+        }
+
+        var relay = interact.GetComponent<ShopZoneTriggerRelay>();
+        if (relay == null)
+            relay = Undo.AddComponent<ShopZoneTriggerRelay>(interact.gameObject);
+        relay.shop = shop;
+
         Undo.RecordObject(shop, "Configurar Lojinha");
         shop.products = products.ToArray();
         shop.shopTitle = "LOJINHA";
+        shop.shopKind = ShopZone.ShopKind.Resell;
+        shop.interactDistance = 7f;
+        shop.useHorizontalInteractRange = true;
+        shop.useInteractTrigger = true;
         EditorUtility.SetDirty(shop);
         UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(target.scene);
 
         var msg = "ShopZone configurado em \"" + target.name + "\" com " + products.Count + " produtos.\n\n" +
-                  "Perto da loja: teclas 1-" + products.Count + " compram os pacotes.\n" +
+                  "Perto da loja: " + shop.interactKey + " abre a interface de compra.\n" +
                   "Salve a cena (Ctrl+S).";
         if (missing.Count > 0)
             msg += "\n\nAVISO — assets não encontrados: " + string.Join(", ", missing) +

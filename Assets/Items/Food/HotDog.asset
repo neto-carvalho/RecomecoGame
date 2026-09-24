@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1ad7ea7d37cd47343adda3ee6bab9cd7, type: 3}
-  m_Name: Chiclete
-  m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemName: Chiclete
-  icon: {fileID: 21300000, guid: afd2efa548734774abbb565ef12c4054, type: 3}
-  unitSellPriceCents: 30
-  consumable: 0
-  hungerRestore: 0
+  m_Name: HotDog
+  m_EditorClassIdentifier: 
+  itemName: Hot dog
+  icon: {fileID: 21300000, guid: 3a4614a85100b584f9771ac73c778e3b, type: 3}
+  unitSellPriceCents: 0
+  consumable: 1
+  hungerRestore: 32
   healthRestore: 0
   reputationRestore: 0
-  consumableHint: 
+  consumableHint: +32 fome

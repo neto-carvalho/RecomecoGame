@@ -37,6 +37,7 @@ public static class PlayerFaintHandler
         _faintInProgress = true;
 
         SellMinigameUI.ForceCloseIfOpen();
+        ShopUI.ForceCloseIfOpen();
         GameplayPauseMenu.ForceCloseIfOpen();
         InteractionUI.HideMessage();
 
