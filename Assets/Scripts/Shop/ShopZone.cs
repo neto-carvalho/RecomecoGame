@@ -270,6 +270,8 @@ public class ShopZone : MonoBehaviour, IInteractionPromptOwner
 
             if (shopKind == ShopKind.Resell)
                 MissionProgress.NotifyShopPurchase();
+            else if (shopKind == ShopKind.FastFood)
+                MissionProgress.NotifyFoodShopPurchase();
 
             message = "Consumiu " + product.DisplayName + " por " +
                       MoneyManager.FormatBRL(product.packPriceCents) + ".";
@@ -281,6 +283,8 @@ public class ShopZone : MonoBehaviour, IInteractionPromptOwner
 
         if (shopKind == ShopKind.Resell)
             MissionProgress.NotifyShopPurchase();
+        else if (shopKind == ShopKind.FastFood)
+            MissionProgress.NotifyFoodShopPurchase();
 
         message = "Comprou " + product.DisplayName + " (" + product.unitsPerPack + " un) por " +
                   MoneyManager.FormatBRL(product.packPriceCents) + ".";
@@ -391,6 +395,8 @@ public class ShopZone : MonoBehaviour, IInteractionPromptOwner
 
         if (shopKind == ShopKind.Resell)
             MissionProgress.NotifyShopPurchase();
+        else if (shopKind == ShopKind.FastFood)
+            MissionProgress.NotifyFoodShopPurchase();
 
         inventory.RefreshAllSlots();
         message = string.Empty;

@@ -127,6 +127,9 @@ public class MainMenuController : MonoBehaviour
 
     public void OnPlayClicked()
     {
+        if (levelSelectPanel != null && levelSelectPanel.activeSelf)
+            return;
+
         OpenSubPanel(levelSelectPanel);
     }
 
@@ -153,6 +156,8 @@ public class MainMenuController : MonoBehaviour
 
         if (sceneName == RecomecoSceneNames.Cidade)
             SceneTransitionState.SetNextSpawn(RecomecoSceneNames.MoradiaInicial);
+        else if (sceneName == RecomecoSceneNames.FerroVelho)
+            SceneTransitionState.SetNextSpawn(RecomecoSceneNames.EntradaFerroVelho);
 
         GameplayIntroVideo.PlayThenLoadScene(sceneName);
     }
@@ -246,7 +251,10 @@ public class MainMenuController : MonoBehaviour
             levelSelectPanel.SetActive(false);
 
         if (artLayout != null)
+        {
+            artLayout.SetMainButtonsVisible(true);
             artLayout.SetLogoVisible(true);
+        }
     }
 
     void OpenSubPanel(GameObject panel)
@@ -254,8 +262,7 @@ public class MainMenuController : MonoBehaviour
         if (panel == null)
             return;
 
-        if (mainButtonsPanel != null)
-            mainButtonsPanel.SetActive(false);
+        SetMainMenuButtonsVisible(false);
         if (optionsPanel != null && optionsPanel != panel)
             optionsPanel.SetActive(false);
         if (creditsPanel != null && creditsPanel != panel)
@@ -264,10 +271,33 @@ public class MainMenuController : MonoBehaviour
             levelSelectPanel.SetActive(false);
 
         if (artLayout != null)
-            artLayout.SetLogoVisible(panel == optionsPanel || panel == creditsPanel);
+        {
+            var showLogo = panel == optionsPanel || panel == creditsPanel;
+            artLayout.SetLogoVisible(showLogo);
+        }
 
         panel.SetActive(true);
         panel.transform.SetAsLastSibling();
+    }
+
+    void SetMainMenuButtonsVisible(bool visible)
+    {
+        if (mainButtonsPanel != null)
+            mainButtonsPanel.SetActive(visible);
+
+        if (artLayout != null)
+            artLayout.SetMainButtonsVisible(visible);
+
+        if (mainMenuButtons == null)
+            return;
+
+        foreach (var button in mainMenuButtons)
+        {
+            if (button == null)
+                continue;
+
+            button.interactable = visible;
+        }
     }
 
     void ApplyCreditsText()

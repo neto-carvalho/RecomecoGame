@@ -86,6 +86,7 @@ public class HouseDoorInteract : MonoBehaviour, IInteractionPromptOwner
     {
         if (PlayerHousingState.TryPurchase(housingId, purchasePriceCents))
         {
+            MissionProgress.NotifyHousePurchased(housingId);
             ShowFeedback("Comprou " + houseDisplayName + "! Aperte E para entrar.");
             return;
         }

@@ -34,7 +34,8 @@ public sealed class MissionTracker : MonoBehaviour
         if (!MissionProgress.IsActive)
             return;
 
-        if (MissionProgress.Current != MissionId.CollectCans)
+        var mission = MissionProgress.Current;
+        if (mission != MissionId.CollectCans && mission != MissionId.CollectCansForHouse)
             return;
 
         MissionProgress.NotifyCollectProgress(ResolveLatinhaCount());

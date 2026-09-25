@@ -733,7 +733,6 @@ public class ShopUI : MonoBehaviour
         tmp.raycastTarget = false;
         tmp.textWrappingMode = TextWrappingModes.Normal;
         tmp.overflowMode = TextOverflowModes.Overflow;
-        tmp.enableWordWrapping = true;
         return tmp;
     }
 

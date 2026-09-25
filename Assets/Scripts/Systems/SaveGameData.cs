@@ -9,6 +9,7 @@ public class SaveGameData
     public HomeStorageSnapshot[] storages;
     public MissionProgressSnapshot mission;
     public PlayerNeedsSnapshot needs;
+    public GameplayDayNightSnapshot dayNight;
     public string lastScene;
     public string lastSpawnId;
 }
@@ -19,6 +20,8 @@ public struct PlayerNeedsSnapshot
     public float hunger;
     public float health;
     public float reputation;
+    public float protection;
+    public float illness;
 }
 
 [Serializable]
@@ -35,4 +38,9 @@ public struct MissionProgressSnapshot
     public int currentMission;
     public int junkyardSoldCount;
     public int lastReportedCollectCount;
+    /// <summary>0 = cadeia antiga; 1 = FOOD4U + revenda; 2 = latinhas antes da casa.</summary>
+    public int schemaVersion;
+    public int resellEarningsCents;
+    public int junkyardSoldForHouseCount;
+    public int lastReportedHouseCollectCount;
 }

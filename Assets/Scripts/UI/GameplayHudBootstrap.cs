@@ -111,6 +111,7 @@ public static class GameplayHudBootstrap
 
         RegisterHud(_persistentHudRoot);
         EnsureMoneyDisplay(_persistentHudRoot);
+        GameplayDayNightCycle.Ensure();
         EnsureMissionPanel(_persistentHudRoot);
         EnsureMissionDirectionIndicator(_persistentHudRoot);
         EnsurePlayerNeedsHud(_persistentHudRoot);
@@ -192,7 +193,7 @@ public static class GameplayHudBootstrap
         panelRect.anchorMax = new Vector2(1f, 1f);
         panelRect.pivot = new Vector2(1f, 1f);
         panelRect.anchoredPosition = new Vector2(-24f, -20f);
-        panelRect.sizeDelta = new Vector2(420f, 148f);
+        panelRect.sizeDelta = new Vector2(440f, 172f);
 
         var panelBg = panelGo.AddComponent<Image>();
         panelBg.color = new Color(0.08f, 0.08f, 0.1f, 0.88f);
@@ -241,24 +242,24 @@ public static class GameplayHudBootstrap
         descriptionRect.anchorMax = new Vector2(1f, 1f);
         descriptionRect.pivot = new Vector2(0.5f, 1f);
         descriptionRect.anchoredPosition = new Vector2(0f, -44f);
-        descriptionRect.sizeDelta = new Vector2(-24f, 44f);
+        descriptionRect.sizeDelta = new Vector2(-24f, 40f);
         var descriptionText = descriptionGo.AddComponent<TextMeshProUGUI>();
         if (TMP_Settings.defaultFontAsset != null)
             descriptionText.font = TMP_Settings.defaultFontAsset;
         descriptionText.fontSize = 18f;
         descriptionText.color = Color.white;
         descriptionText.alignment = TextAlignmentOptions.TopLeft;
+        descriptionText.textWrappingMode = TextWrappingModes.Normal;
         descriptionText.raycastTarget = false;
         descriptionText.text = "Carregando...";
 
         var hintGo = new GameObject("Hint");
         hintGo.transform.SetParent(panelGo.transform, false);
         var hintRect = hintGo.AddComponent<RectTransform>();
-        hintRect.anchorMin = new Vector2(0f, 1f);
+        hintRect.anchorMin = new Vector2(0f, 0f);
         hintRect.anchorMax = new Vector2(1f, 1f);
-        hintRect.pivot = new Vector2(0.5f, 1f);
-        hintRect.anchoredPosition = new Vector2(0f, -88f);
-        hintRect.sizeDelta = new Vector2(-24f, 32f);
+        hintRect.offsetMin = new Vector2(12f, 44f);
+        hintRect.offsetMax = new Vector2(-12f, -88f);
         var hintText = hintGo.AddComponent<TextMeshProUGUI>();
         if (TMP_Settings.defaultFontAsset != null)
             hintText.font = TMP_Settings.defaultFontAsset;
@@ -266,6 +267,7 @@ public static class GameplayHudBootstrap
         hintText.fontStyle = FontStyles.Italic;
         hintText.color = new Color(0.82f, 0.82f, 0.82f, 1f);
         hintText.alignment = TextAlignmentOptions.TopLeft;
+        hintText.textWrappingMode = TextWrappingModes.Normal;
         hintText.raycastTarget = false;
         hintGo.SetActive(false);
 
@@ -275,34 +277,36 @@ public static class GameplayHudBootstrap
         progressRect.anchorMin = new Vector2(0f, 0f);
         progressRect.anchorMax = new Vector2(1f, 0f);
         progressRect.pivot = new Vector2(0.5f, 0f);
-        progressRect.anchoredPosition = new Vector2(0f, 16f);
-        progressRect.sizeDelta = new Vector2(-24f, 24f);
+        progressRect.anchoredPosition = new Vector2(0f, 8f);
+        progressRect.sizeDelta = new Vector2(-24f, 36f);
 
         var progressTextGo = new GameObject("ProgressText");
         progressTextGo.transform.SetParent(progressGo.transform, false);
         var progressTextRect = progressTextGo.AddComponent<RectTransform>();
-        progressTextRect.anchorMin = new Vector2(1f, 0.5f);
-        progressTextRect.anchorMax = new Vector2(1f, 0.5f);
-        progressTextRect.pivot = new Vector2(1f, 0.5f);
-        progressTextRect.anchoredPosition = new Vector2(0f, 0f);
-        progressTextRect.sizeDelta = new Vector2(72f, 24f);
+        progressTextRect.anchorMin = new Vector2(0f, 1f);
+        progressTextRect.anchorMax = new Vector2(1f, 1f);
+        progressTextRect.pivot = new Vector2(0.5f, 1f);
+        progressTextRect.anchoredPosition = Vector2.zero;
+        progressTextRect.sizeDelta = new Vector2(0f, 18f);
         var progressText = progressTextGo.AddComponent<TextMeshProUGUI>();
         if (TMP_Settings.defaultFontAsset != null)
             progressText.font = TMP_Settings.defaultFontAsset;
-        progressText.fontSize = 18f;
+        progressText.fontSize = 15f;
         progressText.fontStyle = FontStyles.Bold;
         progressText.color = Color.white;
-        progressText.alignment = TextAlignmentOptions.MidlineRight;
+        progressText.alignment = TextAlignmentOptions.MidlineLeft;
+        progressText.textWrappingMode = TextWrappingModes.NoWrap;
+        progressText.overflowMode = TextOverflowModes.Overflow;
         progressText.raycastTarget = false;
 
         var barBgGo = new GameObject("BarBackground");
         barBgGo.transform.SetParent(progressGo.transform, false);
         var barBgRect = barBgGo.AddComponent<RectTransform>();
-        barBgRect.anchorMin = new Vector2(0f, 0.5f);
-        barBgRect.anchorMax = new Vector2(1f, 0.5f);
-        barBgRect.pivot = new Vector2(0.5f, 0.5f);
-        barBgRect.anchoredPosition = new Vector2(-40f, 0f);
-        barBgRect.sizeDelta = new Vector2(-80f, 10f);
+        barBgRect.anchorMin = new Vector2(0f, 0f);
+        barBgRect.anchorMax = new Vector2(1f, 0f);
+        barBgRect.pivot = new Vector2(0.5f, 0f);
+        barBgRect.anchoredPosition = new Vector2(0f, 2f);
+        barBgRect.sizeDelta = new Vector2(0f, 10f);
         var barBg = barBgGo.AddComponent<Image>();
         barBg.color = new Color(0.2f, 0.2f, 0.22f, 1f);
         barBg.raycastTarget = false;
@@ -337,6 +341,7 @@ public static class GameplayHudBootstrap
             if (existingController == null)
                 existingController = hudRoot.gameObject.AddComponent<HUDController>();
             ApplyMoneyRowLayout(hudRoot.Find("MoneyRow"), existingController);
+            EnsureTopLeftHudExtras(hudRoot);
             return;
         }
 
@@ -354,6 +359,155 @@ public static class GameplayHudBootstrap
             hudController = hudRoot.gameObject.AddComponent<HUDController>();
 
         BuildMoneyRow(hudRoot, hudController);
+        EnsureTopLeftHudExtras(hudRoot);
+    }
+
+    static void EnsureTopLeftHudExtras(Transform hudRoot)
+    {
+        if (hudRoot == null)
+            return;
+
+        ApplyTopLeftHudStackLayout(hudRoot);
+        EnsureDayNightClock(hudRoot);
+        EnsureTipBanner(hudRoot);
+    }
+
+    static void ApplyTopLeftHudStackLayout(Transform hudRoot)
+    {
+        if (hudRoot is not RectTransform hudRect)
+            return;
+
+        hudRect.anchorMin = new Vector2(0f, 1f);
+        hudRect.anchorMax = new Vector2(0f, 1f);
+        hudRect.pivot = new Vector2(0f, 1f);
+        hudRect.anchoredPosition = new Vector2(24f, -20f);
+        hudRect.sizeDelta = new Vector2(500f, 300f);
+
+        var vlg = hudRoot.GetComponent<VerticalLayoutGroup>();
+        if (vlg == null)
+            vlg = hudRoot.gameObject.AddComponent<VerticalLayoutGroup>();
+        vlg.spacing = 10f;
+        vlg.childAlignment = TextAnchor.UpperLeft;
+        vlg.childControlWidth = true;
+        vlg.childControlHeight = true;
+        vlg.childForceExpandWidth = true;
+        vlg.childForceExpandHeight = false;
+        vlg.padding = new RectOffset(0, 0, 0, 0);
+
+        var moneyRow = hudRoot.Find("MoneyRow");
+        if (moneyRow != null)
+        {
+            moneyRow.SetSiblingIndex(0);
+            var le = moneyRow.GetComponent<LayoutElement>() ?? moneyRow.gameObject.AddComponent<LayoutElement>();
+            le.minHeight = 72f;
+            le.preferredHeight = 72f;
+        }
+    }
+
+    static void EnsureDayNightClock(Transform hudRoot)
+    {
+        var existing = hudRoot.Find("DayNightClock");
+        TextMeshProUGUI clockText;
+        RectTransform clockRect;
+        if (existing != null)
+        {
+            clockText = existing.GetComponent<TextMeshProUGUI>();
+            clockRect = existing as RectTransform;
+        }
+        else
+        {
+            var go = new GameObject("DayNightClock");
+            go.transform.SetParent(hudRoot, false);
+            clockRect = go.AddComponent<RectTransform>();
+            clockText = go.AddComponent<TextMeshProUGUI>();
+            clockText.raycastTarget = false;
+        }
+
+        if (clockRect != null)
+        {
+            var le = clockRect.GetComponent<LayoutElement>() ?? clockRect.gameObject.AddComponent<LayoutElement>();
+            le.minHeight = 44f;
+            le.preferredHeight = 44f;
+            clockRect.localScale = Vector3.one;
+        }
+
+        GameplayDigitalClockStyle.Apply(clockText);
+
+        var hud = hudRoot.GetComponent<GameplayDayNightHud>();
+        if (hud == null)
+            hud = hudRoot.gameObject.AddComponent<GameplayDayNightHud>();
+        hud.Wire(clockText);
+    }
+
+    static void EnsureTipBanner(Transform hudRoot)
+    {
+        var existing = hudRoot.Find("GameplayTipBanner");
+        if (existing != null)
+        {
+            GameplayTipBannerUI.ApplyLayoutToExisting(existing);
+            return;
+        }
+
+        var panelGo = new GameObject("GameplayTipBanner");
+        panelGo.transform.SetParent(hudRoot, false);
+        panelGo.AddComponent<RectTransform>();
+        var panelLayout = panelGo.AddComponent<LayoutElement>();
+        panelLayout.minHeight = 72f;
+        panelLayout.preferredHeight = 96f;
+        panelLayout.flexibleWidth = 1f;
+        var group = panelGo.AddComponent<CanvasGroup>();
+        group.alpha = 0f;
+        group.blocksRaycasts = false;
+        group.interactable = false;
+
+        var bgGo = new GameObject("Background");
+        bgGo.transform.SetParent(panelGo.transform, false);
+        var bgRect = bgGo.AddComponent<RectTransform>();
+        bgRect.anchorMin = Vector2.zero;
+        bgRect.anchorMax = Vector2.one;
+        bgRect.offsetMin = Vector2.zero;
+        bgRect.offsetMax = Vector2.zero;
+        var bg = bgGo.AddComponent<Image>();
+        bg.color = new Color(0.06f, 0.1f, 0.14f, 0.92f);
+        bg.raycastTarget = false;
+
+        var titleGo = new GameObject("Title");
+        titleGo.transform.SetParent(panelGo.transform, false);
+        var titleRect = titleGo.AddComponent<RectTransform>();
+        titleRect.anchorMin = new Vector2(0f, 1f);
+        titleRect.anchorMax = new Vector2(1f, 1f);
+        titleRect.pivot = new Vector2(0.5f, 1f);
+        titleRect.anchoredPosition = new Vector2(0f, -4f);
+        titleRect.sizeDelta = new Vector2(-24f, 30f);
+        var title = titleGo.AddComponent<TextMeshProUGUI>();
+        if (TMP_Settings.defaultFontAsset != null)
+            title.font = TMP_Settings.defaultFontAsset;
+        title.fontSize = 20f;
+        title.fontStyle = FontStyles.Bold;
+        title.color = new Color(0.95f, 0.78f, 0.15f, 1f);
+        title.text = "Dica";
+        title.raycastTarget = false;
+
+        var bodyGo = new GameObject("Body");
+        bodyGo.transform.SetParent(panelGo.transform, false);
+        var bodyRect = bodyGo.AddComponent<RectTransform>();
+        bodyRect.anchorMin = Vector2.zero;
+        bodyRect.anchorMax = Vector2.one;
+        bodyRect.offsetMin = new Vector2(12f, 7f);
+        bodyRect.offsetMax = new Vector2(-12f, -30f);
+        var body = bodyGo.AddComponent<TextMeshProUGUI>();
+        if (TMP_Settings.defaultFontAsset != null)
+            body.font = TMP_Settings.defaultFontAsset;
+        body.fontSize = 17f;
+        body.lineSpacing = -2f;
+        body.color = Color.white;
+        body.alignment = TextAlignmentOptions.TopLeft;
+        body.textWrappingMode = TextWrappingModes.Normal;
+        body.raycastTarget = false;
+
+        var tipUi = panelGo.AddComponent<GameplayTipBannerUI>();
+        tipUi.Wire(body, group);
+        panelGo.SetActive(false);
     }
 
     static Sprite LoadMoneyIconSprite()
@@ -414,7 +568,7 @@ public static class GameplayHudBootstrap
             return;
 
         if (moneyRow.parent is RectTransform hudRect)
-            hudRect.sizeDelta = new Vector2(420f, 96f);
+            hudRect.sizeDelta = new Vector2(500f, 300f);
 
         var iconTransform = moneyRow.Find("MoneyIcon");
         if (iconTransform != null)
@@ -471,7 +625,15 @@ public static class GameplayHudBootstrap
         var existing = canvasRoot.GetComponentInChildren<PlayerNeedsHud>(true);
         if (existing != null)
         {
-            ApplyPlayerNeedsHudLayout(existing.GetComponent<RectTransform>());
+            var rootRect = existing.GetComponent<RectTransform>();
+            if (rootRect != null && rootRect.Find("Prot.Bar") == null)
+            {
+                Object.Destroy(existing.gameObject);
+                BuildPlayerNeedsHud(canvasRoot.transform);
+                return;
+            }
+
+            ApplyPlayerNeedsHudLayout(rootRect);
             return;
         }
 
@@ -488,7 +650,7 @@ public static class GameplayHudBootstrap
         rootRect.anchorMax = new Vector2(0f, 0f);
         rootRect.pivot = new Vector2(0f, 0f);
         rootRect.anchoredPosition = new Vector2(24f, 24f);
-        rootRect.sizeDelta = new Vector2(260f, 88f);
+        rootRect.sizeDelta = new Vector2(260f, 116f);
 
         for (var i = 0; i < rootRect.childCount; i++)
         {
@@ -518,8 +680,12 @@ public static class GameplayHudBootstrap
         var health = CreateNeedBar(rootGo.transform, "Vida", new Vector2(0f, 0f), new Color(0.85f, 0.25f, 0.25f));
         var hunger = CreateNeedBar(rootGo.transform, "Fome", new Vector2(0f, -28f), new Color(0.95f, 0.65f, 0.15f));
         var reputation = CreateNeedBar(rootGo.transform, "Rep.", new Vector2(0f, -56f), new Color(0.35f, 0.85f, 0.45f));
+        var protection = CreateNeedBar(rootGo.transform, "Prot.", new Vector2(0f, -84f), new Color(0.45f, 0.65f, 0.95f));
 
-        hud.Wire(health.fill, hunger.fill, reputation.fill, health.label, hunger.label, reputation.label);
+        hud.Wire(
+            health.fill, hunger.fill, reputation.fill,
+            health.label, hunger.label, reputation.label,
+            protection.fill, protection.label);
     }
 
     static (Image fill, TextMeshProUGUI label) CreateNeedBar(Transform parent, string title, Vector2 anchoredPos, Color fillColor)
@@ -628,10 +794,11 @@ public static class GameplayHudBootstrap
         hudRect.anchorMax = new Vector2(0f, 1f);
         hudRect.pivot = new Vector2(0f, 1f);
         hudRect.anchoredPosition = new Vector2(24f, -20f);
-        hudRect.sizeDelta = new Vector2(420f, 96f);
+        hudRect.sizeDelta = new Vector2(500f, 300f);
 
         var hudController = hudGo.AddComponent<HUDController>();
         BuildMoneyRow(hudGo.transform, hudController);
+        EnsureTopLeftHudExtras(hudGo.transform);
 
         var interactionGo = new GameObject("InteractionText");
         interactionGo.transform.SetParent(canvasGo.transform, false);

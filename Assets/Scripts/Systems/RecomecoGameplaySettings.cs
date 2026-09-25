@@ -79,6 +79,92 @@ public class RecomecoGameplaySettings : ScriptableObject
     [Tooltip("Reputação perdida ao errar o minigame de venda na calçada")]
     public float sellMissReputationLoss = 10f;
 
+    [Tooltip("Dica no HUD após errar venda com pedestre (segundos)")]
+    public float sellMissTipSeconds = 8f;
+
+    [Header("Moradia precária (barraca / lugar abandonado)")]
+    [Tooltip("Proteção ao iniciar nova partida na Cidade (0–100)")]
+    public float newGameProtection = 42f;
+
+    [Tooltip("Com proteção baixa, doença sobe por minuto (só na Cidade, sem casa comprada)")]
+    public float illnessGainPerMinuteWhenExposed = 2.5f;
+
+    [Tooltip("Proteção abaixo disto conta como exposto para ganho de doença")]
+    public float exposedProtectionThreshold = 45f;
+
+    [Tooltip("Dormir na barraca: fome recuperada")]
+    public float precariousSleepHungerRestore = 18f;
+
+    [Tooltip("Dormir na barraca: vida recuperada")]
+    public float precariousSleepHealthRestore = 8f;
+
+    [Tooltip("Dormir na barraca: perde proteção")]
+    public float precariousSleepProtectionLoss = 12f;
+
+    [Tooltip("Dormir na barraca: ganha doença")]
+    public float precariousSleepIllnessGain = 22f;
+
+    [Tooltip("Dormir na cama (casa): fome / vida / proteção / cura doença")]
+    public float safeSleepHungerRestore = 35f;
+    public float safeSleepHealthRestore = 28f;
+    public float safeSleepProtectionGain = 35f;
+    public float safeSleepIllnessReduce = 40f;
+
+    [Header("Dia e noite (Cidade)")]
+    [Tooltip("Duração de um ciclo completo 24h em minutos reais")]
+    public float dayNightCycleMinutes = 8f;
+
+    public float nightStartHour = 20f;
+    public float nightEndHour = 6f;
+
+    [Tooltip("Hora ao iniciar nova partida na Cidade (perto da noite para testar descanso)")]
+    public float newGameStartHour = 19.5f;
+
+    public float daySunIntensity = 1.05f;
+    public float nightSunIntensity = 0.03f;
+
+    [Tooltip("Horas de transição crepuscular antes/depois da noite")]
+    public float twilightHours = 2f;
+
+    [Tooltip("Suavização visual extra (maior = mudança mais lenta)")]
+    public float dayNightVisualSmoothTime = 1.8f;
+
+    public float sleepFadeOutSeconds = 0.55f;
+    public float sleepFadeInSeconds = 0.9f;
+
+    [Header("Vídeo — dormir na barraca")]
+    public VideoClip precariousSleepVideoClip;
+
+    [Tooltip("Resources/Video/carneirinhos_pulando se vazio")]
+    public float sleepVideoFadeInSeconds = 0.45f;
+    public float sleepVideoFadeOutSeconds = 0.5f;
+    public float sleepVideoVolume = 0.85f;
+    public bool allowSkipSleepVideo = true;
+
+    [Tooltip("Material de céu estrelado (Skybox2 no Gameplay Settings)")]
+    public Material nightSkyboxMaterial;
+
+    [Header("Iluminação urbana (postes)")]
+    public bool enableCityStreetLights = true;
+
+    [Tooltip("Intensidade da luz pontual à noite (plena)")]
+    public float streetLightIntensity = 1.15f;
+
+    public float streetLightRange = 11f;
+
+    public Color streetLightColor = new(1f, 0.82f, 0.55f, 1f);
+
+    public bool streetLightShadows;
+
+    [Tooltip("0 = acende todos; senão só os N postes mais perto do jogador")]
+    public int streetLightMaxActiveNearPlayer = 28;
+
+    [Tooltip("Altura da luz em relação à base do poste Pole (metros).")]
+    public float streetLightLampHeight = 3.4f;
+
+    [Tooltip("Segundos exibindo a dica após dormir na barraca")]
+    public float precariousSleepTipSeconds = 7.5f;
+
     [Header("Hospital (desmaio)")]
     [Tooltip("Conta hospital em centavos (8500 = R$ 85,00)")]
     public int hospitalBillCents = 8500;

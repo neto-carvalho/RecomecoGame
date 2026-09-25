@@ -54,6 +54,7 @@ public class MissionPanelUI : MonoBehaviour
 
     public void Refresh()
     {
+        MissionProgress.TryAdvanceSkippableSteps();
         var latinhaCount = ResolveLatinhaCount();
         var display = MissionProgress.GetDisplay(latinhaCount);
         var showCompleteFlash = MissionProgress.CompletionFlashUntil > Time.unscaledTime;

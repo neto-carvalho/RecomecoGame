@@ -33,6 +33,9 @@ public static class ItemConsumption
         if (Mathf.Abs(item.reputationRestore) > 0.001f)
             needs.AddReputation(item.reputationRestore);
 
+        if (Mathf.Abs(item.hungerRestore) > 0.001f)
+            MissionProgress.NotifyAteFood();
+
         return true;
     }
 }

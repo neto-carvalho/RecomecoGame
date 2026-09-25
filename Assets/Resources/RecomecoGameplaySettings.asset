@@ -57,3 +57,26 @@ MonoBehaviour:
   trafficMaxSpeedKmh: 38
   cameraWallCollision: 1
   cameraCollisionPullSpeedMultiplier: 2.5
+  newGameProtection: 42
+  illnessGainPerMinuteWhenExposed: 2.5
+  exposedProtectionThreshold: 45
+  precariousSleepHungerRestore: 18
+  precariousSleepHealthRestore: 8
+  precariousSleepProtectionLoss: 12
+  precariousSleepIllnessGain: 22
+  safeSleepHungerRestore: 35
+  safeSleepHealthRestore: 28
+  safeSleepProtectionGain: 35
+  safeSleepIllnessReduce: 40
+  dayNightCycleMinutes: 8
+  nightStartHour: 20
+  nightEndHour: 6
+  newGameStartHour: 19.5
+  daySunIntensity: 1.05
+  nightSunIntensity: 0.03
+  twilightHours: 2
+  dayNightVisualSmoothTime: 1.8
+  sleepFadeOutSeconds: 0.55
+  sleepFadeInSeconds: 0.9
+  nightSkyboxMaterial: {fileID: 2100000, guid: 28f7f4f78edac124ea941c27797e2edb, type: 2}
+  precariousSleepTipSeconds: 7.5

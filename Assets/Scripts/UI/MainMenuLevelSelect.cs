@@ -41,7 +41,14 @@ public class MainMenuLevelSelect : MonoBehaviour
         for (var i = transform.childCount - 1; i >= 0; i--)
             Destroy(transform.GetChild(i).gameObject);
 
-        CreateStretchImage(transform, "Dim", DimColor);
+        var dim = CreateStretchImage(transform, "Dim", DimColor);
+        dim.raycastTarget = true;
+
+        var group = gameObject.GetComponent<CanvasGroup>();
+        if (group == null)
+            group = gameObject.AddComponent<CanvasGroup>();
+        group.blocksRaycasts = true;
+        group.interactable = true;
 
         var box = new GameObject("Box");
         box.transform.SetParent(transform, false);
@@ -102,6 +109,12 @@ public class MainMenuLevelSelect : MonoBehaviour
             RecomecoSceneNames.Cidade);
 
         CreateBackButton(box.transform);
+    }
+
+    void OnEnable()
+    {
+        if (_menu == null)
+            _menu = GetComponentInParent<MainMenuController>();
     }
 
     void CreateContinueButton(Transform parent)

@@ -76,7 +76,7 @@ public class StreetSellZone : MonoBehaviour
             return;
 
         MoneyManager.instance.AddMoney(item.unitSellPriceCents);
-        MissionProgress.NotifyResell();
+        MissionProgress.NotifyStreetSale(item.unitSellPriceCents);
 
         InteractionUI.ShowMessage(
             "Vendeu 1x " + item.itemName + " por " + MoneyManager.FormatBRL(item.unitSellPriceCents), this);

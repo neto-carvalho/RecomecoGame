@@ -165,6 +165,51 @@ public static class SceneTransitionSetupMenu
             "OK");
     }
 
+    [MenuItem(MenuRoot + "Cidade/Adicionar descanso na barraca (moradia inicial)")]
+    static void EnsurePrecariousSleepOnMoradia()
+    {
+        var scene = SceneManager.GetActiveScene();
+        if (scene.name != RecomecoSceneNames.Cidade)
+        {
+            EditorUtility.DisplayDialog("Recomeco",
+                "Abra a cena Cidade e coloque o ponto perto da barraca / colchão.",
+                "OK");
+            return;
+        }
+
+        var lugar = GameObject.Find(StreetPropsSceneColliders.MoradiaRootName);
+        if (lugar == null)
+        {
+            EditorUtility.DisplayDialog("Recomeco",
+                "Não encontrei \"Lugar abandonado\" na Hierarchy.",
+                "OK");
+            return;
+        }
+
+        var sleep = lugar.GetComponentInChildren<PrecariousSleepInteract>(true);
+        GameObject sleepGo;
+        if (sleep != null)
+        {
+            sleepGo = sleep.gameObject;
+        }
+        else
+        {
+            sleepGo = new GameObject("Barraca_Descanso");
+            Undo.RegisterCreatedObjectUndo(sleepGo, "Create barraca sleep");
+            Undo.SetTransformParent(sleepGo.transform, lugar.transform, "Parent barraca sleep");
+            sleepGo.transform.localPosition = Vector3.zero;
+            sleep = Undo.AddComponent<PrecariousSleepInteract>(sleepGo);
+        }
+
+        Selection.activeGameObject = sleepGo;
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorUtility.DisplayDialog("Recomeco",
+            "PrecariousSleepInteract adicionado em \"Lugar abandonado\".\n\n" +
+            "• Mova \"Barraca_Descanso\" para onde o jogador deita / descansa.\n" +
+            "• Salve a cena (Ctrl+S) e teste: E na barraca vs E na cama da casa.",
+            "OK");
+    }
+
     [MenuItem(MenuRoot + "Cidade/Ajustar moradia (escala + colisão)")]
     static void FixMoradiaScaleAndColliders()
     {

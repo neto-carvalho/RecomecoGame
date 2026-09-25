@@ -94,6 +94,24 @@ public class MainMenuArtLayout : MonoBehaviour
             logoObject.SetActive(visible);
     }
 
+    public void SetMainButtonsVisible(bool visible)
+    {
+        if (mainButtonsPanel != null)
+            mainButtonsPanel.SetActive(visible);
+
+        if (menuButtons == null)
+            return;
+
+        foreach (var button in menuButtons)
+        {
+            if (button == null)
+                continue;
+
+            button.gameObject.SetActive(visible);
+            button.interactable = visible;
+        }
+    }
+
     void AutoWireReferences()
     {
         if (logoObject == null)

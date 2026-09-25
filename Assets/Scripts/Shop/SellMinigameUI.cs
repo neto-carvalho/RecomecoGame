@@ -14,6 +14,11 @@ public class SellMinigameUI : MonoBehaviour
     const float MinZoneHalfWidth = 0.06f;
     const float ZoneShrinkPerUnit = 0.004f;
 
+    const string SellMissTipMessage =
+        "Você errou a venda e perdeu reputação. " +
+        "Reputação baixa deixa a faixa verde menor e a venda mais difícil. " +
+        "Alguns lanches na lanchonete recuperam reputação.";
+
     enum State { PickItem, Ready, Running, Finished }
 
     public static bool IsOpen => _instance != null;
@@ -288,7 +293,7 @@ public class SellMinigameUI : MonoBehaviour
             if (MoneyManager.instance != null)
                 MoneyManager.instance.AddMoney(total);
 
-            MissionProgress.NotifyResell();
+            MissionProgress.NotifyStreetSale(total);
 
             _feedback.text = "VENDIDO! " + removed + "x " + _selectedItem.itemName +
                              "  +" + MoneyManager.FormatBRL(total);
@@ -298,11 +303,19 @@ public class SellMinigameUI : MonoBehaviour
         else
         {
             ApplySellMissReputationLoss();
+            ShowSellMissTip();
 
             _feedback.text = "Errou o tempo! O pedestre foi embora...";
             _feedback.color = new Color(1f, 0.4f, 0.35f);
             _closeTimer = 1.4f;
         }
+    }
+
+    static void ShowSellMissTip()
+    {
+        var settings = RecomecoGameplaySettings.Instance;
+        var seconds = settings != null ? settings.sellMissTipSeconds : 8f;
+        GameplayTipBannerUI.Show(SellMissTipMessage, seconds);
     }
 
     void ApplySellMissReputationLoss()

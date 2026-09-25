@@ -79,6 +79,7 @@ public static class SaveGameManager
             storages = HomeStorage.ExportAll(),
             mission = MissionProgress.ExportSnapshot(),
             needs = ExportNeedsSnapshot(),
+            dayNight = ExportDayNightSnapshot(),
             lastScene = SceneManager.GetActiveScene().name,
             lastSpawnId = !string.IsNullOrEmpty(spawnIdOverride)
                 ? spawnIdOverride
@@ -107,10 +108,26 @@ public static class SaveGameManager
         MissionProgress.ImportSnapshot(data.mission);
         HomeStorage.ImportAll(data.storages);
         ApplyNeedsSnapshot(data.needs);
+        ApplyDayNightSnapshot(data.dayNight);
 
         var player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
             GameSession.ApplyToPlayer(player);
+    }
+
+    static GameplayDayNightSnapshot ExportDayNightSnapshot()
+    {
+        GameplayDayNightCycle.Ensure();
+        return GameplayDayNightCycle.Instance != null
+            ? GameplayDayNightCycle.Instance.ExportSnapshot()
+            : default;
+    }
+
+    static void ApplyDayNightSnapshot(GameplayDayNightSnapshot snapshot)
+    {
+        GameplayDayNightCycle.Ensure();
+        if (GameplayDayNightCycle.Instance != null)
+            GameplayDayNightCycle.Instance.ImportSnapshot(snapshot);
     }
 
     static PlayerNeedsSnapshot ExportNeedsSnapshot()
@@ -125,11 +142,14 @@ public static class SaveGameManager
 
     static PlayerNeedsSnapshot DefaultNeedsSnapshot()
     {
+        var settings = RecomecoGameplaySettings.Instance;
         return new PlayerNeedsSnapshot
         {
             hunger = PlayerNeeds.MaxHunger,
             health = PlayerNeeds.MaxHealth,
             reputation = PlayerNeeds.MaxReputation,
+            protection = settings != null ? settings.newGameProtection : 42f,
+            illness = 0f,
         };
     }
 

@@ -9,6 +9,7 @@ public static class GameplayReturnToMenu
         GameSession.Reset();
         MissionProgress.Reset();
         PlayerHousingState.Reset();
+        GameplayDayNightCycle.ResetForMenu();
         SaveGameManager.ClearPendingLoad();
 
         if (MoneyManager.instance != null)

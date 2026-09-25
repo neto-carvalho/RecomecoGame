@@ -14,5 +14,6 @@ public static class CityLivingBootstrap
             vehiclesRoot.isStatic = false;
 
         CityTrafficStarter.Schedule();
+        CityStreetLightBootstrap.TryEnsurePublic();
     }
 }

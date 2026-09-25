@@ -42,6 +42,7 @@ public static class GameplaySceneRuntimeSetup
             return;
 
         FerroVelhoWalkableGround.EnsureInActiveScene();
+        GameplayDayNightCycle.Ensure();
         GameplayHudBootstrap.Ensure();
         MissionProgress.NotifyEnteredScene(SceneManager.GetActiveScene().name);
 
@@ -66,7 +67,10 @@ public static class GameplaySceneRuntimeSetup
         if (!string.IsNullOrEmpty(SceneTransitionState.PendingSpawnId))
             SceneTransitionState.TryApplyPendingSpawn();
         else
+        {
             MoradiaInitialSpawnBootstrap.TryApplyForDirectPlay();
+            FerroVelhoInitialSpawnBootstrap.TryApplyForDirectPlay();
+        }
 
         if (PlayerFaintHandler.ConsumePendingHospitalWake())
             PlayerFaintHandler.FinishHospitalWake(player);

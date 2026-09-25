@@ -18,24 +18,133 @@ public static class MissionObjectiveLocator
         switch (MissionProgress.Current)
         {
             case MissionId.CollectCans:
+            case MissionId.CollectCansForHouse:
             case MissionId.AllComplete:
+            case MissionId.EatWhenHungry:
                 return default;
 
             case MissionId.SellAtJunkyard:
+            case MissionId.SellAtJunkyardForHouse:
                 return ResolveSellAtJunkyardTarget();
 
             case MissionId.GoToCity:
-                return ResolvePortalTarget(RecomecoSceneNames.Cidade, "Portal_VoltaCidade", "Cidade");
+                return ResolvePortalTarget(RecomecoSceneNames.Cidade, "Portal_VoltaCidade", "Táxi (cidade)");
+
+            case MissionId.KnowYourShelter:
+            case MissionId.RestAtBarraca:
+                return ResolveBarracaTarget();
 
             case MissionId.BuyAtShop:
-                return ResolveNamedTarget("Lojinha", "Lojinha", typeof(ShopZone));
+                return ResolveResellShopTarget();
+
+            case MissionId.BuyMealAtFood4U:
+                return ResolveFood4UTarget();
 
             case MissionId.Resell:
                 return ResolveNearestResellTarget();
 
+            case MissionId.BuyHouse:
+                return ResolveHouseDoorTarget();
+
+            case MissionId.RestInSafeBed:
+                return ResolveSafeBedTarget();
+
             default:
                 return default;
         }
+    }
+
+    static ObjectiveTarget ResolveResellShopTarget()
+    {
+        foreach (var shop in Object.FindObjectsByType<ShopZone>(FindObjectsSortMode.None))
+        {
+            if (shop == null || shop.shopKind != ShopZone.ShopKind.Resell)
+                continue;
+
+            return new ObjectiveTarget
+            {
+                HasTarget = true,
+                WorldPosition = GetGroundPoint(shop.transform),
+                Label = string.IsNullOrEmpty(shop.shopTitle) ? "Lojinha" : shop.shopTitle,
+            };
+        }
+
+        return ResolveNamedTarget("Lojinha", "Lojinha", typeof(ShopZone));
+    }
+
+    static ObjectiveTarget ResolveFood4UTarget()
+    {
+        foreach (var shop in Object.FindObjectsByType<ShopZone>(FindObjectsSortMode.None))
+        {
+            if (shop == null || shop.shopKind != ShopZone.ShopKind.FastFood)
+                continue;
+
+            return new ObjectiveTarget
+            {
+                HasTarget = true,
+                WorldPosition = GetGroundPoint(shop.transform),
+                Label = "Lanchonete",
+            };
+        }
+
+        return ResolveNamedTarget("FOOD4U", "Lanchonete", typeof(ShopZone));
+    }
+
+    static ObjectiveTarget ResolveBarracaTarget()
+    {
+        var sleep = Object.FindFirstObjectByType<PrecariousSleepInteract>();
+        if (sleep != null)
+        {
+            return new ObjectiveTarget
+            {
+                HasTarget = true,
+                WorldPosition = GetGroundPoint(sleep.transform),
+                Label = "Barraca",
+            };
+        }
+
+        return ResolveNamedTarget(
+            StreetPropsSceneColliders.MoradiaRootName,
+            "Moradia precária",
+            null);
+    }
+
+    static ObjectiveTarget ResolveHouseDoorTarget()
+    {
+        foreach (var door in Object.FindObjectsByType<HouseDoorInteract>(FindObjectsSortMode.None))
+        {
+            if (door == null || door.housingId != PlayerHousingState.CasaElegante)
+                continue;
+
+            return new ObjectiveTarget
+            {
+                HasTarget = true,
+                WorldPosition = GetGroundPoint(door.transform),
+                Label = door.houseDisplayName,
+            };
+        }
+
+        return ResolveNamedTarget(RecomecoSceneNames.CasaEleganteRootName, "Casa elegante", typeof(HouseDoorInteract));
+    }
+
+    static ObjectiveTarget ResolveSafeBedTarget()
+    {
+        var scene = SceneManager.GetActiveScene();
+        if (scene.name == RecomecoSceneNames.InteriorCasaElegante)
+        {
+            var bed = Object.FindFirstObjectByType<BedSaveInteract>();
+            if (bed != null)
+            {
+                return new ObjectiveTarget
+                {
+                    HasTarget = true,
+                    WorldPosition = GetGroundPoint(bed.transform),
+                    Label = "Cama",
+                };
+            }
+        }
+
+        return ResolveHouseDoorTarget();
     }
 
     static ObjectiveTarget ResolveSellAtJunkyardTarget()
@@ -44,7 +153,7 @@ public static class MissionObjectiveLocator
         if (sceneName == RecomecoSceneNames.FerroVelho)
             return ResolveNamedTarget("FerroVelho_Venda", "Venda no ferro velho", typeof(SellItems));
 
-        return ResolvePortalTarget(RecomecoSceneNames.FerroVelho, "Portal_FerroVelho", "Ferro velho");
+        return ResolvePortalTarget(RecomecoSceneNames.FerroVelho, "Portal_FerroVelho", "Táxi (ferro velho)");
     }
 
     static ObjectiveTarget ResolvePortalTarget(string targetScene, string objectName, string label)
