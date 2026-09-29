@@ -179,14 +179,34 @@ public class MainMenuController : MonoBehaviour
         }
 
         MainMenuMusic.StopIfPlaying();
+        GameplayScreenFade.ForceClear();
         GameplayReturnToMenu.ResetPersistentGameplayState();
         PlayerScenePersistence.ResetForMenuGameplayStart();
 
+        NormalizeLegacyInteriorSave(data);
         SaveGameManager.StageForLoad(data);
         if (!string.IsNullOrEmpty(data.lastSpawnId))
             SceneTransitionState.SetNextSpawn(data.lastSpawnId);
 
-        GameplayIntroVideo.PlayThenLoadScene(data.lastScene);
+        if (levelSelectPanel != null)
+            levelSelectPanel.SetActive(false);
+        if (mainButtonsPanel != null)
+            mainButtonsPanel.SetActive(false);
+
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(data.lastScene);
+    }
+
+    static void NormalizeLegacyInteriorSave(SaveGameData data)
+    {
+        if (data == null)
+            return;
+
+        if (data.lastScene != RecomecoSceneNames.InteriorCasaElegante)
+            return;
+
+        data.lastScene = RecomecoSceneNames.Cidade;
+        data.lastSpawnId = RecomecoSceneNames.SaidaCasaElegante;
     }
 
     public void OnOptionsClicked()
@@ -197,6 +217,17 @@ public class MainMenuController : MonoBehaviour
     public void OnCreditsClicked()
     {
         OpenSubPanel(creditsPanel);
+        ResetCreditsScroll();
+    }
+
+    void ResetCreditsScroll()
+    {
+        if (creditsPanel == null)
+            return;
+
+        var scroll = creditsPanel.GetComponentInChildren<ScrollRect>(true);
+        if (scroll != null)
+            scroll.verticalNormalizedPosition = 1f;
     }
 
     public void OnQuitClicked()
@@ -305,18 +336,117 @@ public class MainMenuController : MonoBehaviour
         if (creditsPanel == null)
             return;
 
-        var text = creditsPanel.GetComponentInChildren<TextMeshProUGUI>(true);
+        var box = creditsPanel.transform.Find("Box") as RectTransform;
+        if (box == null)
+            return;
+
+        box.sizeDelta = new Vector2(780, 620);
+
+        var text = ResolveCreditsText(box);
         if (text == null)
             return;
 
         text.text = RecomecoCredits.MenuBody;
-        text.fontSize = 18;
-        text.lineSpacing = 2f;
+        text.fontSize = 15;
+        text.lineSpacing = -2f;
         text.alignment = TextAlignmentOptions.TopLeft;
-        text.margin = new Vector4(28, 28, 28, 88);
+        text.textWrappingMode = TextWrappingModes.Normal;
+        text.overflowMode = TextOverflowModes.Overflow;
+        text.margin = new Vector4(8, 4, 8, 8);
 
-        if (text.transform.parent is RectTransform box)
-            box.sizeDelta = new Vector2(760, 540);
+        EnsureCreditsScrollArea(box, text);
+        EnsureCreditsTextFitsScroll(text);
+    }
+
+    static TextMeshProUGUI ResolveCreditsText(RectTransform box)
+    {
+        var content = box.Find("CreditsScroll/Viewport/Content");
+        if (content != null)
+            return content.GetComponentInChildren<TextMeshProUGUI>(true);
+
+        var legacy = box.Find("Text");
+        return legacy != null ? legacy.GetComponent<TextMeshProUGUI>() : null;
+    }
+
+    static void EnsureCreditsScrollArea(RectTransform box, TextMeshProUGUI text)
+    {
+        const float buttonReserve = 64f;
+
+        var scrollRoot = box.Find("CreditsScroll") as RectTransform;
+        if (scrollRoot == null)
+        {
+            var scrollGo = new GameObject("CreditsScroll", typeof(RectTransform), typeof(ScrollRect), typeof(Image));
+            scrollRoot = scrollGo.GetComponent<RectTransform>();
+            scrollRoot.SetParent(box, false);
+            scrollRoot.SetSiblingIndex(0);
+
+            var scrollImage = scrollGo.GetComponent<Image>();
+            scrollImage.color = new Color(0f, 0f, 0f, 0f);
+            scrollImage.raycastTarget = true;
+
+            var viewportGo = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
+            var viewport = viewportGo.GetComponent<RectTransform>();
+            viewport.SetParent(scrollRoot, false);
+            StretchFull(viewport);
+            var viewportImage = viewportGo.GetComponent<Image>();
+            viewportImage.color = new Color(1f, 1f, 1f, 0.01f);
+            viewportGo.GetComponent<Mask>().showMaskGraphic = false;
+
+            var contentGo = new GameObject("Content", typeof(RectTransform), typeof(ContentSizeFitter));
+            var content = contentGo.GetComponent<RectTransform>();
+            content.SetParent(viewport, false);
+            content.anchorMin = new Vector2(0f, 1f);
+            content.anchorMax = new Vector2(1f, 1f);
+            content.pivot = new Vector2(0.5f, 1f);
+            content.anchoredPosition = Vector2.zero;
+            content.sizeDelta = new Vector2(0f, 0f);
+
+            var fitter = contentGo.GetComponent<ContentSizeFitter>();
+            fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            text.transform.SetParent(content, false);
+            var textRect = text.rectTransform;
+            textRect.anchorMin = new Vector2(0f, 1f);
+            textRect.anchorMax = new Vector2(1f, 1f);
+            textRect.pivot = new Vector2(0.5f, 1f);
+            textRect.anchoredPosition = Vector2.zero;
+            textRect.sizeDelta = new Vector2(-8f, 0f);
+
+            var scroll = scrollGo.GetComponent<ScrollRect>();
+            scroll.horizontal = false;
+            scroll.vertical = true;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.viewport = viewport;
+            scroll.content = content;
+        }
+
+        scrollRoot.anchorMin = Vector2.zero;
+        scrollRoot.anchorMax = Vector2.one;
+        scrollRoot.offsetMin = new Vector2(12f, buttonReserve);
+        scrollRoot.offsetMax = new Vector2(-12f, -12f);
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(text.rectTransform);
+    }
+
+    static void EnsureCreditsTextFitsScroll(TextMeshProUGUI text)
+    {
+        var fitter = text.GetComponent<ContentSizeFitter>();
+        if (fitter == null)
+            fitter = text.gameObject.AddComponent<ContentSizeFitter>();
+        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        text.rectTransform.anchorMin = new Vector2(0f, 1f);
+        text.rectTransform.anchorMax = new Vector2(1f, 1f);
+        text.rectTransform.pivot = new Vector2(0.5f, 1f);
+        text.rectTransform.sizeDelta = new Vector2(0f, 0f);
+
+        text.ForceMeshUpdate();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(text.rectTransform);
+        var content = text.transform.parent as RectTransform;
+        if (content != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(content);
     }
 
     void WireCloseButtons()
@@ -343,5 +473,13 @@ public class MainMenuController : MonoBehaviour
             button.onClick.AddListener(OnCloseSubPanelClicked);
             return;
         }
+    }
+
+    static void StretchFull(RectTransform rect)
+    {
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
     }
 }

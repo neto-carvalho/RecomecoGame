@@ -74,17 +74,16 @@ public class MainMenuLevelSelect : MonoBehaviour
         subtitleRect.sizeDelta = new Vector2(1200f, 40f);
         subtitle.color = new Color(0.88f, 0.86f, 0.82f, 1f);
 
-        if (SaveGameManager.HasSave())
-            CreateContinueButton(box.transform);
+        var hasSave = SaveGameManager.HasSave();
 
         var cards = new GameObject("Cards");
         cards.transform.SetParent(box.transform, false);
         var cardsRect = cards.AddComponent<RectTransform>();
-        cardsRect.anchorMin = new Vector2(0.5f, 0.5f);
-        cardsRect.anchorMax = new Vector2(0.5f, 0.5f);
-        cardsRect.pivot = new Vector2(0.5f, 0.5f);
-        cardsRect.anchoredPosition = new Vector2(0f, -10f);
-        cardsRect.sizeDelta = new Vector2(1420f, 520f);
+        cardsRect.anchorMin = new Vector2(0.5f, 1f);
+        cardsRect.anchorMax = new Vector2(0.5f, 1f);
+        cardsRect.pivot = new Vector2(0.5f, 1f);
+        cardsRect.anchoredPosition = new Vector2(0f, hasSave ? -248f : -148f);
+        cardsRect.sizeDelta = new Vector2(1420f, hasSave ? 460f : 520f);
 
         var layout = cards.AddComponent<HorizontalLayoutGroup>();
         layout.spacing = 48f;
@@ -108,6 +107,9 @@ public class MainMenuLevelSelect : MonoBehaviour
             "Comece explorando a cidade costeira",
             RecomecoSceneNames.Cidade);
 
+        if (hasSave)
+            CreateContinueButton(box.transform);
+
         CreateBackButton(box.transform);
     }
 
@@ -115,18 +117,22 @@ public class MainMenuLevelSelect : MonoBehaviour
     {
         if (_menu == null)
             _menu = GetComponentInParent<MainMenuController>();
+
+        if (_built)
+            BuildUi();
     }
 
     void CreateContinueButton(Transform parent)
     {
         var go = new GameObject("Btn_Continuar");
         go.transform.SetParent(parent, false);
+        go.transform.SetAsLastSibling();
         var rect = go.AddComponent<RectTransform>();
         rect.anchorMin = new Vector2(0.5f, 1f);
         rect.anchorMax = new Vector2(0.5f, 1f);
         rect.pivot = new Vector2(0.5f, 1f);
-        rect.anchoredPosition = new Vector2(0f, -140f);
-        rect.sizeDelta = new Vector2(420f, 56f);
+        rect.anchoredPosition = new Vector2(0f, -158f);
+        rect.sizeDelta = new Vector2(480f, 56f);
 
         var img = go.AddComponent<Image>();
         img.color = new Color(0.22f, 0.18f, 0.1f, 1f);
@@ -221,10 +227,11 @@ public class MainMenuLevelSelect : MonoBehaviour
         desc.alignment = TextAlignmentOptions.Center;
     }
 
-    static Button CreateBackButton(Transform parent)
+    void CreateBackButton(Transform parent)
     {
         var go = new GameObject("Btn_Voltar");
         go.transform.SetParent(parent, false);
+        go.transform.SetAsLastSibling();
         var rect = go.AddComponent<RectTransform>();
         rect.anchorMin = new Vector2(0.5f, 0f);
         rect.anchorMax = new Vector2(0.5f, 0f);
@@ -237,10 +244,14 @@ public class MainMenuLevelSelect : MonoBehaviour
 
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
+        btn.onClick.AddListener(() =>
+        {
+            if (_menu != null)
+                _menu.OnCloseSubPanelClicked();
+        });
 
         var label = AddTmp(go.transform, "Text", "VOLTAR", 24, FontStyles.Bold);
         label.color = Gold;
-        return btn;
     }
 
     static Sprite LoadPreviewSprite(string resourcesPath)

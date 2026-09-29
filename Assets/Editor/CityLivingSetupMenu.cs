@@ -50,12 +50,6 @@ public static class CityLivingSetupMenu
             "OK");
     }
 
-    [MenuItem(MenuRoot + "Gerar rotas em rede (loops pela cidade) — recomendado")]
-    static void GenerateRoutesFromRoads()
-    {
-        CityTrafficRouteGeneratorMenu.GenerateNetworkLoopsFromRoads();
-    }
-
     [MenuItem(MenuRoot + "Recriar rotas de tráfego padrão (perto da Lojinha)")]
     static void RecreateDefaultRoutes()
     {
@@ -124,6 +118,113 @@ public static class CityLivingSetupMenu
         FixVehiclesRootInScene();
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
         EditorUtility.DisplayDialog("Cidade", "Rotas e veículos realinhados ao chão.\nSalve a cena (Ctrl+S).", "OK");
+    }
+
+    [MenuItem(MenuRoot + "Desativar carros decorativos em cima das rotas")]
+    static void DisableDecorVehiclesOnTrafficRoutes()
+    {
+        var scene = SceneManager.GetActiveScene();
+        if (!scene.IsValid() || scene.name != RecomecoSceneNames.Cidade)
+        {
+            EditorUtility.DisplayDialog("Cidade", "Abra a cena Cidade.", "OK");
+            return;
+        }
+
+        var vehicles = GameObject.Find("Vehicles");
+        if (vehicles == null)
+        {
+            EditorUtility.DisplayDialog("Cidade", "Objeto «Vehicles» não encontrado.", "OK");
+            return;
+        }
+
+        var routes = Object.FindObjectsByType<TrafficRoute>(FindObjectsSortMode.None);
+        if (routes.Length == 0)
+        {
+            EditorUtility.DisplayDialog("Cidade", "Nenhuma rota em TrafficRoutes.", "OK");
+            return;
+        }
+
+        const float routeProximity = 2.8f;
+        var disabled = 0;
+        foreach (Transform child in vehicles.transform)
+        {
+            if (child == null || !child.gameObject.activeSelf)
+                continue;
+
+            if (child.GetComponent<PlayerDrivableVehicle>() != null)
+                continue;
+
+            var p = child.position;
+            p.y = 0f;
+            var onRoute = false;
+            foreach (var route in routes)
+            {
+                if (route == null || !CityTrafficZone.IsPlausibleRoute(route))
+                    continue;
+
+                route.EnsureReady();
+                if (IsNearRoute(p, route, routeProximity))
+                {
+                    onRoute = true;
+                    break;
+                }
+            }
+
+            if (!onRoute)
+                continue;
+
+            Undo.RecordObject(child.gameObject, "Desativar decor na rota");
+            child.gameObject.SetActive(false);
+            disabled++;
+        }
+
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorUtility.DisplayDialog(
+            "Cidade",
+            disabled + " carro(s) decorativo(s) desativado(s) em cima das rotas.\n\n" +
+            "Tráfego em movimento continua só em «ActiveCityTraffic» ao dar Play.\nSalve a cena (Ctrl+S).",
+            "OK");
+    }
+
+    static bool IsNearRoute(Vector3 flatPos, TrafficRoute route, float maxDistance)
+    {
+        var count = route.WaypointCount;
+        if (count < 2)
+            return false;
+
+        for (var i = 0; i < count - 1; i++)
+        {
+            var a = route.GetWorldPoint(i);
+            var b = route.GetWorldPoint(i + 1);
+            a.y = 0f;
+            b.y = 0f;
+            if (DistancePointToSegment(flatPos, a, b) <= maxDistance)
+                return true;
+        }
+
+        if (route.loop && count >= 2)
+        {
+            var a = route.GetWorldPoint(count - 1);
+            var b = route.GetWorldPoint(0);
+            a.y = 0f;
+            b.y = 0f;
+            if (DistancePointToSegment(flatPos, a, b) <= maxDistance)
+                return true;
+        }
+
+        return false;
+    }
+
+    static float DistancePointToSegment(Vector3 p, Vector3 a, Vector3 b)
+    {
+        var ab = b - a;
+        var lenSq = ab.sqrMagnitude;
+        if (lenSq < 0.0001f)
+            return Vector3.Distance(p, a);
+
+        var t = Mathf.Clamp01(Vector3.Dot(p - a, ab) / lenSq);
+        var closest = a + ab * t;
+        return Vector3.Distance(p, closest);
     }
 
     [MenuItem(MenuRoot + "Remover rotas de tráfego fora da zona urbana")]

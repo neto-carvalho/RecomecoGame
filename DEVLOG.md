@@ -1,13 +1,16 @@
 # DEVLOG — Projeto "Recomeço"
 
-Este documento registra o progresso do desenvolvimento do jogo.
+Este documento registra o progresso do desenvolvimento do jogo e o **estado atual** para TCC / entrega.
 
-Engine: Unity
-Plataforma: PC
-Gênero: Simulação / Economia / Sandbox
+| | |
+|---|---|
+| **Engine** | Unity 6 (URP) |
+| **Plataforma** | PC |
+| **Gênero** | Simulação / economia / sobrevivência leve |
+| **Tema** | Recomeço após precariedade (moradia, renda informal, necessidades básicas) |
+| **Referência de loop** | Schedule I (economia informal e progressão) |
 
-Referência principal de gameplay:
-Schedule I
+Documentação complementar: [README.md](README.md) (como abrir o projeto e cenas principais).
 
 ---
 
@@ -213,37 +216,158 @@ Feedback claro para o jogador em coleta e venda; MVP do loop principal concluíd
 
 ---
 
-# ESTADO ATUAL DO PROJETO
+# FASE 11 — Cidade, lojas, NPCs e revenda
 
-Sistemas funcionando:
-
-* movimentação completa do player (andar, correr, pular, agachar)
-* sistema de interação com mensagens (coletar / vender)
-* coleta de itens (Latinha)
-* inventário com slots e stack
-* sistema de dinheiro (MoneyManager, exibição no HUD)
-* venda no ferro velho (itens do inventário → dinheiro)
-* spawn de itens no mapa (SpawnManager)
-
-Loop do MVP concluído:
-
-Explorar → Coletar → Armazenar no inventário → Vender no ferro velho → Ganhar dinheiro
+* Cena **Cidade** (low-poly urbano) e **Ferro Velho** (junkyard) com transição por portal / táxi.
+* **Lojinha**, **lanchonete (FOOD4U)**, barraca de comida de rua, armazenamento.
+* **Minigame de venda** a pedestres (`SellMinigameUI`) — faixa verde, reputação, dicas ao errar.
+* **Revenda** de itens comprados na lojinha (meta em dinheiro para avançar missões).
+* **SpawnManager** — latinhas na Cidade; evita spawn sobre água.
 
 ---
 
-# PRÓXIMOS PASSOS
+# FASE 12 — Necessidades, hospital e reputação
 
-De acordo com o roadmap:
+* **PlayerNeeds** — fome, vida, reputação, **proteção**, **doença** (exposição).
+* Fome e corrida drenam necessidades; fome zero reduz vida; desmaio → **Hospital** (cena/spawn, conta, recuperação parcial).
+* Reputação afeta confiança na venda na calçada.
+* HUD de necessidades (`PlayerNeedsHud`, relógio, ciclo dia/noite).
 
-1. Fase 8 — NPCs simples (parados, jogador interage para vender)
-2. Fase 9 — Mapa do MVP (praça, ferro velho, mercado com áreas distintas)
-3. Fase 10 — Testes e polish do loop completo
-4. Expansões futuras: reputação, necessidades, veículos, comércio avançado
+Configuração central: `Assets/Resources/RecomecoGameplaySettings.asset`.
+
+---
+
+# FASE 13 — Moradia precária vs recomeço (casa)
+
+| Moradia precária (barraca / lugar abandonado) | Casa (após compra) |
+|-----------------------------------------------|---------------------|
+| Dormir **à noite** (`PrecariousSleepInteract`) | **Cama** (`BedSaveInteract`) |
+| Recuperação **parcial**; perde proteção; ganha doença | Descanso **seguro**; melhora proteção; reduz doença |
+| Vídeo/fade opcional na barraca | **Salvar** de dia; **dormir + salvar** de noite |
+| Sem “lar definitivo” na narrativa de missões | Missão **RestInSafeBed** |
+
+* **GameplayDayNightCycle** — noite 20h–6h (configurável), `sleptThisNight`, transições ao dormir.
+* **HouseDoorInteract** / compra de casa ligada à cadeia de missões.
+
+---
+
+# FASE 14 — Missões guiadas e save
+
+* **MissionProgress** — arco completo até `AllComplete` (versão de save `MissionSchemaVersion = 2`).
+* Início **Ferro Velho**: latinhas → ferro velho → ir à cidade.
+* Início **Cidade**: conhecer moradia inicial → lojinha → revenda → lanchonete → comer → barraca → funding casa → comprar casa → cama.
+* **SaveGameManager** — dinheiro, inventário, missão, necessidades, dia/noite, flags de sono.
+* **MissionPanelUI**, localizador de objetivos, textos em linguagem simples (“lanchonete”, não siglas internas).
+
+Scripts principais: `MissionProgress.cs`, `MissionTracker.cs`, `SaveGameData.cs`.
+
+---
+
+# FASE 15 — Menu, intro e bootstrap de cenas
+
+* **MenuInicial** — JOGAR, escolha Ferro Velho ou Cidade, intro em vídeo.
+* **MainMenuController**, spawn correto (`FerroVelhoInitialSpawnBootstrap`, `MoradiaInitialSpawnBootstrap`).
+* **GameplaySceneRuntimeSetup** — player, HUD, missões, hospital ao acordar.
+* Créditos de assets (`RecomecoCredits`).
+
+---
+
+# FASE 16 — Cidade viva (ambiente)
+
+* **Tráfego** — rotas (`TrafficRoute`), spawn em `ActiveCityTraffic` (`CityTrafficManager`, `TrafficRouteFollower`).
+* Carros **estacionados** na pasta `Vehicles` (decoração + colisão); tráfego **em movimento** só no pool ativo.
+* **Luzes de poste** (`CityStreetLight`, `CityStreetLightManager`) — ativação por proximidade ao jogador.
+* **Água** — shader Houidi (canal), barreiras invisíveis (`Recomeco_WaterWalkBlockers`); lago opcional com `LakeWaterZone` (efeito subaquático visual).
+* Áudio ambiente e passos por superfície (`FootstepSurfaceResolver`, `AmbientAudioController`).
+
+Menus Editor (versão enxuta): ver tabela em [README.md](README.md#ferramentas-de-setup-editor). Removidos: correções URP one-shot, terreno natureza automático, Mixamo, gerador de ícones FOOD4U, duplicatas de rotas e entradas legadas de menu/ferro velho.
+
+---
+
+# PILARES DE DESIGN (referência TCC)
+
+1. **Renda informal** — coleta, ferro velho, revenda, venda a NPC; dinheiro sempre escasso no início.
+2. **Corpo exposto** — fome, doença e proteção; dormir mal na rua não “resolve” o jogo.
+3. **Moradia como progressão** — barraca = sobreviver; casa = recomeço simbólico e mecânico (save confortável, descanso).
+4. **Cidade como sistema** — tempo (noite), tráfego e ambiente reforçam escala urbana, sem simular vida completa.
+
+---
+
+# MATRIZ MECÂNICA ↔ PRECARIEDADE (anexo sugerido)
+
+| Mecânica | O que comunica |
+|----------|----------------|
+| Latinhas + ferro velho | Renda imediata, trabalho de baixo retorno |
+| Revenda / meta R$ 4,00 | Capital mínimo para subsistir na cidade |
+| Lanchonete + fome | Custo fixo de viver; pressão constante |
+| Reputação na venda | Confiança social necessária para renda na rua |
+| Proteção / doença | Exposição ao clima e à falta de abrigo |
+| Dormir na barraca | Descanso precário, risco à saúde |
+| Comprar casa + cama | Estabilidade habitacional como objetivo jogável |
+| Hospital ao desmaiar | Consequência de negligenciar necessidades |
+| Missões em linguagem clara | Guia quem não conhece o gênero / o tema |
+
+---
+
+# ESTADO ATUAL DO PROJETO
+
+## Sistemas implementados e jogáveis
+
+* Locomoção terceira pessoa (`CharacterMover`, câmera, snap ao chão).
+* Interação (E), inventário, itens, dinheiro (`MoneyManager`).
+* Ferro velho, lojinha, lanchonete, comida, armário, portas de casa.
+* NPC venda calçada, reputação, dicas de gameplay.
+* Necessidades completas + desmaio/hospital.
+* Ciclo dia/noite + dormir barraca vs cama + save.
+* Cadeia de missões até conclusão + persistência.
+* Menu, múltiplas cenas, settings centralizados.
+* Tráfego, luzes urbanas, água estilizada, barreiras no canal.
+
+## Loop principal (pós-MVP)
+
+**Ferro Velho:** explorar → coletar latinhas → vender → ir à cidade.
+
+**Cidade:** moradia precária → trabalhar economia informal (loja, revenda, rua, lanchonete) → juntar para casa → **recomeço** na cama segura.
+
+## O que fica em sandbox após `AllComplete`
+
+Exploração livre na Cidade com sistemas ativos (fome, tráfego, etc.), sem novo arco de missões — **limitação assumida** para o TCC.
+
+---
+
+# CENAS PRINCIPAIS
+
+| Cena | Papel |
+|------|--------|
+| `MenuInicial` | Menu e escolha de início |
+| `FerroVelho` | Tutorial econômico inicial (latinhas) |
+| `Cidade` | Mundo principal urbano |
+| `Interior Casa elegante (player)` | Interior da casa do jogador |
+| `Gameplay_City`, `Gameplay_Test`, etc. | Cenas auxiliares / testes |
+
+IDs de spawn e nomes constantes: `RecomecoSceneNames.cs`.
+
+---
+
+# PRÓXIMOS PASSOS (entrega TCC — não features obrigatórias)
+
+1. **Playtest estruturado** (5–10 pessoas, roteiro, questionário curto).
+2. **Build PC** de demonstração + teste de save/load fora do Editor.
+3. **Monografia** — problema, referencial, método, matriz acima, limitações, avaliação.
+4. **Atualizar este DEVLOG** após cada marco de playtest ou correção crítica.
+5. Opcional: tela ou texto curto de **epílogo** ao completar missões (reforço narrativo).
+
+## Trabalhos futuros (fora do escopo atual)
+
+* Natação, barco, emprego formal, mapa maior, IA social avançada.
+* Pós-jogo profundo além do sandbox.
 
 ---
 
 # OBSERVAÇÕES
 
-O projeto saiu da fase de protótipo: o loop principal do MVP está implementado e jogável.
+O projeto **superou o MVP de latinha + ferro velho**: é um **vertical slice** jogável alinhado ao tema de precariedade e recomeço habitacional.
 
-Próximo foco: NPCs ou expansão do mapa, conforme prioridade do desenvolvimento.
+O histórico **DIA 1–10** (início deste arquivo) documenta a fundação técnica; as **FASES 11–16** descrevem a evolução até o estado atual.
+
+Para abrir ajustes de balanceamento: menu **Recomeco → Abrir Gameplay Settings**.

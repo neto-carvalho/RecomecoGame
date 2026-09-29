@@ -6,7 +6,8 @@ using UnityEngine;
 public class PrecariousSleepInteract : MonoBehaviour, IInteractionPromptOwner
 {
     const string TipAfterSleep =
-        "Dormir em um lugar precário como este pode causar dores ou problemas de saúde.";
+        "Dormir em um lugar precário como este pode causar dores ou problemas de saúde. " +
+        "Isso não salva o jogo — quando tiver casa, use a cama à noite para salvar.";
 
     [Tooltip("Distância para interagir")]
     public float interactDistance = 2.8f;

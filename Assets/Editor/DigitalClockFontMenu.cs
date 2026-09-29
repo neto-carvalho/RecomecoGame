@@ -75,7 +75,6 @@ public static class DigitalClockFontMenu
     const string TtfPath = "Assets/Fonts/DSEG7Classic-Bold.ttf";
     const string SdfPath = "Assets/Resources/Fonts/DSEG7Classic-Bold SDF.asset";
 
-    [MenuItem(MenuRoot + "Gerar fonte TMP relógio digital (DSEG7)")]
     static void CreateDigitalClockFontAsset()
     {
         if (!File.Exists(TtfPath))

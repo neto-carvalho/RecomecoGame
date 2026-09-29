@@ -76,7 +76,6 @@ public static class FootstepAudioSetupMenu
         EditorUtility.DisplayDialog("Biblioteca", "Superfícies actualizadas em:\n" + LibraryPath, "OK");
     }
 
-    [MenuItem(MenuRoot + "Corrigir terreno natureza/lago (passos relva/terra)")]
     static void TagNatureTerrainFootsteps()
     {
         var count = 0;
@@ -139,7 +138,6 @@ public static class FootstepAudioSetupMenu
         EditorUtility.DisplayDialog("Marcador", $"Marcadores em {count} objeto(s). Ajusta «Surface» no Inspector se precisares.", "OK");
     }
 
-    [MenuItem(MenuRoot + "Adicionar passos ao Player e NPCs")]
     static void AddFootstepsToCharacters()
     {
         var library = AssetDatabase.LoadAssetAtPath<FootstepSurfaceLibrary>(LibraryPath);
@@ -164,7 +162,6 @@ public static class FootstepAudioSetupMenu
             "OK");
     }
 
-    [MenuItem(MenuRoot + "Atribuir Footsteps Essentials (calçada)")]
     static void AssignFootstepsEssentials()
     {
         var walk = LoadEssentialsClips(DefaultWalkSurface, run: false);
@@ -188,7 +185,6 @@ public static class FootstepAudioSetupMenu
             $"Fallback calçada: {walk.Count} andar, {run.Count} correr.");
     }
 
-    [MenuItem(MenuRoot + "Atribuir Footsteps Essentials (relva)")]
     static void AssignFootstepsEssentialsGrass()
     {
         var walk = LoadEssentialsClips(AlternateGrassSurface, run: false);
@@ -204,7 +200,6 @@ public static class FootstepAudioSetupMenu
         AssignFallbackClips(walk.ToArray(), run.ToArray(), "Fallback relva atribuído.");
     }
 
-    [MenuItem(MenuRoot + "Atribuir sons Kenney (concreto/relva)")]
     static void AssignKenneyFootsteps()
     {
         var concrete = LoadKenneyFootstepClips("concrete");

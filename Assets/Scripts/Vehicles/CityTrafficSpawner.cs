@@ -47,6 +47,17 @@ public static class CityTrafficSpawner
                 var startWp = Random.Range(0, route.WaypointCount);
                 var along = (i + 1f) / (perRoute + 1f);
                 follower.BeginRoute(route, startWp, along);
+                VehicleColliderUtility.PrepareTrafficObject(instance);
+
+                if (!follower.IsDriving || instance.GetComponent<BoxCollider>() == null)
+                {
+                    Debug.LogWarning(
+                        "[Tráfego] Removido spawn inválido em «" + route.name + "» (rota ou collider).",
+                        instance);
+                    Object.Destroy(instance);
+                    continue;
+                }
+
                 spawned++;
             }
         }

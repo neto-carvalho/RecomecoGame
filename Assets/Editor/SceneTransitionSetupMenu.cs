@@ -19,7 +19,7 @@ public static class SceneTransitionSetupMenu
     const string JunkyardRoot = "Assets/Junkyard models";
     static readonly Vector3 FerroVelhoSpawnPosition = new(201.9f, 8.29f, 0f);
 
-    [MenuItem(MenuRoot + "Cenas/Criar cena FerroVelho (junkyard + venda)")]
+    // [MenuItem(MenuRoot + "Cenas/Criar cena FerroVelho (junkyard + venda)")]
     static void CreateFerroVelhoScene()
     {
         if (!File.Exists(JunkyardDemoPath))
@@ -70,7 +70,7 @@ public static class SceneTransitionSetupMenu
             "OK");
     }
 
-    [MenuItem(MenuRoot + "Cenas/Portal para FerroVelho (cena ativa)")]
+    // [MenuItem(MenuRoot + "Cenas/Portal para FerroVelho (cena ativa)")]
     static void AddPortalToFerroVelho()
     {
         var view = SceneView.lastActiveSceneView;
@@ -303,7 +303,7 @@ public static class SceneTransitionSetupMenu
         return count;
     }
 
-    [MenuItem(MenuRoot + "Cenas/Portal voltar à cidade (cena FerroVelho)")]
+    // [MenuItem(MenuRoot + "Cenas/Portal voltar à cidade (cena FerroVelho)")]
     static void AddReturnPortalInFerroVelho()
     {
         EnsureReturnPortal();
@@ -319,7 +319,7 @@ public static class SceneTransitionSetupMenu
         CompleteGameplayInActiveScene(silent: false);
     }
 
-    [MenuItem(MenuRoot + "Cenas/Adicionar colliders nos objetos (ferro velho)")]
+    // [MenuItem(MenuRoot + "Cenas/Adicionar colliders nos objetos (ferro velho)")]
     static void AddPropCollidersToFerroVelho()
     {
         var scene = SceneManager.GetActiveScene();
@@ -342,7 +342,7 @@ public static class SceneTransitionSetupMenu
             "OK");
     }
 
-    [MenuItem(MenuRoot + "Cenas/Ativar chão da cena (Mesh Collider no terreno)")]
+    // [MenuItem(MenuRoot + "Cenas/Ativar chão da cena (Mesh Collider no terreno)")]
     static void EnableSceneTerrainGround()
     {
         var count = FerroVelhoSceneGround.EnsureSceneGroundColliders();
@@ -365,7 +365,7 @@ public static class SceneTransitionSetupMenu
             "OK");
     }
 
-    [MenuItem(MenuRoot + "Cenas/Adicionar chão Chao_FerroVelho (cena junkyard/Demo aberta)")]
+    // [MenuItem(MenuRoot + "Cenas/Adicionar chão Chao_FerroVelho (cena junkyard/Demo aberta)")]
     static void AddGroundToOpenScene()
     {
         EnsureWalkableGround();

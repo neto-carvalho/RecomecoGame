@@ -61,6 +61,12 @@ public static class GameplayDebugCheats
         if (Input.GetKeyDown(KeyCode.F2))
             TriggerFaintTest();
 
+        if (Input.GetKeyDown(KeyCode.F1))
+            ToggleDayNight();
+
+        if (Input.GetKeyDown(KeyCode.F4))
+            ToggleIllness();
+
         if (Input.GetKeyDown(KeyCode.F12))
             ShowHelp();
     }
@@ -159,6 +165,43 @@ public static class GameplayDebugCheats
         ShowMessage("Fome zerada + vida baixa (teste rápido).  " + FormatNeedsLine(needs));
     }
 
+    static void ToggleDayNight()
+    {
+        GameplayDayNightCycle.Ensure();
+        var cycle = GameplayDayNightCycle.Instance;
+        if (cycle == null)
+        {
+            ShowMessage("Ciclo dia/noite não disponível.");
+            return;
+        }
+
+        cycle.ToggleDayNightForDebug();
+        var period = cycle.IsNight() ? "Noite" : "Dia";
+        ShowMessage(period + "  →  relógio " + cycle.GetClockTimeText());
+    }
+
+    static void ToggleIllness()
+    {
+        var needs = ResolveNeeds();
+        if (needs == null)
+        {
+            ShowMessage("PlayerNeeds não encontrado.");
+            return;
+        }
+
+        if (needs.IsSick || needs.Illness >= 20f)
+        {
+            var settings = RecomecoGameplaySettings.Instance;
+            var protection = settings != null ? settings.newGameProtection : 55f;
+            needs.SetShelterForDebug(Mathf.Max(protection, 70f), 0f);
+            ShowMessage("Curado (doença 0, proteção alta).  " + FormatShelterLine(needs));
+            return;
+        }
+
+        needs.SetShelterForDebug(12f, 72f);
+        ShowMessage("Doente (teste).  " + FormatShelterLine(needs));
+    }
+
     static void TriggerFaintTest()
     {
         var needs = ResolveNeeds();
@@ -186,12 +229,19 @@ public static class GameplayDebugCheats
                "% | Rep. " + Mathf.RoundToInt(needs.Reputation) + "%";
     }
 
+    static string FormatShelterLine(PlayerNeeds needs)
+    {
+        return "Prot. " + Mathf.RoundToInt(needs.Protection) + "% | Doença " +
+               Mathf.RoundToInt(needs.Illness) + "%";
+    }
+
     static void ShowHelp()
     {
         ShowMessage(
-            "Debug: F2 desmaio | F3 max needs | F5 fome-35 | F6 vida-35 | F7 rep-12 | F8 fome 0\n" +
+            "Debug: F1 dia/noite | F2 desmaio | F3 max needs | F4 doente/curar\n" +
+            "F5 fome-35 | F6 vida-35 | F7 rep-12 | F8 fome 0\n" +
             "F9 +R$500 | F10 max $ | F11 casa | F12 ajuda",
-            6f);
+            7f);
     }
 
     static void ShowMessage(string message, float seconds = 2f)

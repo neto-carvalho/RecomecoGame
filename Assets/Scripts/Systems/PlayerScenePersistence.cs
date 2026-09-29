@@ -141,6 +141,10 @@ public static class PlayerScenePersistence
         if (_travelingUiRoot != null)
             Object.Destroy(_travelingUiRoot);
 
+        var orphanCam = GameObject.Find("GameplayCamera");
+        if (orphanCam != null)
+            Object.Destroy(orphanCam);
+
         _travelingPlayer = null;
         _travelingCamera = null;
         _travelingUiRoot = null;
@@ -154,6 +158,15 @@ public static class PlayerScenePersistence
         _travelingCamera = camera;
         if (player != null)
             _travelingPlayer = player;
+    }
+
+    public static void RegisterTravelingPlayer(GameObject player)
+    {
+        if (player == null)
+            return;
+
+        _travelingPlayer = player;
+        Object.DontDestroyOnLoad(player);
     }
 
     public static PlayerCamera GetTravelingCamera()

@@ -50,14 +50,6 @@ public static class RecomecoDebugMenu
             "OK");
     }
 
-    [MenuItem("Recomeco/Debug/Selecionar RecomecoGameplaySettings")]
-    static void SelectSettings()
-    {
-        var settings = LoadSettings();
-        if (settings != null)
-            Selection.activeObject = settings;
-    }
-
     static RecomecoGameplaySettings LoadSettings()
     {
         var settings = AssetDatabase.LoadAssetAtPath<RecomecoGameplaySettings>(SettingsPath);

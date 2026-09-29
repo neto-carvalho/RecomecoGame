@@ -8,6 +8,17 @@ public static class Food4USetupMenu
 {
     const string MenuRoot = "Recomeco/Loja/";
     const string FoodFolder = "Assets/Items/Food";
+    const string FoodIconsFolder = "Assets/Items/Icons/Food";
+
+    static readonly (string assetName, string iconFile)[] FoodIconMap =
+    {
+        ("LancheClassico", "icon_food_lanche.png"),
+        ("XSalada", "icon_food_xsalada.png"),
+        ("HotDog", "icon_food_hotdog.png"),
+        ("Refrigerante", "icon_food_refrigerante.png"),
+        ("MilkShake", "icon_food_milkshake.png"),
+        ("LancheDuplicado", "icon_food_duplicado.png"),
+    };
 
     /// assetName, display label, price cents, hunger, health, reputation, hint override (optional)
     static readonly (string assetName, string label, int priceCents, float hunger, float health, float rep, string hint)[] Menu =
@@ -20,10 +31,9 @@ public static class Food4USetupMenu
         ("LancheDuplicado", "Lanche do dia (?) ", 290, 28f, -12f, -3f, "+28 fome, -12 vida, -3 rep."),
     };
 
-    [MenuItem(MenuRoot + "Criar itens de lanchonete (Assets/Items/Food)")]
+    // [MenuItem(MenuRoot + "Criar itens de lanchonete (Assets/Items/Food)")]
     static void CreateFoodItemAssets()
     {
-        FoodMealIconGenerator.GenerateAllIconsInternal();
         EnsureFoodFolder();
         var created = 0;
 
@@ -48,12 +58,11 @@ public static class Food4USetupMenu
                 ? ItemData.BuildEffectHint(entry.hunger, entry.health, entry.rep)
                 : entry.hint;
 
-            var icon = FoodMealIconGenerator.LoadFoodIcon(FindIconFile(entry.assetName));
+            var icon = LoadFoodIcon(FindIconFile(entry.assetName));
             if (icon != null)
                 item.icon = icon;
             else
-                Debug.LogWarning("[FOOD4U] Ícone não encontrado para " + entry.assetName +
-                                 ". Rode \"Gerar ícones dos lanches FOOD4U\".");
+                Debug.LogWarning("[FOOD4U] Ícone não encontrado em " + FoodIconsFolder + " para " + entry.assetName);
 
             EditorUtility.SetDirty(item);
         }
@@ -66,7 +75,7 @@ public static class Food4USetupMenu
             "OK");
     }
 
-    [MenuItem(MenuRoot + "Lojinha: pacotes só para revenda (desativa consumo)")]
+    // [MenuItem(MenuRoot + "Lojinha: pacotes só para revenda (desativa consumo)")]
     static void MarkResellItemsNotConsumable()
     {
         var names = new[] { "Pacoca", "Chiclete", "Biscoito", "AguaMineral", "BalaDeGoma", "Cocada" };
@@ -118,7 +127,7 @@ public static class Food4USetupMenu
         }
     }
 
-    [MenuItem(MenuRoot + "Configurar TODOS os objetos FOOD4U na cena ativa")]
+    // [MenuItem(MenuRoot + "Configurar TODOS os objetos FOOD4U na cena ativa")]
     static void SetupAllFood4UInScene()
     {
         CreateFoodItemAssets();
@@ -202,13 +211,21 @@ public static class Food4USetupMenu
 
     static string FindIconFile(string foodAssetName)
     {
-        foreach (var pair in FoodMealIconGenerator.FoodIconMap)
+        foreach (var pair in FoodIconMap)
         {
             if (pair.assetName == foodAssetName)
                 return pair.iconFile;
         }
 
         return null;
+    }
+
+    static Sprite LoadFoodIcon(string iconFile)
+    {
+        if (string.IsNullOrEmpty(iconFile))
+            return null;
+
+        return AssetDatabase.LoadAssetAtPath<Sprite>(FoodIconsFolder + "/" + iconFile);
     }
 
     static List<GameObject> FindAllFood4UGameObjects()

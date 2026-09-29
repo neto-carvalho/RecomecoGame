@@ -262,6 +262,33 @@ public class GameplayDayNightCycle : MonoBehaviour
         NotifyChanged();
     }
 
+    public void SetTimeOfDayForDebug(float hour, bool resetSleptThisNight = true)
+    {
+        hourOfDay = Mathf.Repeat(hour, 24f);
+        if (resetSleptThisNight)
+            sleptThisNight = false;
+
+        var settings = RecomecoGameplaySettings.Instance;
+        _visualNightBlend = ComputeNightBlend(hourOfDay, settings);
+        _visualBlendVelocity = 0f;
+        ApplyVisuals(settings);
+        NotifyChanged();
+    }
+
+    public void ToggleDayNightForDebug()
+    {
+        var settings = RecomecoGameplaySettings.Instance;
+        if (IsNight(settings))
+        {
+            var dayHour = settings != null ? Mathf.Repeat(settings.nightEndHour + 3f, 24f) : 10f;
+            SetTimeOfDayForDebug(dayHour);
+            return;
+        }
+
+        var nightHour = settings != null ? Mathf.Repeat(settings.nightStartHour + 1f, 24f) : 21f;
+        SetTimeOfDayForDebug(nightHour);
+    }
+
     public GameplayDayNightSnapshot ExportSnapshot()
     {
         return new GameplayDayNightSnapshot

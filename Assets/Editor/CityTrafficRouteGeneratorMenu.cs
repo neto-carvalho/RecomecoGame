@@ -212,7 +212,7 @@ public static class CityTrafficRouteGeneratorMenu
             "OK");
     }
 
-    [MenuItem(MenuRoot + "Gerar rotas por trecho (vai e volta — legado)")]
+    // Legado — use «Gerar rotas em rede». Mantido só para referência interna.
     public static void GenerateFromRoadObjects()
     {
         var scene = SceneManager.GetActiveScene();

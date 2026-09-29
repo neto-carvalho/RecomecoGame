@@ -47,6 +47,19 @@ public static class GameplayScreenFade
         s_canvas.gameObject.SetActive(false);
     }
 
+    /// <summary>Remove overlay preto/cinza (ex.: fade de sono interrompido ao voltar ao menu).</summary>
+    public static void ForceClear()
+    {
+        if (s_canvas != null)
+        {
+            s_canvas.gameObject.SetActive(false);
+            Object.Destroy(s_canvas.gameObject);
+        }
+
+        s_group = null;
+        s_canvas = null;
+    }
+
     static void EnsureOverlay()
     {
         if (s_group != null)

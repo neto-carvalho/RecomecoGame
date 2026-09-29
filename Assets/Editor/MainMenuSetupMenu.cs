@@ -80,7 +80,8 @@ public static class MainMenuSetupMenu
         ProfessionalSprites,
     }
 
-    [MenuItem(MenuRoot + "Cenas/Gerar arte do menu (recortar PNGs)")]
+    // Menu legado (arte já aplicada).
+    // [MenuItem(MenuRoot + "Cenas/Gerar arte do menu (recortar PNGs)")]
     static void GenerateMenuArtFromPython()
     {
         var script = "Tools/slice_menu_art.py";
@@ -126,7 +127,7 @@ public static class MainMenuSetupMenu
             "OK");
     }
 
-    [MenuItem(MenuRoot + "Cenas/Aplicar menu — arte completa (botões invisíveis)")]
+    // [MenuItem(MenuRoot + "Cenas/Aplicar menu — arte completa (botões invisíveis)")]
     static void ApplyArtOverlayToExistingScene()
     {
         ApplyMenuLayoutMode(ArtLayoutMode.FullArtInvisible,
@@ -137,13 +138,13 @@ public static class MainMenuSetupMenu
             "Melhor opção para ficar igual ao mockup (com ícones na arte).");
     }
 
-    [MenuItem(MenuRoot + "Cenas/Fatiar sprites de botões (menu_buttons_sheet)")]
+    // [MenuItem(MenuRoot + "Cenas/Fatiar sprites de botões (menu_buttons_sheet)")]
     static void SliceButtonSpritesMenu()
     {
         RunPythonScript("Tools/slice_menu_buttons.py", "Sprites fatiados em Assets/UI/Menu/Buttons/");
     }
 
-    [MenuItem(MenuRoot + "Cenas/Atualizar sprites MainMenuButtonSet")]
+    // [MenuItem(MenuRoot + "Cenas/Atualizar sprites MainMenuButtonSet")]
     static void RefreshMainMenuButtonSetMenu()
     {
         var buttonSet = CreateOrUpdateButtonSetAsset();
@@ -235,7 +236,7 @@ public static class MainMenuSetupMenu
         EditorUtility.DisplayDialog("Recomeco", successMessage, "OK");
     }
 
-    [MenuItem(MenuRoot + "Cenas/Aplicar imagem de fundo do menu (se existir em UI/Menu)")]
+    // [MenuItem(MenuRoot + "Cenas/Aplicar imagem de fundo do menu (se existir em UI/Menu)")]
     static void ApplyBackgroundFromFolder()
     {
         var sprite = LoadMenuBackgroundSprite();

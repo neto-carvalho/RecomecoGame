@@ -5,6 +5,8 @@ public static class GameplayReturnToMenu
 {
     public static void ResetPersistentGameplayState()
     {
+        GameplayScreenFade.ForceClear();
+        GameplaySessionCleanup.ClearDontDestroyOnLoadGameplay();
         GameplayHudBootstrap.ResetForMenu();
         GameSession.Reset();
         MissionProgress.Reset();

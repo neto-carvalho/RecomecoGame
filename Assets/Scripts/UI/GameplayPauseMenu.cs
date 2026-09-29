@@ -182,6 +182,20 @@ public class GameplayPauseMenu : MonoBehaviour
         GameplayReturnToMenu.GoToMainMenu();
     }
 
+    void OnSaveGameClicked()
+    {
+        if (!SaveGameManager.CanSaveProgress())
+        {
+            GameplayTipBannerUI.Show(
+                "Salvar só depois de comprar a casa. De noite, durma na cama (também salva).",
+                5f);
+            return;
+        }
+
+        if (SaveGameManager.SaveWithPlayerFeedback())
+            Resume();
+    }
+
     static void EnsureEventSystem()
     {
         if (FindFirstObjectByType<EventSystem>() != null)
@@ -223,7 +237,7 @@ public class GameplayPauseMenu : MonoBehaviour
         var panel = new GameObject("Panel");
         panel.transform.SetParent(overlay.transform, false);
         var panelRect = panel.AddComponent<RectTransform>();
-        panelRect.sizeDelta = new Vector2(420f, 300f);
+        panelRect.sizeDelta = new Vector2(420f, 368f);
         var panelBg = panel.AddComponent<Image>();
         panelBg.color = new Color(0.09f, 0.09f, 0.12f, 0.96f);
 
@@ -232,9 +246,11 @@ public class GameplayPauseMenu : MonoBehaviour
         CreateText(panelRect, "ESC — continuar", 16f, new Vector2(0f, 58f), new Vector2(380f, 28f),
             TextAlignmentOptions.Center, new Color(0.75f, 0.75f, 0.8f));
 
-        CreateButton(panelRect, "CONTINUAR", new Vector2(0f, 4f), new Vector2(300f, 52f),
+        CreateButton(panelRect, "CONTINUAR", new Vector2(0f, 24f), new Vector2(300f, 52f),
             new Color(0.15f, 0.4f, 0.2f, 1f), Resume);
-        CreateButton(panelRect, "MENU INICIAL", new Vector2(0f, -64f), new Vector2(300f, 52f),
+        CreateButton(panelRect, "SALVAR JOGO", new Vector2(0f, -44f), new Vector2(300f, 52f),
+            new Color(0.18f, 0.28f, 0.45f, 1f), OnSaveGameClicked);
+        CreateButton(panelRect, "MENU INICIAL", new Vector2(0f, -112f), new Vector2(300f, 52f),
             new Color(0.45f, 0.15f, 0.15f, 1f), OnReturnToMenuClicked);
 
         _panelRoot = canvasGo;

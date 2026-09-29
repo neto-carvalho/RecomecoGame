@@ -15,7 +15,7 @@ public static class CityTrafficPrefabCatalog
         {
             foreach (var p in fromResources)
             {
-                if (p != null)
+                if (p != null && VehicleColliderUtility.HasExteriorVehicleBounds(p))
                     list.Add(p);
             }
 
@@ -32,7 +32,7 @@ public static class CityTrafficPrefabCatalog
 
             var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
             var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            if (prefab != null)
+            if (prefab != null && VehicleColliderUtility.HasExteriorVehicleBounds(prefab))
                 list.Add(prefab);
         }
 #endif

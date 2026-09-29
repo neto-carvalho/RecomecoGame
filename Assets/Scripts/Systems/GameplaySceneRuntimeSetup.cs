@@ -44,7 +44,6 @@ public static class GameplaySceneRuntimeSetup
         FerroVelhoWalkableGround.EnsureInActiveScene();
         GameplayDayNightCycle.Ensure();
         GameplayHudBootstrap.Ensure();
-        MissionProgress.NotifyEnteredScene(SceneManager.GetActiveScene().name);
 
         if (SceneManager.GetActiveScene().name == RecomecoSceneNames.Cidade)
         {
@@ -52,16 +51,23 @@ public static class GameplaySceneRuntimeSetup
             CityLivingBootstrap.EnsureForActiveScene();
         }
 
-        var player = FindPlayer();
-        if (player == null)
-            return;
-
         if (InteriorSceneColliders.IsInteriorScene(SceneManager.GetActiveScene()))
         {
             InteriorSceneLayout.EnsureGameplayReady();
             InteriorSceneColliders.EnsureColliders();
             Physics.SyncTransforms();
             InteriorSceneLayout.FinalizeMarkerPositions();
+        }
+
+        GameplayPlayerSpawner.EnsureForActiveScene();
+
+        var player = FindPlayer();
+        if (player == null)
+        {
+            Debug.LogError(
+                "GameplaySceneRuntimeSetup: nenhum Player na cena " +
+                SceneManager.GetActiveScene().name + ". Continuar/save não pode aplicar estado.");
+            return;
         }
 
         if (!string.IsNullOrEmpty(SceneTransitionState.PendingSpawnId))
@@ -96,6 +102,8 @@ public static class GameplaySceneRuntimeSetup
         GameSession.ApplyToPlayer(player);
         GameplayHudBootstrap.WirePlayerInventory(player);
         SceneTransitionPlayerSetup.AfterSceneLoad(player);
+
+        MissionProgress.NotifyEnteredScene(SceneManager.GetActiveScene().name);
     }
 
     static void EnsureGameplayCamera(GameObject player)
@@ -111,13 +119,21 @@ public static class GameplaySceneRuntimeSetup
         {
             playerCamera = CreateFollowCamera(player.transform);
             if (playerCamera != null)
+            {
+                Object.DontDestroyOnLoad(playerCamera.gameObject);
                 PlayerScenePersistence.RegisterRuntimeCamera(playerCamera, player);
+            }
         }
 
         if (playerCamera != null)
         {
+            playerCamera.gameObject.SetActive(true);
             playerCamera.ApplyGameplaySettings(RecomecoGameplaySettings.Instance);
             PlayerScenePersistence.WireCameraAfterLoad(player);
+
+            var input = player.GetComponent<MovePlayerInput>();
+            if (input != null)
+                input.BindPlayerCamera(playerCamera);
         }
     }
 
@@ -248,9 +264,18 @@ sealed class GameplaySceneSetupRunner : MonoBehaviour
 
     IEnumerator Start()
     {
-        yield return null;
-        FerroVelhoWalkableGround.TrySetupActiveScene();
-        GameplaySceneRuntimeSetup.Run();
+        for (var i = 0; i < 10; i++)
+        {
+            yield return null;
+            FerroVelhoWalkableGround.TrySetupActiveScene();
+            GameplaySceneRuntimeSetup.Run();
+
+            var player = GameObject.FindGameObjectWithTag("Player");
+            var cam = Object.FindFirstObjectByType<PlayerCamera>();
+            if (player != null && cam != null)
+                break;
+        }
+
         Destroy(gameObject);
     }
 }

@@ -50,6 +50,7 @@ public static class SaveGameManager
 
     public static bool SaveCurrentGame(string spawnIdOverride = null)
     {
+        GameplayHudBootstrap.EnsureMoneyManager();
         GameSession.SaveBeforeSceneLoad();
         var data = CaptureCurrentState(spawnIdOverride);
         if (data == null)
@@ -71,6 +72,12 @@ public static class SaveGameManager
 
     public static SaveGameData CaptureCurrentState(string spawnIdOverride = null)
     {
+        var sceneName = SceneManager.GetActiveScene().name;
+        var spawnId = !string.IsNullOrEmpty(spawnIdOverride)
+            ? spawnIdOverride
+            : GuessSpawnIdForScene(sceneName);
+        NormalizeContinueLocation(ref sceneName, ref spawnId);
+
         var data = new SaveGameData
         {
             money = MoneyManager.instance != null ? MoneyManager.instance.GetMoney() : 0,
@@ -80,13 +87,23 @@ public static class SaveGameManager
             mission = MissionProgress.ExportSnapshot(),
             needs = ExportNeedsSnapshot(),
             dayNight = ExportDayNightSnapshot(),
-            lastScene = SceneManager.GetActiveScene().name,
-            lastSpawnId = !string.IsNullOrEmpty(spawnIdOverride)
-                ? spawnIdOverride
-                : GuessSpawnIdForScene(SceneManager.GetActiveScene().name),
+            lastScene = sceneName,
+            lastSpawnId = spawnId,
         };
 
         return data;
+    }
+
+    /// <summary>
+    /// Interior não tem Player na cena; continuar sempre na Cidade (porta da casa).
+    /// </summary>
+    static void NormalizeContinueLocation(ref string sceneName, ref string spawnId)
+    {
+        if (sceneName != RecomecoSceneNames.InteriorCasaElegante)
+            return;
+
+        sceneName = RecomecoSceneNames.Cidade;
+        spawnId = RecomecoSceneNames.SaidaCasaElegante;
     }
 
     public static void ApplyPendingToGame()
@@ -184,5 +201,23 @@ public static class SaveGameManager
             return RecomecoSceneNames.EntradaFerroVelho;
 
         return null;
+    }
+
+    /// <summary>Salva e mostra confirmação no HUD (cama / menu pausa).</summary>
+    public static bool SaveWithPlayerFeedback(string spawnIdOverride = null, string successMessage = null)
+    {
+        if (!SaveCurrentGame(spawnIdOverride))
+            return false;
+
+        var message = string.IsNullOrEmpty(successMessage)
+            ? "Progresso salvo. No menu inicial, use Continuar jogo salvo."
+            : successMessage;
+        GameplayTipBannerUI.Show(message, 5f);
+        return true;
+    }
+
+    public static bool CanSaveProgress()
+    {
+        return PlayerHousingState.Owns(PlayerHousingState.CasaElegante);
     }
 }

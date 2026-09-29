@@ -70,7 +70,7 @@ public static class MissionProgress
 
     public static void EnsureStartedForScene(string sceneName)
     {
-        if (_started || RecomecoSceneNames.IsMenuScene(sceneName))
+        if (SaveGameManager.HasPendingLoad || _started || RecomecoSceneNames.IsMenuScene(sceneName))
             return;
 
         BeginNewGame(sceneName);
@@ -416,7 +416,8 @@ public static class MissionProgress
                 {
                     Title = "MISSÃO",
                     Description = "Descanse na barraca à noite",
-                    Hint = "É possível dormir das " + sleepWindow + ".",
+                    Hint = "É possível dormir das " + sleepWindow +
+                           ". A barraca não salva o jogo — depois de ter casa, salve dormindo na cama.",
                     ProgressText = string.Empty,
                     ShowProgress = false,
                 };

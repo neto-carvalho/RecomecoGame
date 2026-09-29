@@ -30,7 +30,7 @@ public static class GameplayHudBootstrap
         inventory.ReconnectUi();
     }
 
-    static void EnsureMoneyManager()
+    public static void EnsureMoneyManager()
     {
         if (MoneyManager.instance != null)
             return;

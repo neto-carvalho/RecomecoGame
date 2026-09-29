@@ -17,6 +17,8 @@ public class TrafficRouteFollower : MonoBehaviour
     Rigidbody _rb;
     bool _aligningAtCorner;
     Vector3 _alignForward;
+    float _alignStartedTime;
+    const float MaxCornerAlignSeconds = 4f;
 
     public bool IsDriving => enabled && _route != null && _route.WaypointCount >= 2;
 
@@ -169,6 +171,7 @@ public class TrafficRouteFollower : MonoBehaviour
 
         _aligningAtCorner = true;
         _alignForward = outgoing;
+        _alignStartedTime = Time.time;
     }
 
     void StepCornerAlign(float deltaTime)
@@ -179,7 +182,8 @@ public class TrafficRouteFollower : MonoBehaviour
         if (_rb != null)
             _rb.rotation = rot;
 
-        if (Quaternion.Angle(transform.rotation, targetRot) <= 6f)
+        if (Quaternion.Angle(transform.rotation, targetRot) <= 6f
+            || Time.time - _alignStartedTime >= MaxCornerAlignSeconds)
             _aligningAtCorner = false;
     }
 
