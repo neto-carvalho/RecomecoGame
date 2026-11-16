@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 [RequireComponent(typeof(CharacterController))]
 public sealed class SidewalkNpcWalker : MonoBehaviour
@@ -72,6 +73,8 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
     private int _skinVariantFromSpawn = int.MinValue;
     private MaterialPropertyBlock _skinBlock;
     private bool _replacedDefaultRig;
+    private bool _navMeshMode;
+    private NavMeshAgent _navAgent;
 
     private void Awake()
     {
@@ -219,16 +222,42 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
 
     public bool InteractionPaused { get; private set; }
 
+    public void EnableNavMeshMode(bool on)
+    {
+        _navMeshMode = on;
+        if (on)
+        {
+            _navAgent = GetComponent<NavMeshAgent>();
+            if (_controller != null)
+                _controller.enabled = false;
+        }
+    }
+
     public void PauseForInteraction(Transform faceTarget)
     {
         InteractionPaused = true;
         _interactionFaceTarget = faceTarget;
+
+        if (_navAgent != null)
+        {
+            _navAgent.isStopped = true;
+            _navAgent.velocity = Vector3.zero;
+        }
+
+        var navWalker = GetComponent<CityPedestrianNavWalker>();
+        navWalker?.StopForInteraction();
     }
 
     public void ResumeFromInteraction()
     {
         InteractionPaused = false;
         _interactionFaceTarget = null;
+
+        var navWalker = GetComponent<CityPedestrianNavWalker>();
+        if (navWalker != null)
+            navWalker.ResumeAfterInteraction();
+        else if (_navAgent != null)
+            _navAgent.isStopped = false;
     }
 
     void UpdatePausedInteraction()
@@ -257,6 +286,12 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
         if (InteractionPaused)
         {
             UpdatePausedInteraction();
+            return;
+        }
+
+        if (_navMeshMode)
+        {
+            UpdateNavMeshLocomotion();
             return;
         }
 
@@ -315,6 +350,49 @@ public sealed class SidewalkNpcWalker : MonoBehaviour
         _controller.Move(delta);
 
         UpdateAnimator();
+    }
+
+    void UpdateNavMeshLocomotion()
+    {
+        if (_navAgent == null)
+            _navAgent = GetComponent<NavMeshAgent>();
+
+        var velocity = _navAgent != null ? _navAgent.velocity : Vector3.zero;
+        velocity.y = 0f;
+
+        if (velocity.sqrMagnitude > 0.02f)
+        {
+            _moveDir = velocity.normalized;
+            ApplyYawDegreesTowardsWorldDirection(_moveDir, rotateSpeedDegrees);
+        }
+
+        var speed = velocity.magnitude;
+        var walkingAnim = speed > 0.08f;
+        _inIdlePause = !walkingAnim;
+
+        if (_animator == null)
+            return;
+
+        var local = transform.InverseTransformDirection(_moveDir);
+        local.y = 0f;
+        if (local.sqrMagnitude > 0.0001f)
+            local.Normalize();
+
+        var dt = Time.deltaTime;
+        var horTarget = walkingAnim ? local.x : 0f;
+        var vertTarget = walkingAnim ? local.z : 0f;
+        var blendStep = walkingAnim ? 12f * dt : 5f * dt;
+
+        if (_hasHor)
+            _animator.SetFloat("Hor", Mathf.MoveTowards(_animator.GetFloat("Hor"), horTarget, blendStep));
+        if (_hasVert)
+            _animator.SetFloat("Vert", Mathf.MoveTowards(_animator.GetFloat("Vert"), vertTarget, blendStep));
+        if (_hasState)
+            _animator.SetFloat(
+                "State",
+                Mathf.MoveTowards(_animator.GetFloat("State"), 0f, animatorStateBlendSpeed * dt));
+        if (_hasIsJump)
+            _animator.SetBool("IsJump", false);
     }
 
     private void FlipPatrolDirection()

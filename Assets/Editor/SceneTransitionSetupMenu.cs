@@ -461,7 +461,7 @@ public static class SceneTransitionSetupMenu
         {
             var sell = Undo.AddComponent<SellItems>(sellGo);
             sell.itemName = "Latinha";
-            sell.pricePerUnit = 2;
+            sell.pricePerUnit = 0;
             sell.sellDistance = 5f;
             sell.messageNear = "Aperte E para vender";
         }

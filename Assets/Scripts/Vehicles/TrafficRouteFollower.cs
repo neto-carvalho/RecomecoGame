@@ -1,33 +1,37 @@
 using UnityEngine;
 
+/// <summary>
+/// Segue o centro da polilinha da rota (não corta quinas); volante alinhado à tangente com desaceleração em curva.
+/// </summary>
 [DisallowMultipleComponent]
 public class TrafficRouteFollower : MonoBehaviour
 {
-    [SerializeField] float arriveDistance = 0.25f;
-    [SerializeField] float rotateSpeed = 140f;
-    [Tooltip("Curva ≥ este ângulo: para no waypoint e só segue depois de alinhar.")]
-    [SerializeField] float sharpCornerAngle = 38f;
-    [Tooltip("Se o carro sair da linha, puxa de volta para o trecho atual (m).")]
-    [SerializeField] float maxLateralOffset = 0.45f;
+    [SerializeField] float followProbeMeters = 14f;
+    [SerializeField] LayerMask obstacleMask = ~0;
 
     TrafficRoute _route;
     int _waypointIndex;
     int _stepDirection = 1;
-    float _speedMs;
+    float _alongOnSegmentMeters;
+    float _cruiseSpeedMs;
+    float _currentSpeedMs;
+    float _stuckLowSpeedSeconds;
+    float _steerYawVelocity;
     Rigidbody _rb;
-    bool _aligningAtCorner;
-    Vector3 _alignForward;
-    float _alignStartedTime;
-    const float MaxCornerAlignSeconds = 4f;
+    RecomecoGameplaySettings _settings;
 
     public bool IsDriving => enabled && _route != null && _route.WaypointCount >= 2;
 
     public TrafficRoute Route => _route;
 
+    public float CurrentSpeedKmh => _currentSpeedMs * 3.6f;
+
     void Awake()
     {
         VehicleColliderUtility.PrepareTrafficObject(gameObject);
         _rb = GetComponent<Rigidbody>();
+        if (GetComponent<TrafficVehiclePlayerImpact>() == null)
+            gameObject.AddComponent<TrafficVehiclePlayerImpact>();
     }
 
     public void AssignRoute(TrafficRoute route, int startWaypointIndex = 0, bool snapOntoRoute = true)
@@ -35,10 +39,10 @@ public class TrafficRouteFollower : MonoBehaviour
         BeginRoute(route, startWaypointIndex, snapOntoRoute ? Random.Range(0.15f, 0.85f) : -1f);
     }
 
-    /// <param name="segmentAlong01">0–1 entre waypoint e o próximo; &lt; 0 não reposiciona.</param>
     public void BeginRoute(TrafficRoute route, int startWaypointIndex, float segmentAlong01)
     {
         _route = route;
+        _settings = RecomecoGameplaySettings.Instance;
         if (_route != null)
             _route.EnsureReady();
 
@@ -47,8 +51,9 @@ public class TrafficRouteFollower : MonoBehaviour
             _waypointIndex = Mathf.Clamp(startWaypointIndex, 0, _route.WaypointCount - 1);
 
         _stepDirection = 1;
-        _aligningAtCorner = false;
-        _speedMs = _route != null ? Mathf.Max(5f, _route.speedKmh / 3.6f) : 8f;
+        _alongOnSegmentMeters = 0f;
+        _cruiseSpeedMs = ResolveCruiseSpeedMs();
+        _currentSpeedMs = _cruiseSpeedMs * Random.Range(0.65f, 0.85f);
 
         foreach (var wander in GetComponentsInChildren<CityTrafficVehicle>(true))
             wander.enabled = false;
@@ -66,133 +71,279 @@ public class TrafficRouteFollower : MonoBehaviour
 
     void PlaceOnRouteSegment(int waypointIndex, float alongSegment01)
     {
-        if (_route == null)
-            return;
-
-        var a = _route.GetWorldPoint(waypointIndex);
-        var b = _route.GetWorldPoint(waypointIndex + 1);
-        var dir = b - a;
-        dir.y = 0f;
-        var len = dir.magnitude;
+        _waypointIndex = waypointIndex;
+        var seg = GetSegmentVectors(out var len);
         if (len < 0.05f)
         {
-            ApplyPose(a, transform.rotation);
+            ApplyPose(_route.GetWorldPoint(waypointIndex), transform.rotation);
+            _alongOnSegmentMeters = 0f;
             return;
         }
 
-        dir /= len;
-        var pos = a + dir * (len * Mathf.Clamp01(alongSegment01));
-        pos.y = VehicleGroundSnap.SnapYNearReference(pos.x, pos.z, a.y);
-        var rot = Quaternion.LookRotation(dir, Vector3.up);
+        _alongOnSegmentMeters = len * Mathf.Clamp01(alongSegment01);
+        var pos = seg.start + seg.dir * _alongOnSegmentMeters;
+        pos.y = VehicleGroundSnap.SnapLowestRoadY(pos.x, pos.z, seg.start.y);
+        var rot = Quaternion.LookRotation(seg.dir, Vector3.up);
         ApplyPose(pos, rot);
+        VehicleGroundSnap.SnapTrafficWheelsToGround(transform);
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (!IsDriving)
             return;
 
-        Step(Time.deltaTime);
+        Step(Time.fixedDeltaTime);
         if (_rb != null)
         {
-            _rb.position = transform.position;
-            _rb.rotation = transform.rotation;
+            _rb.MovePosition(transform.position);
+            _rb.MoveRotation(transform.rotation);
         }
     }
 
     void Step(float deltaTime)
     {
-        if (_aligningAtCorner)
+        if (!TryGetDriveSegment(out var seg, out var segLen))
+            return;
+
+        var travelDir = seg.dir;
+        var pathTurn = UpcomingCornerAngleDegrees();
+        var targetSpeed = ComputeTargetSpeed(pathTurn, travelDir);
+        TickStuckRecovery(deltaTime, ref targetSpeed);
+
+        var accel = targetSpeed > _currentSpeedMs ? AccelRate() : BrakeRate();
+        _currentSpeedMs = Mathf.MoveTowards(_currentSpeedMs, targetSpeed, accel * deltaTime);
+
+        var move = _currentSpeedMs * deltaTime;
+        if (move > 0.0001f)
+            AdvanceAlongRoute(move);
+
+        if (!TryGetDriveSegment(out seg, out segLen))
+            return;
+
+        var travelAlong = Mathf.Clamp(_alongOnSegmentMeters, 0f, segLen);
+        Vector3 pos;
+        Vector3 faceDir;
+        if (UseSplineMotion()
+            && TrafficRouteSpline.TryEvaluate(_route, _waypointIndex, _stepDirection, travelAlong, segLen, out pos, out faceDir))
         {
-            StepCornerAlign(deltaTime);
+            pos.y = VehicleGroundSnap.SnapLowestRoadY(pos.x, pos.z, seg.start.y);
+        }
+        else
+        {
+            pos = seg.start + seg.dir * travelAlong;
+            pos.y = VehicleGroundSnap.SnapLowestRoadY(pos.x, pos.z, seg.start.y);
+            faceDir = seg.dir;
+        }
+
+        transform.position = pos;
+        VehicleGroundSnap.SnapTrafficWheelsToGround(transform);
+        ApplyFacing(faceDir, seg.dir, deltaTime);
+    }
+
+    bool UseSplineMotion() => _settings == null || _settings.trafficUseSplineMotion;
+
+    bool TryGetDriveSegment(out (Vector3 start, Vector3 dir) seg, out float segLen)
+    {
+        seg = default;
+        segLen = 0f;
+        for (var guard = 0; guard < _route.WaypointCount + 2; guard++)
+        {
+            seg = GetSegmentVectors(out segLen);
+            if (segLen >= 0.05f)
+                return true;
+
+            var end = ResolveDestinationIndex(_waypointIndex);
+            if (end == _waypointIndex)
+                return false;
+
+            _waypointIndex = end;
+            _alongOnSegmentMeters = 0f;
+        }
+
+        return false;
+    }
+
+    void TickStuckRecovery(float deltaTime, ref float targetSpeed)
+    {
+        if (_currentSpeedMs > 0.25f && targetSpeed > 0.25f)
+        {
+            _stuckLowSpeedSeconds = 0f;
             return;
         }
 
-        var segEndIndex = ResolveDestinationIndex(_waypointIndex);
-        if (segEndIndex == _waypointIndex && !_route.loop)
+        _stuckLowSpeedSeconds += deltaTime;
+        if (_stuckLowSpeedSeconds < 1.6f)
             return;
 
-        var segStart = Flatten(_route.GetWorldPoint(_waypointIndex));
-        var segEnd = Flatten(_route.GetWorldPoint(segEndIndex));
-        var seg = segEnd - segStart;
-        var segLen = seg.magnitude;
-        if (segLen < 0.05f)
+        targetSpeed = Mathf.Max(targetSpeed, _cruiseSpeedMs * 0.42f);
+        if (_currentSpeedMs < 0.15f)
+            _currentSpeedMs = _cruiseSpeedMs * 0.25f;
+
+        _stuckLowSpeedSeconds = 0.45f;
+    }
+
+    void ApplyFacing(Vector3 desiredFacing, Vector3 moveDir, float deltaTime)
+    {
+        desiredFacing = Flatten(desiredFacing);
+        moveDir = Flatten(moveDir);
+        if (desiredFacing.sqrMagnitude < 0.0001f)
+            desiredFacing = moveDir;
+        if (moveDir.sqrMagnitude < 0.0001f)
+            moveDir = desiredFacing;
+
+        desiredFacing.Normalize();
+        moveDir.Normalize();
+
+        if (Vector3.Dot(moveDir, desiredFacing) < 0f)
+            desiredFacing = moveDir;
+
+        var targetYaw = Mathf.Atan2(desiredFacing.x, desiredFacing.z) * Mathf.Rad2Deg;
+        var smooth = _settings != null ? _settings.trafficSteerSmoothSeconds : 0.18f;
+        if (smooth <= 0.01f)
         {
-            AdvanceWaypoint(segEndIndex);
+            transform.rotation = Quaternion.LookRotation(desiredFacing, Vector3.up);
             return;
         }
 
-        var segDir = seg / segLen;
-        var pos = Flatten(transform.position);
-        var along = Vector3.Dot(pos - segStart, segDir);
-        along = Mathf.Clamp(along, 0f, segLen);
+        var currentYaw = transform.eulerAngles.y;
+        var newYaw = Mathf.SmoothDampAngle(currentYaw, targetYaw, ref _steerYawVelocity, smooth, 120f, deltaTime);
+        transform.rotation = Quaternion.Euler(0f, newYaw, 0f);
+    }
 
-        var lateral = pos - (segStart + segDir * along);
-        if (lateral.sqrMagnitude > maxLateralOffset * maxLateralOffset)
-            pos = segStart + segDir * along;
+    float ResolveCruiseSpeedMs()
+    {
+        if (_route == null)
+            return 5f;
 
-        along += _speedMs * deltaTime;
+        var kmh = _route.speedKmh;
+        if (_settings != null)
+            kmh = Mathf.Min(kmh, _settings.trafficMaxSpeedKmh);
 
-        if (along >= segLen - arriveDistance)
+        return Mathf.Max(3f, kmh / 3.6f);
+    }
+
+    void AdvanceAlongRoute(float distanceMeters)
+    {
+        var guard = 0;
+        while (distanceMeters > 0.0001f && guard++ < 32)
         {
-            var endY = _route.GetWorldPoint(segEndIndex).y;
-            var endPos = segEnd;
-            endPos.y = VehicleGroundSnap.SnapYNearReference(endPos.x, endPos.z, endY);
-            var endRot = Quaternion.LookRotation(segDir, Vector3.up);
-            ApplyPose(endPos, endRot);
-            BeginCornerAlignIfNeeded(segEndIndex, segDir);
-            return;
+            var seg = GetSegmentVectors(out var len);
+            if (len < 0.05f)
+            {
+                var endOnly = ResolveDestinationIndex(_waypointIndex);
+                _waypointIndex = endOnly;
+                _alongOnSegmentMeters = 0f;
+                if (!_route.loop && ResolveDestinationIndex(_waypointIndex) == _waypointIndex)
+                    break;
+                continue;
+            }
+
+            var left = len - _alongOnSegmentMeters;
+            if (distanceMeters <= left)
+            {
+                _alongOnSegmentMeters += distanceMeters;
+                break;
+            }
+
+            distanceMeters -= left;
+            var end = ResolveDestinationIndex(_waypointIndex);
+            _waypointIndex = end;
+            _alongOnSegmentMeters = 0f;
+
+            if (!_route.loop && ResolveDestinationIndex(_waypointIndex) == _waypointIndex)
+                break;
+        }
+    }
+
+    (Vector3 start, Vector3 dir) GetSegmentVectors(out float length)
+    {
+        length = 0f;
+        var end = ResolveDestinationIndex(_waypointIndex);
+        var a = Flatten(_route.GetWorldPoint(_waypointIndex));
+        var b = Flatten(_route.GetWorldPoint(end));
+        var delta = b - a;
+        length = delta.magnitude;
+        if (length < 0.0001f)
+            return (a, Vector3.forward);
+
+        return (a, delta / length);
+    }
+
+    float UpcomingCornerAngleDegrees()
+    {
+        var end = ResolveDestinationIndex(_waypointIndex);
+        var next = ResolveDestinationIndex(end);
+        if (next == end)
+            return 0f;
+
+        var a = Flatten(_route.GetWorldPoint(_waypointIndex));
+        var b = Flatten(_route.GetWorldPoint(end));
+        var c = Flatten(_route.GetWorldPoint(next));
+
+        var v1 = b - a;
+        var v2 = c - b;
+        if (v1.sqrMagnitude < 0.04f || v2.sqrMagnitude < 0.04f)
+            return 0f;
+
+        return Vector3.Angle(v1.normalized, v2.normalized);
+    }
+
+    float ComputeTargetSpeed(float pathTurnDegrees, Vector3 tangent)
+    {
+        var speed = _cruiseSpeedMs;
+
+        if (pathTurnDegrees > 6f)
+        {
+            var t = Mathf.Clamp01((pathTurnDegrees - 6f) / 48f);
+            speed *= Mathf.Lerp(1f, 0.28f, t);
         }
 
-        var nextPos = segStart + segDir * along;
-        var refY = _route.GetWorldPoint(_waypointIndex).y;
-        nextPos.y = VehicleGroundSnap.SnapYNearReference(nextPos.x, nextPos.z, refY);
-        var rot = Quaternion.LookRotation(segDir, Vector3.up);
-        transform.SetPositionAndRotation(nextPos, rot);
+        speed = ApplyCarFollowSpeed(speed, tangent);
+
+        return Mathf.Max(_cruiseSpeedMs * 0.22f, speed);
     }
 
-    void BeginCornerAlignIfNeeded(int cornerWaypointIndex, Vector3 incomingDir)
+    float ApplyCarFollowSpeed(float desired, Vector3 forward)
     {
-        AdvanceWaypoint(cornerWaypointIndex);
+        var gap = _settings != null ? _settings.trafficFollowGapMeters : 5.5f;
+        var origin = transform.position + Vector3.up * 0.65f;
+        forward.y = 0f;
+        if (forward.sqrMagnitude < 0.001f)
+            return desired;
 
-        var nextEnd = ResolveDestinationIndex(_waypointIndex);
-        if (nextEnd == _waypointIndex)
-            return;
+        forward.Normalize();
+        if (!Physics.Raycast(origin, forward, out var hit, followProbeMeters, obstacleMask, QueryTriggerInteraction.Ignore))
+            return desired;
 
-        var from = Flatten(_route.GetWorldPoint(_waypointIndex));
-        var to = Flatten(_route.GetWorldPoint(nextEnd));
-        var outgoing = to - from;
-        if (outgoing.sqrMagnitude < 0.0025f)
-            return;
+        if (hit.collider != null && hit.collider.transform.root == transform.root)
+            return desired;
 
-        outgoing.Normalize();
-        if (Vector3.Angle(incomingDir, outgoing) < sharpCornerAngle)
-            return;
+        if (!IsOtherTraffic(hit.collider))
+            return desired;
 
-        _aligningAtCorner = true;
-        _alignForward = outgoing;
-        _alignStartedTime = Time.time;
+        if (hit.distance <= gap * 0.55f)
+            return 0f;
+
+        if (hit.distance < gap + 2f)
+            return Mathf.Min(desired, _cruiseSpeedMs * 0.35f);
+
+        return Mathf.Min(desired, _cruiseSpeedMs * Mathf.Clamp01((hit.distance - gap) / gap));
     }
 
-    void StepCornerAlign(float deltaTime)
+    static bool IsOtherTraffic(Collider col)
     {
-        var targetRot = Quaternion.LookRotation(_alignForward, Vector3.up);
-        var rot = Quaternion.RotateTowards(transform.rotation, targetRot, rotateSpeed * deltaTime);
-        transform.rotation = rot;
-        if (_rb != null)
-            _rb.rotation = rot;
+        if (col == null)
+            return false;
 
-        if (Quaternion.Angle(transform.rotation, targetRot) <= 6f
-            || Time.time - _alignStartedTime >= MaxCornerAlignSeconds)
-            _aligningAtCorner = false;
+        var root = col.transform.root;
+        return root.GetComponent<TrafficRouteFollower>() != null
+               || root.GetComponent<CityTrafficVehicle>() != null;
     }
 
-    void AdvanceWaypoint(int newIndex)
-    {
-        _waypointIndex = newIndex;
-        if (_route.pingPong)
-            UpdatePingPongDirection();
-    }
+    float AccelRate() => _settings != null ? _settings.trafficAcceleration : 4.2f;
+
+    float BrakeRate() => _settings != null ? _settings.trafficBraking : 7.5f;
 
     static Vector3 Flatten(Vector3 v)
     {
@@ -230,17 +381,6 @@ public class TrafficRouteFollower : MonoBehaviour
             return _route.loop ? _route.WaypointCount - 1 : 0;
 
         return next;
-    }
-
-    void UpdatePingPongDirection()
-    {
-        if (_route == null || !_route.pingPong || _route.WaypointCount < 2)
-            return;
-
-        if (_waypointIndex >= _route.WaypointCount - 1)
-            _stepDirection = -1;
-        else if (_waypointIndex <= 0)
-            _stepDirection = 1;
     }
 
     void ApplyPose(Vector3 pos, Quaternion rot)

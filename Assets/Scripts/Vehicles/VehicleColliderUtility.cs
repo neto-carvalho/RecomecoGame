@@ -103,6 +103,8 @@ public static class VehicleColliderUtility
         RemoveNestedRigidbodies(root);
         EnsureRootBoxCollider(root);
         EnsureTrafficRigidbody(root);
+        if (root.GetComponent<TrafficVehiclePlayerImpact>() == null)
+            root.AddComponent<TrafficVehiclePlayerImpact>();
     }
 
     public static void PrepareParkedObject(GameObject root)

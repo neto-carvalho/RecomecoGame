@@ -105,6 +105,7 @@ namespace Controller
                 return;
 
             GatherInput();
+            PlayerSkateSteering.ApplyBeforeMover(ref m_Axis, transform, m_Camera);
             SetInput();
         }
 
@@ -147,7 +148,9 @@ namespace Controller
             if (m_Mover != null)
             {
                 var target = m_Target;
-                if ((target - transform.position).sqrMagnitude < 0.25f)
+                if (PlayerSkateSteering.IsRiding(transform))
+                    target = transform.position + transform.forward * (m_Camera != null ? m_Camera.TargetDistance : 8f);
+                else if ((target - transform.position).sqrMagnitude < 0.25f)
                     target = transform.position + transform.forward * 8f;
                 m_Mover.SetInput(in m_Axis, in target, in m_IsRun, m_IsJump);
             }

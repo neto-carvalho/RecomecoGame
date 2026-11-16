@@ -34,6 +34,25 @@ public class NpcSellInteraction : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E))
         {
             InteractionUI.HideMessage(this);
+
+            var needs = player.GetComponent<PlayerNeeds>();
+            if (!StreetSellProtectionRules.TryPedestrianAcceptsNegotiation(needs, out var refuse, out var banner))
+            {
+                if (!string.IsNullOrEmpty(refuse))
+                {
+                    InteractionUI.ShowMessage(refuse, this);
+
+                    if (banner)
+                    {
+                        var settings = RecomecoGameplaySettings.Instance;
+                        var seconds = settings != null ? settings.npcSellRefuseTipSeconds : 9f;
+                        GameplayTipBannerUI.Show(refuse, seconds);
+                    }
+                }
+
+                return;
+            }
+
             SellMinigameUI.Open(_walker, player);
         }
     }

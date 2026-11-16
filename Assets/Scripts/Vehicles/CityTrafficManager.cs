@@ -89,6 +89,7 @@ public class CityTrafficManager : MonoBehaviour
             }
 
             VehicleColliderUtility.PrepareParkedObject(go);
+            VehicleGroundSnap.SnapTrafficWheelsToGround(child);
         }
     }
 
@@ -132,7 +133,7 @@ public class CityTrafficManager : MonoBehaviour
 
         var route = routeGo.AddComponent<TrafficRoute>();
         route.loop = true;
-        route.speedKmh = 26f;
+        route.speedKmh = 10f;
 
         var points = new Transform[offsets.Length + 1];
         points[0] = CreateWaypoint(routeGo.transform, "Waypoint_00", firstWorld);

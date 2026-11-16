@@ -150,6 +150,41 @@ public static class PlayerAnimatorSetup
                 settings.ApplyToMover(mover, player.transform);
             mover.RebindAnimator();
         }
+    }
 
+    public static bool HasSkateAnimatorConfigured()
+    {
+        var settings = RecomecoGameplaySettings.Instance;
+        return settings != null && settings.skateMovementController != null;
+    }
+
+    public static bool ApplySkateAnimator(GameObject player)
+    {
+        if (player == null)
+            return false;
+
+        var settings = RecomecoGameplaySettings.Instance;
+        if (settings == null || settings.skateMovementController == null)
+            return false;
+
+        var primary = FindPrimaryAnimator(player);
+        if (primary == null)
+            return false;
+
+        primary.runtimeAnimatorController = settings.skateMovementController;
+        primary.applyRootMotion = false;
+        return true;
+    }
+
+    public static void RestoreFootAnimator(GameObject player)
+    {
+        if (player == null)
+            return;
+
+        Apply(player, RecomecoGameplaySettings.Instance);
+
+        var mover = player.GetComponent<Controller.CharacterMover>();
+        if (mover != null)
+            mover.RebindAnimator();
     }
 }

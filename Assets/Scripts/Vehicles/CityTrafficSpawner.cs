@@ -22,7 +22,24 @@ public static class CityTrafficSpawner
 
         ClearActivePool();
         var root = EnsureActiveRoot();
-        var perRoute = Mathf.Clamp(Mathf.CeilToInt(maxTotal / (float)routes.Length), 2, 4);
+
+        var settings = RecomecoGameplaySettings.Instance;
+        var perRouteCap = settings != null ? Mathf.Clamp(settings.trafficMaxCarsPerRoute, 1, 3) : 1;
+
+        var validRoutes = 0;
+        foreach (var route in routes)
+        {
+            if (route == null)
+                continue;
+            route.EnsureReady();
+            if (route.WaypointCount >= 2 && CityTrafficZone.IsPlausibleRoute(route))
+                validRoutes++;
+        }
+
+        if (validRoutes == 0)
+            return 0;
+
+        var perRoute = Mathf.Clamp(Mathf.CeilToInt(maxTotal / (float)validRoutes), 1, perRouteCap);
         var spawned = 0;
 
         foreach (var route in routes)
@@ -40,14 +57,16 @@ public static class CityTrafficSpawner
                 var instance = Object.Instantiate(prefab, root);
                 instance.name = "Traffic_" + route.name + "_" + (i + 1);
 
+                VehicleColliderUtility.PrepareTrafficObject(instance);
+
                 var follower = instance.GetComponent<TrafficRouteFollower>();
                 if (follower == null)
                     follower = instance.AddComponent<TrafficRouteFollower>();
 
-                var startWp = Random.Range(0, route.WaypointCount);
-                var along = (i + 1f) / (perRoute + 1f);
+                var routeFraction = (i + 1f) / (perRoute + 1f);
+                TrafficSpawnPlacement.PlaceOnRoute(route, routeFraction, out var startWp, out var along);
                 follower.BeginRoute(route, startWp, along);
-                VehicleColliderUtility.PrepareTrafficObject(instance);
+                VehicleGroundSnap.SnapTrafficWheelsToGround(instance.transform);
 
                 if (!follower.IsDriving || instance.GetComponent<BoxCollider>() == null)
                 {

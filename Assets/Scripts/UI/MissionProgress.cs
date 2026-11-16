@@ -24,7 +24,15 @@ public static class MissionProgress
 {
     public const string CanItemName = "Latinha";
     public const int CansRequired = 10;
-    public const int ResellGoalCents = 400;
+
+    public static int ResellGoalCents
+    {
+        get
+        {
+            var settings = RecomecoGameplaySettings.Instance;
+            return settings != null && settings.resellGoalCents > 0 ? settings.resellGoalCents : 1500;
+        }
+    }
     public const string LanchoneteDisplayName = "lanchonete";
     const int MissionSchemaVersion = 2;
     const string InventoryKeysHint = "Pressione I ou Tab para abrir o inventário.";
@@ -46,6 +54,7 @@ public static class MissionProgress
 
     public static void BeginNewGame(string startScene)
     {
+        PlayerUnlocks.Reset();
         _started = true;
         _junkyardSoldCount = 0;
         _lastReportedCollectCount = -1;
@@ -317,7 +326,7 @@ public static class MissionProgress
         {
             case MissionId.CollectCans:
                 var collected = Mathf.Clamp(latinhaInInventory, 0, CansRequired);
-                return new MissionDisplay
+                return WithReward(new MissionDisplay
                 {
                     Title = "MISSÃO",
                     Description = "Tenha " + CansRequired + " latinhas no inventário",
@@ -328,11 +337,11 @@ public static class MissionProgress
                     ShowProgress = true,
                     ProgressCurrent = collected,
                     ProgressTarget = CansRequired,
-                };
+                });
 
             case MissionId.SellAtJunkyard:
                 var sold = Mathf.Clamp(_junkyardSoldCount, 0, CansRequired);
-                return new MissionDisplay
+                return WithReward(new MissionDisplay
                 {
                     Title = "MISSÃO",
                     Description = "Venda as latinhas no ferro velho",
@@ -343,64 +352,63 @@ public static class MissionProgress
                     ShowProgress = true,
                     ProgressCurrent = sold,
                     ProgressTarget = CansRequired,
-                };
+                });
 
             case MissionId.GoToCity:
-                return new MissionDisplay
+                return WithReward(new MissionDisplay
                 {
                     Title = "MISSÃO",
                     Description = "Entre na cidade",
                     Hint = "A cidade é onde você tentará se recomeçar.",
                     ProgressText = string.Empty,
                     ShowProgress = false,
-                };
+                });
 
             case MissionId.KnowYourShelter:
-                return new MissionDisplay
+                return WithReward(new MissionDisplay
                 {
                     Title = "MISSÃO",
                     Description = "Encontre a barraca onde você vai dormir",
                     Hint = "Siga a seta até o abrigo. A barra Proteção mostra o quanto você está exposto.",
                     ProgressText = string.Empty,
                     ShowProgress = false,
-                };
+                });
 
             case MissionId.BuyAtShop:
-                return new MissionDisplay
+                return WithReward(new MissionDisplay
                 {
                     Title = "MISSÃO",
                     Description = "Compre um pacote na Lojinha para revender",
-                    Hint = "A Lojinha vende doces e salgados para vender na rua, não comida pronta. " +
-                           "Sem dinheiro? Colete latinhas e venda no ferro velho. " + InventoryKeysHint,
+                    Hint = "Pague na Lojinha. O pacote cai no inventário ao concluir. " + InventoryKeysHint,
                     ProgressText = string.Empty,
                     ShowProgress = false,
-                };
+                });
 
             case MissionId.Resell:
                 var resellEarned = Mathf.Clamp(_resellEarningsCents, 0, ResellGoalCents);
-                return new MissionDisplay
+                return WithReward(new MissionDisplay
                 {
                     Title = "MISSÃO",
                     Description = "Venda na rua o que comprou na Lojinha",
-                    Hint = "Use pontos de venda ou fale com pedestres. Meta: " + MoneyManager.FormatBRL(ResellGoalCents) + " de lucro.",
+                    Hint = "Use pontos de venda ou fale com pedestres. Ao bater a meta você ganha o skate.",
                     ProgressText = MoneyManager.FormatBRL(resellEarned) + " / " + MoneyManager.FormatBRL(ResellGoalCents),
                     ShowProgress = true,
                     ProgressCurrent = resellEarned,
                     ProgressTarget = ResellGoalCents,
-                };
+                });
 
             case MissionId.BuyMealAtFood4U:
-                return new MissionDisplay
+                return WithReward(new MissionDisplay
                 {
                     Title = "MISSÃO",
                     Description = "Compre um lanche na " + LanchoneteDisplayName,
                     Hint = "Com o dinheiro da revenda, compre algo para comer. Lanches recuperam fome.",
                     ProgressText = string.Empty,
                     ShowProgress = false,
-                };
+                });
 
             case MissionId.EatWhenHungry:
-                return new MissionDisplay
+                return WithReward(new MissionDisplay
                 {
                     Title = "MISSÃO",
                     Description = "Coma o lanche que você comprou",
@@ -409,22 +417,21 @@ public static class MissionProgress
                     ShowProgress = true,
                     ProgressCurrent = ResolveHungerPercent(),
                     ProgressTarget = 100,
-                };
+                });
 
             case MissionId.RestAtBarraca:
-                return new MissionDisplay
+                return WithReward(new MissionDisplay
                 {
                     Title = "MISSÃO",
                     Description = "Descanse na barraca à noite",
-                    Hint = "É possível dormir das " + sleepWindow +
-                           ". A barraca não salva o jogo — depois de ter casa, salve dormindo na cama.",
+                    Hint = "Dormir das " + sleepWindow + ". Barraca não salva. Com casa, salve na cama.",
                     ProgressText = string.Empty,
                     ShowProgress = false,
-                };
+                });
 
             case MissionId.CollectCansForHouse:
                 var houseCollect = Mathf.Clamp(latinhaInInventory, 0, CansRequired);
-                return new MissionDisplay
+                return WithReward(new MissionDisplay
                 {
                     Title = "MISSÃO",
                     Description = "Junte " + CansRequired + " latinhas para vender no ferro velho",
@@ -435,11 +442,11 @@ public static class MissionProgress
                     ShowProgress = true,
                     ProgressCurrent = houseCollect,
                     ProgressTarget = CansRequired,
-                };
+                });
 
             case MissionId.SellAtJunkyardForHouse:
                 var houseSold = Mathf.Clamp(_junkyardSoldForHouseCount, 0, CansRequired);
-                return new MissionDisplay
+                return WithReward(new MissionDisplay
                 {
                     Title = "MISSÃO",
                     Description = "Venda " + CansRequired + " latinhas no ferro velho",
@@ -451,10 +458,10 @@ public static class MissionProgress
                     ShowProgress = true,
                     ProgressCurrent = houseSold,
                     ProgressTarget = CansRequired,
-                };
+                });
 
             case MissionId.BuyHouse:
-                return new MissionDisplay
+                return WithReward(new MissionDisplay
                 {
                     Title = "MISSÃO",
                     Description = "Compre a Casa elegante",
@@ -462,21 +469,30 @@ public static class MissionProgress
                            ResolveHousePriceLabel() + ".",
                     ProgressText = FormatMoneyProgress(),
                     ShowProgress = false,
-                };
+                });
 
             case MissionId.RestInSafeBed:
-                return new MissionDisplay
+                return WithReward(new MissionDisplay
                 {
                     Title = "MISSÃO",
                     Description = "Descanse na cama da sua casa à noite",
                     Hint = "De noite, durma na cama para recuperar. De dia, você ainda pode salvar o jogo na cama, sem dormir.",
                     ProgressText = string.Empty,
                     ShowProgress = false,
-                };
+                });
 
             default:
                 return default;
         }
+    }
+
+    static MissionDisplay WithReward(MissionDisplay display)
+    {
+        var reward = MissionRewardPreview.GetForMission(_current);
+        display.ShowReward = reward.Show;
+        display.RewardLabel = reward.Label;
+        display.RewardIcon = reward.Icon;
+        return display;
     }
 
     static string FormatHungerProgress()
@@ -518,6 +534,7 @@ public static class MissionProgress
     static void CompleteCurrent()
     {
         _completionFlashUntil = Time.unscaledTime + 2f;
+        var completed = _current;
 
         switch (_current)
         {
@@ -564,6 +581,7 @@ public static class MissionProgress
                 break;
         }
 
+        MissionRewards.GrantForCompletedMission(completed);
         NotifyChanged();
     }
 
@@ -634,6 +652,24 @@ public static class MissionProgress
         return 15000;
     }
 
+    public static bool PlayerCarriesResellMerchandise()
+    {
+        var inventory = UnityEngine.Object.FindFirstObjectByType<Inventory>();
+        if (inventory == null || inventory.slots == null)
+            return false;
+
+        foreach (var slot in inventory.slots)
+        {
+            if (slot == null || slot.item == null || slot.quantity <= 0)
+                continue;
+
+            if (slot.item.CanStreetSell && slot.quantity > 0)
+                return true;
+        }
+
+        return false;
+    }
+
     static bool PlayerCarriesConsumableMeal()
     {
         var inventory = UnityEngine.Object.FindFirstObjectByType<Inventory>();
@@ -665,4 +701,7 @@ public struct MissionDisplay
     public bool IsComplete;
     public int ProgressCurrent;
     public int ProgressTarget;
+    public bool ShowReward;
+    public string RewardLabel;
+    public Sprite RewardIcon;
 }

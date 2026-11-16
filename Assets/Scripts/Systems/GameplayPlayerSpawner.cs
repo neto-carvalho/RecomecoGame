@@ -38,6 +38,12 @@ public static class GameplayPlayerSpawner
         if (instance.GetComponent<PlayerLocomotionBootstrap>() == null)
             instance.AddComponent<PlayerLocomotionBootstrap>();
 
+        if (instance.GetComponent<PlayerSkateController>() == null)
+            instance.AddComponent<PlayerSkateController>();
+
+        if (instance.GetComponent<PlayerSkateAudio>() == null)
+            instance.AddComponent<PlayerSkateAudio>();
+
         var settings = RecomecoGameplaySettings.Instance;
         if (settings != null)
             settings.ApplyPlayerScaleForScene(instance, SceneManager.GetActiveScene());

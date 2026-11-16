@@ -8,14 +8,30 @@ public class SellItems : MonoBehaviour
     [Tooltip("Nome do item vendido (ex: Latinha). Deve bater com ItemData.itemName.")]
     public string itemName = "Latinha";
 
-    [Tooltip("Valor por unidade vendida, em CENTAVOS (200 = R$ 2,00)")]
-    public int pricePerUnit = 200;
+    [Tooltip("Valor por unidade em CENTAVOS. Se zero, usa RecomecoGameplaySettings.junkyardLatinhaPriceCents.")]
+    public int pricePerUnit;
 
     [Tooltip("Mensagem exibida quando o jogador está perto (ex.: Aperte E para vender)")]
     public string messageNear = "Aperte E para vender";
 
     bool _playerWasInRange;
     float _feedbackTimer;
+
+    void Awake()
+    {
+        ApplyPriceFromSettings();
+    }
+
+    void ApplyPriceFromSettings()
+    {
+        var settings = RecomecoGameplaySettings.Instance;
+        if (settings != null && settings.junkyardLatinhaPriceCents > 0)
+            pricePerUnit = settings.junkyardLatinhaPriceCents;
+        else if (pricePerUnit <= 0)
+            pricePerUnit = 120;
+    }
+
+    int EffectivePricePerUnit => Mathf.Max(1, pricePerUnit);
 
     void Update()
     {
@@ -70,7 +86,7 @@ public class SellItems : MonoBehaviour
 
         InteractionUI.ShowMessage(
             messageNear + " " + count + "x " + itemName + " — " +
-            MoneyManager.FormatBRL(pricePerUnit) + " cada",
+            MoneyManager.FormatBRL(EffectivePricePerUnit) + " cada",
             this);
     }
 
@@ -100,7 +116,7 @@ public class SellItems : MonoBehaviour
         }
 
         var removed = inventory.RemoveItem(itemName, count);
-        var total = removed * pricePerUnit;
+        var total = removed * EffectivePricePerUnit;
         MoneyManager.instance.AddMoney(total);
         MissionProgress.NotifyJunkyardSale(removed);
 

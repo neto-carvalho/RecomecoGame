@@ -89,6 +89,7 @@ public static class SaveGameManager
             dayNight = ExportDayNightSnapshot(),
             lastScene = sceneName,
             lastSpawnId = spawnId,
+            hasSkate = PlayerUnlocks.HasSkate,
         };
 
         return data;
@@ -122,6 +123,7 @@ public static class SaveGameManager
 
         GameSession.ImportSnapshot(data.money, data.inventory);
         PlayerHousingState.ImportOwned(data.ownedHouses);
+        PlayerUnlocks.Import(data.hasSkate);
         MissionProgress.ImportSnapshot(data.mission);
         HomeStorage.ImportAll(data.storages);
         ApplyNeedsSnapshot(data.needs);

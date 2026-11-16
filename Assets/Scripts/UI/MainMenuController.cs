@@ -42,8 +42,17 @@ public class MainMenuController : MonoBehaviour
         CacheButtonImages();
         WireCloseButtons();
         ApplyCreditsText();
+        EnsureOptionsControls();
         ShowMainButtons();
         HighlightButton(0);
+    }
+
+    void EnsureOptionsControls()
+    {
+        if (optionsPanel == null)
+            optionsPanel = transform.Find("Panel_Opcoes")?.gameObject;
+
+        LookSensitivityOptionsUI.EnsureOnMainMenuOptions(optionsPanel);
     }
 
     void EnsureCanvasScaler()

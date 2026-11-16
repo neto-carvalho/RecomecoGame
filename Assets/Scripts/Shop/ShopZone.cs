@@ -279,7 +279,17 @@ public class ShopZone : MonoBehaviour, IInteractionPromptOwner
         }
 
         for (var i = 0; i < product.unitsPerPack; i++)
-            inventory.AddItem(product.item);
+        {
+            if (inventory.AddItem(product.item))
+                continue;
+
+            MoneyManager.instance.AddMoney(product.packPriceCents);
+            inventory.RefreshAllSlots();
+            message = "Inventário cheio — compra cancelada, dinheiro devolvido.";
+            return false;
+        }
+
+        inventory.RefreshAllSlots();
 
         if (shopKind == ShopKind.Resell)
             MissionProgress.NotifyShopPurchase();
@@ -287,7 +297,7 @@ public class ShopZone : MonoBehaviour, IInteractionPromptOwner
             MissionProgress.NotifyFoodShopPurchase();
 
         message = "Comprou " + product.DisplayName + " (" + product.unitsPerPack + " un) por " +
-                  MoneyManager.FormatBRL(product.packPriceCents) + ".";
+                  MoneyManager.FormatBRL(product.packPriceCents) + ". Abra o inventário (I ou Tab).";
         return true;
     }
 

@@ -12,9 +12,9 @@ namespace Controller
         protected Transform m_Player;
 
         [SerializeField, Range(0f, 1f)]
-        private float m_SensitivityX = 0.1f;
+        private float m_SensitivityX = 0.08f;
         [SerializeField, Range(0f, 1f)]
-        private float m_SensitivityY = 0.1f;
+        private float m_SensitivityY = 0.08f;
 
         [SerializeField, Range(0f, 1f)]
         private float m_Zoom = 0.5f;
@@ -42,6 +42,9 @@ namespace Controller
         protected float m_FaintDistanceMultiplier = 1f;
 
         public float FaintDistanceMultiplier => m_FaintDistanceMultiplier;
+
+        /// <summary>Yaw da câmera em graus (terceira pessoa).</summary>
+        public float HorizontalYaw => m_Angles.y;
 
         public void SetFaintDistanceMultiplier(float multiplier)
         {
@@ -141,7 +144,8 @@ namespace Controller
 
         public virtual void SetInput(in Vector2 delta, float scroll)
         {
-            m_Angles += new Vector2(delta.y * m_SensitivityY, delta.x * m_SensitivityX) * 360f;
+            var lookMul = RecomecoLookSensitivitySettings.Multiplier;
+            m_Angles += new Vector2(delta.y * m_SensitivityY, delta.x * m_SensitivityX) * 360f * lookMul;
             m_Angles.x = Mathf.Clamp(m_Angles.x, m_MinAngle, m_MaxAngle);
 
             m_Zoom += scroll * m_SensetivityZoom;

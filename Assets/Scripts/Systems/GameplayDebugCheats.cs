@@ -43,6 +43,7 @@ public static class GameplayDebugCheats
         if (Input.GetKeyDown(KeyCode.F11))
             GrantCasaElegante();
 
+
         if (Input.GetKeyDown(KeyCode.F5))
             AdjustNeeds(-35f, 0f, 0f, "Fome -35%");
 
@@ -68,7 +69,12 @@ public static class GameplayDebugCheats
             ToggleIllness();
 
         if (Input.GetKeyDown(KeyCode.F12))
-            ShowHelp();
+        {
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                ShowHelp();
+            else
+                GrantSkate();
+        }
     }
 
     public static void TickMessage()
@@ -109,6 +115,24 @@ public static class GameplayDebugCheats
     {
         PlayerHousingState.Grant(PlayerHousingState.CasaElegante);
         ShowMessage("Casa elegante liberada para teste.");
+    }
+
+    static void GrantSkate()
+    {
+        if (!PlayerSkateItems.TryGrantToPlayer(out var msg))
+        {
+            ShowMessage(string.IsNullOrEmpty(msg) ? "Não foi possível dar o skate." : msg);
+            return;
+        }
+
+        PlayerUnlocks.NotifyChanged();
+        var inv = PlayerSkateItems.ResolveInventory();
+        inv?.RefreshAllSlots();
+
+        if (!PlayerSkateController.IsSkateLocomotionReady())
+            msg += " (falta animator no settings.)";
+
+        ShowMessage(msg);
     }
 
     static PlayerNeeds ResolveNeeds()
@@ -240,7 +264,8 @@ public static class GameplayDebugCheats
         ShowMessage(
             "Debug: F1 dia/noite | F2 desmaio | F3 max needs | F4 doente/curar\n" +
             "F5 fome-35 | F6 vida-35 | F7 rep-12 | F8 fome 0\n" +
-            "F9 +R$500 | F10 max $ | F11 casa | F12 ajuda",
+            "F9 +R$500 | F10 max $ | F11 casa\n" +
+            "F12 skate (teste) | Shift+F12 ajuda",
             7f);
     }
 

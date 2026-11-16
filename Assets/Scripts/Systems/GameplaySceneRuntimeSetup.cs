@@ -162,10 +162,16 @@ public static class GameplaySceneRuntimeSetup
                 settings.ApplyToMover(mover, player.transform);
         }
 
-        EnsureFootstepAudio(player, settings);
-
         if (player.GetComponent<PlayerNeeds>() == null)
             player.AddComponent<PlayerNeeds>();
+
+        if (player.GetComponent<PlayerSkateController>() == null)
+            player.AddComponent<PlayerSkateController>();
+
+        if (player.GetComponent<PlayerSkateAudio>() == null)
+            player.AddComponent<PlayerSkateAudio>();
+
+        EnsureFootstepAudio(player, settings);
     }
 
     static void EnsureFootstepAudio(GameObject player, RecomecoGameplaySettings settings)

@@ -76,6 +76,66 @@ public static class VehicleGroundSnap
         t.position = pos;
     }
 
+    /// <summary>
+    /// Coloca o ponto mais baixo do mesh (rodas) sobre o asfalto — corrige pivot no centro do prefab.
+    /// </summary>
+    public static void SnapTrafficWheelsToGround(Transform root)
+    {
+        if (root == null)
+            return;
+
+        var renderers = root.GetComponentsInChildren<Renderer>(false);
+        if (renderers == null || renderers.Length == 0)
+        {
+            SnapTransform(root);
+            return;
+        }
+
+        var bounds = renderers[0].bounds;
+        for (var i = 1; i < renderers.Length; i++)
+            bounds.Encapsulate(renderers[i].bounds);
+
+        var pivotToBottom = root.position.y - bounds.min.y;
+        var groundY = SnapLowestRoadY(root.position.x, root.position.z, bounds.min.y);
+        root.position = new Vector3(root.position.x, groundY + pivotToBottom + 0.02f, root.position.z);
+    }
+
+    public static float SnapLowestRoadY(float x, float z, float hintY)
+    {
+        var origin = new Vector3(x, RayStartHeight, z);
+        var hits = Physics.RaycastAll(origin, Vector3.down, RayStartHeight + 40f, GroundMask, QueryTriggerInteraction.Ignore);
+        if (hits == null || hits.Length == 0)
+            return SnapYNearReference(x, z, hintY);
+
+        var bestY = float.PositiveInfinity;
+        foreach (var hit in hits)
+        {
+            if (hit.collider == null || hit.normal.y < 0.55f)
+                continue;
+
+            if (IsVehicleCollider(hit.collider))
+                continue;
+
+            if (IsTreeOrFoliageCollider(hit.collider))
+                continue;
+
+            var y = hit.point.y;
+            if (y > MaxRoadHeight)
+                continue;
+
+            if (y > hintY + 4f)
+                continue;
+
+            if (y < bestY)
+                bestY = y;
+        }
+
+        if (float.IsPositiveInfinity(bestY))
+            return SnapYNearReference(x, z, hintY);
+
+        return bestY + 0.06f;
+    }
+
     static bool IsTreeOrFoliageCollider(Collider collider)
     {
         var t = collider.transform;

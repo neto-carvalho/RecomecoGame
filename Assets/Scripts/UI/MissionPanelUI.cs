@@ -13,10 +13,15 @@ public class MissionPanelUI : MonoBehaviour
     TextMeshProUGUI _hintText;
     TextMeshProUGUI _progressText;
     TextMeshProUGUI _flashText;
+    TextMeshProUGUI _rewardText;
+    Image _rewardIcon;
     Image _progressFill;
+
+    static readonly Color RewardGold = new(0.95f, 0.85f, 0.35f, 1f);
 
     void OnEnable()
     {
+        EnsureRewardRow();
         MissionProgress.Changed += Refresh;
         Refresh();
     }
@@ -41,7 +46,9 @@ public class MissionPanelUI : MonoBehaviour
         TextMeshProUGUI hintText,
         TextMeshProUGUI progressText,
         TextMeshProUGUI flashText,
-        Image progressFill)
+        Image progressFill,
+        TextMeshProUGUI rewardText = null,
+        Image rewardIcon = null)
     {
         _titleText = titleText;
         _descriptionText = descriptionText;
@@ -49,7 +56,76 @@ public class MissionPanelUI : MonoBehaviour
         _progressText = progressText;
         _flashText = flashText;
         _progressFill = progressFill;
+        _rewardText = rewardText;
+        _rewardIcon = rewardIcon;
         Refresh();
+    }
+
+    void EnsureRewardRow()
+    {
+        if (_rewardText != null)
+            return;
+
+        var existing = transform.Find("RewardRow");
+        if (existing != null)
+        {
+            _rewardText = existing.Find("RewardLabel")?.GetComponent<TextMeshProUGUI>();
+            _rewardIcon = existing.Find("RewardIcon")?.GetComponent<Image>();
+            return;
+        }
+
+        var panelRect = transform as RectTransform;
+        if (panelRect != null && panelRect.sizeDelta.y < 196f)
+            panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, 206f);
+
+        var rewardGo = new GameObject("RewardRow");
+        rewardGo.transform.SetParent(transform, false);
+        var rewardRect = rewardGo.AddComponent<RectTransform>();
+        rewardRect.anchorMin = new Vector2(0f, 1f);
+        rewardRect.anchorMax = new Vector2(1f, 1f);
+        rewardRect.pivot = new Vector2(0.5f, 1f);
+        rewardRect.anchoredPosition = new Vector2(0f, -86f);
+        rewardRect.sizeDelta = new Vector2(-24f, 30f);
+        rewardGo.SetActive(false);
+
+        var iconGo = new GameObject("RewardIcon");
+        iconGo.transform.SetParent(rewardGo.transform, false);
+        var iconRect = iconGo.AddComponent<RectTransform>();
+        iconRect.anchorMin = new Vector2(0f, 0.5f);
+        iconRect.anchorMax = new Vector2(0f, 0.5f);
+        iconRect.pivot = new Vector2(0f, 0.5f);
+        iconRect.anchoredPosition = new Vector2(0f, 0f);
+        iconRect.sizeDelta = new Vector2(28f, 28f);
+        var icon = iconGo.AddComponent<Image>();
+        icon.preserveAspect = true;
+        icon.raycastTarget = false;
+
+        var labelGo = new GameObject("RewardLabel");
+        labelGo.transform.SetParent(rewardGo.transform, false);
+        var labelRect = labelGo.AddComponent<RectTransform>();
+        labelRect.anchorMin = new Vector2(0f, 0f);
+        labelRect.anchorMax = new Vector2(1f, 1f);
+        labelRect.offsetMin = new Vector2(34f, 0f);
+        labelRect.offsetMax = Vector2.zero;
+        var label = labelGo.AddComponent<TextMeshProUGUI>();
+        if (TMP_Settings.defaultFontAsset != null)
+            label.font = TMP_Settings.defaultFontAsset;
+        label.fontSize = 14f;
+        label.fontStyle = FontStyles.Bold;
+        label.color = RewardGold;
+        label.alignment = TextAlignmentOptions.MidlineLeft;
+        label.textWrappingMode = TextWrappingModes.NoWrap;
+        label.overflowMode = TextOverflowModes.Overflow;
+        label.raycastTarget = false;
+
+        _rewardText = label;
+        _rewardIcon = icon;
+
+        if (_hintText != null)
+        {
+            var hintRect = _hintText.rectTransform;
+            hintRect.offsetMax = new Vector2(hintRect.offsetMax.x, -118f);
+        }
     }
 
     public void Refresh()
@@ -67,6 +143,27 @@ public class MissionPanelUI : MonoBehaviour
             _descriptionText.gameObject.SetActive(!showCompleteFlash);
             _descriptionText.text = display.Description;
             _descriptionText.color = display.IsComplete ? CompleteColor : Color.white;
+        }
+
+        if (_rewardText != null)
+        {
+            var showReward = !showCompleteFlash && !display.IsComplete && display.ShowReward;
+            var rewardRoot = _rewardText.transform.parent;
+            if (rewardRoot != null)
+                rewardRoot.gameObject.SetActive(showReward);
+
+            if (showReward)
+                _rewardText.text = display.RewardLabel;
+
+            if (_rewardIcon != null)
+            {
+                _rewardIcon.gameObject.SetActive(showReward && display.RewardIcon != null);
+                if (showReward && display.RewardIcon != null)
+                {
+                    _rewardIcon.sprite = display.RewardIcon;
+                    _rewardIcon.enabled = true;
+                }
+            }
         }
 
         if (_hintText != null)

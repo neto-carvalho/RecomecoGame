@@ -35,7 +35,7 @@ public static class CityTrafficRouteGenerator
 
     public static List<Vector3> BuildCenterline(Transform road, Bounds worldBounds)
     {
-        if (!TryGetFarthestEndsXZ(worldBounds, out var start, out var end))
+        if (!RoadCenterSnap.TryGetCenterlineEnds(road, out var start, out var end))
             return null;
 
         var length = HorizontalDistance(start, end);
@@ -48,42 +48,11 @@ public static class CityTrafficRouteGenerator
         {
             var t = i / (float)(steps - 1);
             var p = Vector3.Lerp(start, end, t);
-            p.y = VehicleGroundSnap.SnapYNearReference(p.x, p.z, p.y);
+            p.y = VehicleGroundSnap.SnapLowestRoadY(p.x, p.z, p.y);
             points.Add(p);
         }
 
         return points;
-    }
-
-    static bool TryGetFarthestEndsXZ(Bounds bounds, out Vector3 start, out Vector3 end)
-    {
-        start = default;
-        end = default;
-        var c = bounds.center;
-        var e = bounds.extents;
-        var bestDist = 0f;
-
-        var corners = new Vector3[4];
-        corners[0] = new Vector3(c.x - e.x, c.y, c.z - e.z);
-        corners[1] = new Vector3(c.x + e.x, c.y, c.z - e.z);
-        corners[2] = new Vector3(c.x - e.x, c.y, c.z + e.z);
-        corners[3] = new Vector3(c.x + e.x, c.y, c.z + e.z);
-
-        for (var i = 0; i < corners.Length; i++)
-        {
-            for (var j = i + 1; j < corners.Length; j++)
-            {
-                var d = HorizontalDistance(corners[i], corners[j]);
-                if (d > bestDist)
-                {
-                    bestDist = d;
-                    start = corners[i];
-                    end = corners[j];
-                }
-            }
-        }
-
-        return bestDist >= MinRoadLength;
     }
 
     static float HorizontalDistance(Vector3 a, Vector3 b)
@@ -230,7 +199,7 @@ public static class CityTrafficRouteGenerator
         var route = routeGo.AddComponent<TrafficRoute>();
         route.loop = loop;
         route.pingPong = pingPong;
-        route.speedKmh = 26f;
+        route.speedKmh = 10f;
 
         var waypoints = new Transform[points.Count];
         for (var i = 0; i < points.Count; i++)

@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class GameplayPauseMenu : MonoBehaviour
 {
+    const int PauseUiLayoutVersion = 3;
+
     public static GameplayPauseMenu Instance { get; private set; }
     public static bool IsPaused => Instance != null && Instance._isOpen;
 
@@ -209,7 +211,14 @@ public class GameplayPauseMenu : MonoBehaviour
     void BuildUiIfNeeded()
     {
         if (_panelRoot != null)
-            return;
+        {
+            var ver = _panelRoot.GetComponent<PauseMenuUiVersion>();
+            if (ver != null && ver.version >= PauseUiLayoutVersion)
+                return;
+
+            Destroy(_panelRoot);
+            _panelRoot = null;
+        }
 
         var canvasGo = new GameObject("Canvas_PauseMenu");
         canvasGo.transform.SetParent(transform, false);
@@ -237,24 +246,112 @@ public class GameplayPauseMenu : MonoBehaviour
         var panel = new GameObject("Panel");
         panel.transform.SetParent(overlay.transform, false);
         var panelRect = panel.AddComponent<RectTransform>();
-        panelRect.sizeDelta = new Vector2(420f, 368f);
+        panelRect.anchorMin = new Vector2(0.5f, 0.5f);
+        panelRect.anchorMax = new Vector2(0.5f, 0.5f);
+        panelRect.pivot = new Vector2(0.5f, 0.5f);
+        panelRect.anchoredPosition = Vector2.zero;
+        panelRect.sizeDelta = new Vector2(420f, 0f);
+
         var panelBg = panel.AddComponent<Image>();
         panelBg.color = new Color(0.09f, 0.09f, 0.12f, 0.96f);
 
-        CreateText(panelRect, "PAUSADO", 32f, new Vector2(0f, 96f), new Vector2(380f, 44f),
-            TextAlignmentOptions.Center, Color.white, FontStyles.Bold);
-        CreateText(panelRect, "ESC — continuar", 16f, new Vector2(0f, 58f), new Vector2(380f, 28f),
-            TextAlignmentOptions.Center, new Color(0.75f, 0.75f, 0.8f));
+        var layout = panel.AddComponent<VerticalLayoutGroup>();
+        layout.padding = new RectOffset(28, 28, 32, 32);
+        layout.spacing = 16f;
+        layout.childAlignment = TextAnchor.UpperCenter;
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = true;
+        layout.childForceExpandHeight = false;
 
-        CreateButton(panelRect, "CONTINUAR", new Vector2(0f, 24f), new Vector2(300f, 52f),
-            new Color(0.15f, 0.4f, 0.2f, 1f), Resume);
-        CreateButton(panelRect, "SALVAR JOGO", new Vector2(0f, -44f), new Vector2(300f, 52f),
-            new Color(0.18f, 0.28f, 0.45f, 1f), OnSaveGameClicked);
-        CreateButton(panelRect, "MENU INICIAL", new Vector2(0f, -112f), new Vector2(300f, 52f),
-            new Color(0.45f, 0.15f, 0.15f, 1f), OnReturnToMenuClicked);
+        var fitter = panel.AddComponent<ContentSizeFitter>();
+        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        AddPauseLabel(panel.transform, "PAUSADO", 34, 48, Color.white, FontStyles.Bold);
+        AddPauseLabel(panel.transform, "ESC — continuar", 16, 28, new Color(0.75f, 0.75f, 0.8f));
+
+        AddPauseSpacer(panel.transform, 6f);
+        LookSensitivityOptionsUI.AddPauseSensitivityRow(panel.transform);
+        AddPauseSpacer(panel.transform, 10f);
+
+        CreatePauseButton(panel.transform, "CONTINUAR", new Color(0.15f, 0.4f, 0.2f, 1f), Resume);
+        CreatePauseButton(panel.transform, "SALVAR JOGO", new Color(0.18f, 0.28f, 0.45f, 1f), OnSaveGameClicked);
+        CreatePauseButton(panel.transform, "MENU INICIAL", new Color(0.45f, 0.15f, 0.15f, 1f), OnReturnToMenuClicked);
 
         _panelRoot = canvasGo;
+        var uiVer = canvasGo.AddComponent<PauseMenuUiVersion>();
+        uiVer.version = PauseUiLayoutVersion;
         _panelRoot.SetActive(false);
+    }
+
+    static void AddPauseSpacer(Transform parent, float height)
+    {
+        var go = new GameObject("Spacer", typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+        var le = go.AddComponent<LayoutElement>();
+        le.minHeight = height;
+        le.preferredHeight = height;
+    }
+
+    static void AddPauseLabel(
+        Transform parent, string text, float fontSize, float height, Color color,
+        FontStyles style = FontStyles.Normal)
+    {
+        var go = new GameObject("Text_" + text, typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+        var le = go.AddComponent<LayoutElement>();
+        le.minHeight = height;
+        le.preferredHeight = height;
+
+        var tmp = go.AddComponent<TextMeshProUGUI>();
+        if (TMP_Settings.defaultFontAsset != null)
+            tmp.font = TMP_Settings.defaultFontAsset;
+        tmp.text = text;
+        tmp.fontSize = fontSize;
+        tmp.color = color;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.fontStyle = style;
+        tmp.raycastTarget = false;
+    }
+
+    static void CreatePauseButton(
+        Transform parent, string label, Color color, UnityEngine.Events.UnityAction onClick)
+    {
+        var go = new GameObject("Button_" + label, typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+
+        var le = go.AddComponent<LayoutElement>();
+        le.minHeight = 52f;
+        le.preferredHeight = 52f;
+
+        var img = go.AddComponent<Image>();
+        img.color = color;
+        var button = go.AddComponent<Button>();
+        button.targetGraphic = img;
+        button.onClick.AddListener(onClick);
+
+        var textGo = new GameObject("Label", typeof(RectTransform));
+        textGo.transform.SetParent(go.transform, false);
+        StretchFull(textGo.GetComponent<RectTransform>());
+
+        var tmp = textGo.AddComponent<TextMeshProUGUI>();
+        if (TMP_Settings.defaultFontAsset != null)
+            tmp.font = TMP_Settings.defaultFontAsset;
+        tmp.text = label;
+        tmp.fontSize = 22f;
+        tmp.color = Color.white;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.raycastTarget = false;
+    }
+
+    static void StretchFull(RectTransform rect)
+    {
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
     }
 
     static TextMeshProUGUI CreateText(

@@ -153,6 +153,27 @@ public class Inventory : MonoBehaviour
         return false;
     }
 
+    /// <returns>Quantas unidades foram adicionadas (recompensas de missão, loja, etc.).</returns>
+    public int AddItems(ItemData item, int amount)
+    {
+        if (item == null || amount <= 0)
+            return 0;
+
+        EnsureSlotUiBinding();
+        var added = 0;
+        for (var i = 0; i < amount; i++)
+        {
+            if (!AddItem(item))
+                break;
+            added++;
+        }
+
+        if (added > 0)
+            RefreshAllSlots();
+
+        return added;
+    }
+
     int GetSlotCount()
     {
         if (slots == null) return 0;

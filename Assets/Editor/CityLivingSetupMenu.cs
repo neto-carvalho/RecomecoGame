@@ -8,6 +8,32 @@ public static class CityLivingSetupMenu
 {
     const string MenuRoot = "Recomeco/Cidade/";
 
+    [MenuItem(MenuRoot + "Colar veículos no asfalto (Vehicles)")]
+    static void SnapVehiclesToAsphalt()
+    {
+        var scene = SceneManager.GetActiveScene();
+        if (!scene.IsValid() || scene.name != RecomecoSceneNames.Cidade)
+        {
+            EditorUtility.DisplayDialog("Veículos", "Abra a cena Cidade.", "OK");
+            return;
+        }
+
+        var count = 0;
+        var vehicles = GameObject.Find("Vehicles");
+        if (vehicles != null)
+        {
+            foreach (Transform child in vehicles.transform)
+            {
+                VehicleGroundSnap.SnapTrafficWheelsToGround(child);
+                count++;
+            }
+        }
+
+        TrafficRoute.RealignAllRoutesInScene();
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorUtility.DisplayDialog("Veículos", count + " objeto(s) em «Vehicles» alinhados.\nSalve a cena (Ctrl+S).", "OK");
+    }
+
     [MenuItem(MenuRoot + "Configurar cidade viva (tráfego + rotas + NPCs)")]
     static void SetupLivingCity()
     {
@@ -25,7 +51,7 @@ public static class CityLivingSetupMenu
             var snapped = 0;
             foreach (Transform child in vehicles.transform)
             {
-                VehicleGroundSnap.SnapTransform(child);
+                VehicleGroundSnap.SnapTrafficWheelsToGround(child);
                 snapped++;
             }
 
@@ -43,9 +69,11 @@ public static class CityLivingSetupMenu
             "Configuração aplicada:\n" +
             "• Veículos alinhados ao chão (collider + tráfego no Play)\n" +
             "• Rotas de tráfego (TrafficRoutes)\n" +
-            "• Marcadores de NPC na calçada\n\n" +
+            "• Marcadores de NPC na calçada (12)\n" +
+            "• Depois: Recomeco → Cidade → Assar NavMesh para pedestres\n\n" +
             "Salve a cena (Ctrl+S) e dê Play.\n\n" +
             "Tráfego em movimento: pasta ActiveCityTraffic (spawn automático nas rotas).\n" +
+            "Pedestres: NavMesh (Gameplay Settings → Pedestres).\n" +
             "Ajustes: Recomeco → Abrir Gameplay Settings",
             "OK");
     }
@@ -111,13 +139,16 @@ public static class CityLivingSetupMenu
             "OK");
     }
 
+    [MenuItem(MenuRoot + "Realinhar rotas ao asfalto (altura Y)")]
     [MenuItem(MenuRoot + "Alinhar rotas e veículos ao chão")]
     static void RealignRoutesAndVehicles()
     {
+        RoadCenterSnap.InvalidateCache();
         TrafficRoute.RealignAllRoutesInScene();
         FixVehiclesRootInScene();
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-        EditorUtility.DisplayDialog("Cidade", "Rotas e veículos realinhados ao chão.\nSalve a cena (Ctrl+S).", "OK");
+        EditorUtility.DisplayDialog("Cidade",
+            "Rotas centralizadas no meio das ruas + altura Y.\nSalve a cena (Ctrl+S).", "OK");
     }
 
     [MenuItem(MenuRoot + "Desativar carros decorativos em cima das rotas")]
@@ -271,7 +302,7 @@ public static class CityLivingSetupMenu
         }
 
         foreach (Transform child in vehicles.transform)
-            VehicleGroundSnap.SnapTransform(child);
+            VehicleGroundSnap.SnapTrafficWheelsToGround(child);
     }
 
     [MenuItem("Recomeco/Abrir Gameplay Settings")]

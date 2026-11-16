@@ -1,7 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.SceneManagement;
 
 public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
@@ -100,7 +100,10 @@ public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
         SceneManager.MoveGameObjectToScene(npcRoot, scene);
 
         var spawnPoints = FindSpawnPointsInScene(scene);
-        Array.Sort(spawnPoints, (a, b) => string.CompareOrdinal(a.gameObject.name, b.gameObject.name));
+        System.Array.Sort(spawnPoints, (a, b) => string.CompareOrdinal(a.gameObject.name, b.gameObject.name));
+
+        var settings = RecomecoGameplaySettings.Instance;
+        var useNav = settings != null && settings.cityPedestriansUseNavMesh;
 
         if (spawnPoints.Length > 0)
         {
@@ -116,7 +119,10 @@ public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
                 var instance = Instantiate(prefab, spawnPos, rot, npcRoot.transform);
                 instance.name = $"SidewalkNpc_{i + 1}";
 
-                ConfigureNpcInstance(instance, i, dir, sp.PatrolHalfLength, sp.WalkSpeed);
+                if (useNav && CityPedestrianNavUtil.IsNavMeshReadyNear(spawnPos))
+                    ConfigureNavNpcInstance(instance, i, settings);
+                else
+                    ConfigureNpcInstance(instance, i, dir, sp.PatrolHalfLength, sp.WalkSpeed);
             }
         }
         else
@@ -138,14 +144,75 @@ public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
             }
         }
 
+        if (useNav && settings != null && settings.cityPedestrianExtraCount > 0)
+            SpawnExtraNavPedestrians(prefab, npcRoot.transform, settings, spawnPoints.Length);
+
+        if (useNav && !CityPedestrianNavUtil.IsNavMeshReadyNear(CityPedestrianNavUtil.ResolveCityCenter()))
+        {
+            Debug.LogWarning(
+                "[NPC] NavMesh não encontrado na Cidade. Pedestres usam patrulha em linha ou ficam limitados. " +
+                "No Unity: Recomeco → Cidade → Assar NavMesh para pedestres (marque chão/calçadas como Navigation Static).");
+        }
+
         _spawnedForSceneHandle = scene.handle;
         Destroy(gameObject);
+    }
+
+    static void SpawnExtraNavPedestrians(
+        GameObject prefab, Transform parent, RecomecoGameplaySettings settings, int nameOffset)
+    {
+        var center = CityPedestrianNavUtil.ResolveCityCenter();
+        var radius = Mathf.Max(12f, settings.cityPedestrianWanderRadius);
+        var count = settings.cityPedestrianExtraCount;
+
+        for (var i = 0; i < count; i++)
+        {
+            if (!CityPedestrianNavUtil.TryGetRandomPoint(center, radius, out var point))
+                continue;
+
+            var instance = Instantiate(
+                prefab, point, Quaternion.Euler(0f, UnityEngine.Random.Range(0f, 360f), 0f), parent);
+            instance.name = $"SidewalkNpc_nav_{nameOffset + i + 1}";
+            ConfigureNavNpcInstance(instance, nameOffset + i, settings);
+        }
+    }
+
+    static void ConfigureNavNpcInstance(GameObject instance, int index, RecomecoGameplaySettings settings)
+    {
+        var worldScale = GetNpcWorldScale();
+        instance.transform.localScale = Vector3.one * worldScale;
+
+        var agent = instance.GetComponent<NavMeshAgent>();
+        if (agent == null)
+            agent = instance.AddComponent<NavMeshAgent>();
+
+        var navWalker = instance.GetComponent<CityPedestrianNavWalker>();
+        if (navWalker == null)
+            navWalker = instance.AddComponent<CityPedestrianNavWalker>();
+
+        var wander = settings != null ? settings.cityPedestrianWanderRadius : 60f;
+        var speed = settings != null ? settings.cityPedestrianWalkSpeed : 1.1f;
+        navWalker.Configure(wander * worldScale, speed * Mathf.Sqrt(worldScale));
+
+        var walker = instance.GetComponent<SidewalkNpcWalker>();
+        if (walker != null)
+        {
+            walker.ConfigurePatrol(Vector3.forward, 1f, speed, index);
+            walker.EnableNavMeshMode(true);
+        }
+
+        var cc = instance.GetComponent<CharacterController>();
+        if (cc != null)
+            cc.enabled = false;
+
+        if (instance.GetComponent<NpcSellInteraction>() == null)
+            instance.AddComponent<NpcSellInteraction>();
     }
 
     static SidewalkNpcSpawnPoint[] FindSpawnPointsInScene(Scene scene)
     {
         if (!scene.IsValid() || !scene.isLoaded)
-            return Array.Empty<SidewalkNpcSpawnPoint>();
+            return System.Array.Empty<SidewalkNpcSpawnPoint>();
 
         var list = new List<SidewalkNpcSpawnPoint>();
         foreach (var root in scene.GetRootGameObjects())
@@ -157,7 +224,7 @@ public sealed class CartoonLowPolyCityLiteNpcBootstrap : MonoBehaviour
             }
         }
 
-        return list.Count > 0 ? list.ToArray() : Array.Empty<SidewalkNpcSpawnPoint>();
+        return list.Count > 0 ? list.ToArray() : System.Array.Empty<SidewalkNpcSpawnPoint>();
     }
 
     static void ClearRuntimeNpcsInScene(Scene scene)

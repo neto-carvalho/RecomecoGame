@@ -193,7 +193,7 @@ public static class GameplayHudBootstrap
         panelRect.anchorMax = new Vector2(1f, 1f);
         panelRect.pivot = new Vector2(1f, 1f);
         panelRect.anchoredPosition = new Vector2(-24f, -20f);
-        panelRect.sizeDelta = new Vector2(440f, 172f);
+        panelRect.sizeDelta = new Vector2(440f, 206f);
 
         var panelBg = panelGo.AddComponent<Image>();
         panelBg.color = new Color(0.08f, 0.08f, 0.1f, 0.88f);
@@ -259,7 +259,7 @@ public static class GameplayHudBootstrap
         hintRect.anchorMin = new Vector2(0f, 0f);
         hintRect.anchorMax = new Vector2(1f, 1f);
         hintRect.offsetMin = new Vector2(12f, 44f);
-        hintRect.offsetMax = new Vector2(-12f, -88f);
+        hintRect.offsetMax = new Vector2(-12f, -118f);
         var hintText = hintGo.AddComponent<TextMeshProUGUI>();
         if (TMP_Settings.defaultFontAsset != null)
             hintText.font = TMP_Settings.defaultFontAsset;
@@ -322,8 +322,48 @@ public static class GameplayHudBootstrap
         barFill.color = new Color(0.95f, 0.78f, 0.15f, 1f);
         barFill.raycastTarget = false;
 
+        var rewardGo = new GameObject("RewardRow");
+        rewardGo.transform.SetParent(panelGo.transform, false);
+        var rewardRect = rewardGo.AddComponent<RectTransform>();
+        rewardRect.anchorMin = new Vector2(0f, 1f);
+        rewardRect.anchorMax = new Vector2(1f, 1f);
+        rewardRect.pivot = new Vector2(0.5f, 1f);
+        rewardRect.anchoredPosition = new Vector2(0f, -86f);
+        rewardRect.sizeDelta = new Vector2(-24f, 30f);
+        rewardGo.SetActive(false);
+
+        var rewardIconGo = new GameObject("RewardIcon");
+        rewardIconGo.transform.SetParent(rewardGo.transform, false);
+        var rewardIconRect = rewardIconGo.AddComponent<RectTransform>();
+        rewardIconRect.anchorMin = new Vector2(0f, 0.5f);
+        rewardIconRect.anchorMax = new Vector2(0f, 0.5f);
+        rewardIconRect.pivot = new Vector2(0f, 0.5f);
+        rewardIconRect.anchoredPosition = Vector2.zero;
+        rewardIconRect.sizeDelta = new Vector2(28f, 28f);
+        var rewardIcon = rewardIconGo.AddComponent<Image>();
+        rewardIcon.preserveAspect = true;
+        rewardIcon.raycastTarget = false;
+
+        var rewardLabelGo = new GameObject("RewardLabel");
+        rewardLabelGo.transform.SetParent(rewardGo.transform, false);
+        var rewardLabelRect = rewardLabelGo.AddComponent<RectTransform>();
+        rewardLabelRect.anchorMin = new Vector2(0f, 0f);
+        rewardLabelRect.anchorMax = new Vector2(1f, 1f);
+        rewardLabelRect.offsetMin = new Vector2(34f, 0f);
+        rewardLabelRect.offsetMax = Vector2.zero;
+        var rewardText = rewardLabelGo.AddComponent<TextMeshProUGUI>();
+        if (TMP_Settings.defaultFontAsset != null)
+            rewardText.font = TMP_Settings.defaultFontAsset;
+        rewardText.fontSize = 14f;
+        rewardText.fontStyle = FontStyles.Bold;
+        rewardText.color = new Color(0.95f, 0.85f, 0.35f, 1f);
+        rewardText.alignment = TextAlignmentOptions.MidlineLeft;
+        rewardText.textWrappingMode = TextWrappingModes.NoWrap;
+        rewardText.overflowMode = TextOverflowModes.Overflow;
+        rewardText.raycastTarget = false;
+
         var missionUi = panelGo.AddComponent<MissionPanelUI>();
-        missionUi.Wire(titleText, descriptionText, hintText, progressText, flashText, barFill);
+        missionUi.Wire(titleText, descriptionText, hintText, progressText, flashText, barFill, rewardText, rewardIcon);
     }
 
     static void EnsureMoneyDisplay(GameObject canvasRoot)

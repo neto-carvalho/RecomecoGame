@@ -329,7 +329,7 @@ public static class MainMenuSetupMenu
         var btnQuit = CreateOverlayMenuButton(buttonsPanel.transform, "SAIR");
 
         var optionsPanel = CreateSubPanel(canvasGo.transform, "Panel_Opcoes",
-            "OPÇÕES\n\nEm breve: volume, qualidade gráfica e controles.");
+            "OPÇÕES");
         var creditsPanel = CreateSubPanel(canvasGo.transform, "Panel_Creditos", RecomecoCredits.MenuBody, 540f);
 
         EnsureLevelSelectPanel(menu);

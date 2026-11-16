@@ -149,6 +149,15 @@ public class PlayerNeeds : MonoBehaviour
         NotifyChanged();
     }
 
+    public void AddProtection(float amount)
+    {
+        if (amount == 0f)
+            return;
+
+        protection = Mathf.Clamp(protection + amount, 0f, MaxProtection);
+        NotifyChanged();
+    }
+
     public void ApplyPrecariousNewGameStart(RecomecoGameplaySettings settings)
     {
         hunger = MaxHunger * 0.72f;

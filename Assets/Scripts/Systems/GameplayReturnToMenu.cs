@@ -11,6 +11,7 @@ public static class GameplayReturnToMenu
         GameSession.Reset();
         MissionProgress.Reset();
         PlayerHousingState.Reset();
+        PlayerUnlocks.Reset();
         GameplayDayNightCycle.ResetForMenu();
         SaveGameManager.ClearPendingLoad();
 

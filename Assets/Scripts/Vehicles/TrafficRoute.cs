@@ -7,7 +7,7 @@ public class TrafficRoute : MonoBehaviour
     public bool loop = true;
     [Tooltip("Trecho reto: carro vai e volta entre waypoints (útil em ruas EasyRoads).")]
     public bool pingPong;
-    public float speedKmh = 28f;
+    public float speedKmh = 10f;
 
     public int WaypointCount
     {
@@ -78,18 +78,25 @@ public class TrafficRoute : MonoBehaviour
                 continue;
 
             var pos = wp.position;
-            pos.y = VehicleGroundSnap.SnapY(pos.x, pos.z, pos.y);
+            pos.y = VehicleGroundSnap.SnapLowestRoadY(pos.x, pos.z, pos.y);
             wp.position = pos;
         }
     }
 
+    public void SnapWaypointsToRoadCenter()
+    {
+        RoadCenterSnap.SnapTrafficRouteToRoadCenters(this);
+    }
+
     public static void RealignAllRoutesInScene()
     {
+        RoadCenterSnap.InvalidateCache();
         foreach (var route in Object.FindObjectsByType<TrafficRoute>(FindObjectsSortMode.None))
         {
             if (route == null)
                 continue;
 
+            route.SnapWaypointsToRoadCenter();
             route.RealignWaypointsToGround();
         }
     }

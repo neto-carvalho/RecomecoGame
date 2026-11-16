@@ -112,15 +112,5 @@ public static class GameSession
         _hasInventory = slots != null && slots.Length > 0;
     }
 
-    static ItemData FindItemByName(string itemName)
-    {
-        var all = Resources.FindObjectsOfTypeAll<ItemData>();
-        foreach (var item in all)
-        {
-            if (item != null && item.itemName == itemName)
-                return item;
-        }
-
-        return null;
-    }
+    static ItemData FindItemByName(string itemName) => ItemCatalog.FindByName(itemName);
 }

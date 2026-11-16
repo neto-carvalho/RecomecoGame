@@ -45,10 +45,18 @@ namespace Controller
         private bool m_IsJump;
 
         private bool m_IsMoving;
+        bool _suppressLocomotionAnimation;
 
         public Vector2 Axis => m_Axis;
         public Vector3 Target => m_Target;
         public bool IsRun => m_IsRun;
+        public bool IsMoving => m_IsMoving;
+        public bool IsJumping => m_IsJump;
+
+        public void SetSuppressLocomotionAnimation(bool suppress)
+        {
+            _suppressLocomotionAnimation = suppress;
+        }
 
         private void OnValidate()
         {
@@ -170,7 +178,7 @@ namespace Controller
 
         void ApplyLocomotionParameters(Vector2 driveAxis, float locomotionState, bool isJump, float deltaTime)
         {
-            if (m_Animator == null)
+            if (_suppressLocomotionAnimation || m_Animator == null)
                 return;
 
             const float blendSpeed = 10f;

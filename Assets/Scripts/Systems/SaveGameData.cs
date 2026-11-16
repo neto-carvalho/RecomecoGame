@@ -12,6 +12,8 @@ public class SaveGameData
     public GameplayDayNightSnapshot dayNight;
     public string lastScene;
     public string lastSpawnId;
+    /// <summary>Progressão (skate, etc.). Saves antigos = false.</summary>
+    public bool hasSkate;
 }
 
 [Serializable]

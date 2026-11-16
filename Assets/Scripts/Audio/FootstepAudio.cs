@@ -34,17 +34,21 @@ public sealed class FootstepAudio : MonoBehaviour
 
     CharacterController _controller;
     CharacterMover _mover;
+    PlayerSkateController _skate;
     AudioSource _source;
     float _stepTimer;
     float _surfaceRefreshTimer;
     FootstepSurfaceType _currentSurface = FootstepSurfaceType.Default;
+    bool _suppressed;
 
     public FootstepSurfaceType CurrentSurface => _currentSurface;
+    public bool IsSuppressed => _suppressed;
 
     void Awake()
     {
         _controller = GetComponent<CharacterController>();
         _mover = GetComponent<CharacterMover>();
+        _skate = GetComponent<PlayerSkateController>();
         _source = GetComponent<AudioSource>();
         if (_source == null)
             _source = gameObject.AddComponent<AudioSource>();
@@ -63,10 +67,51 @@ public sealed class FootstepAudio : MonoBehaviour
         _source.dopplerLevel = 0f;
     }
 
+    /// <summary>Skate, montaria, etc. — não depende só de GetComponent no Awake.</summary>
+    public void SetSuppressed(bool suppressed)
+    {
+        _suppressed = suppressed;
+        if (suppressed)
+            _stepTimer = 0f;
+    }
+
+    public static void SetSuppressedForPlayer(GameObject playerRoot, bool suppressed)
+    {
+        if (playerRoot == null)
+            return;
+
+        foreach (var foot in playerRoot.GetComponentsInChildren<FootstepAudio>(true))
+        {
+            if (foot != null)
+                foot.SetSuppressed(suppressed);
+        }
+    }
+
+    bool ShouldSuppressForSkate()
+    {
+        if (_suppressed)
+            return true;
+
+        if (_skate == null)
+        {
+            _skate = GetComponent<PlayerSkateController>();
+            if (_skate == null)
+                _skate = GetComponentInParent<PlayerSkateController>();
+        }
+
+        return _skate != null && _skate.IsRiding;
+    }
+
     void Update()
     {
         if (_controller == null)
             return;
+
+        if (ShouldSuppressForSkate())
+        {
+            _stepTimer = 0f;
+            return;
+        }
 
         if (!_controller.isGrounded)
         {

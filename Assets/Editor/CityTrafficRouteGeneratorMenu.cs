@@ -121,6 +121,62 @@ public static class CityTrafficRouteGeneratorMenu
             "OK");
     }
 
+    [MenuItem(MenuRoot + "Centralizar rotas no meio das ruas (todas)")]
+    static void CenterAllRoutesOnRoads()
+    {
+        var scene = SceneManager.GetActiveScene();
+        if (!scene.IsValid() || scene.name != RecomecoSceneNames.Cidade)
+        {
+            EditorUtility.DisplayDialog("Tráfego", "Abra a cena Cidade.", "OK");
+            return;
+        }
+
+        var count = 0;
+        RoadCenterSnap.InvalidateCache();
+        foreach (var route in Object.FindObjectsByType<TrafficRoute>(FindObjectsSortMode.None))
+        {
+            if (route == null)
+                continue;
+
+            Undo.RegisterFullObjectHierarchyUndo(route.gameObject, "Center route on road");
+            route.SnapWaypointsToRoadCenter();
+            route.RealignWaypointsToGround();
+            EditorUtility.SetDirty(route);
+            count++;
+        }
+
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorUtility.DisplayDialog("Tráfego",
+            count > 0
+                ? count + " rota(s) centralizadas no eixo da rua.\n" +
+                  "Se ainda torto: apague rotas «Rota_Rede_» e use «Gerar rotas em rede» de novo.\nSalve (Ctrl+S)."
+                : "Nenhuma TrafficRoute na cena.",
+            "OK");
+    }
+
+    [MenuItem(MenuRoot + "Velocidade urbana nas rotas (10 km/h)")]
+    static void ApplyUrbanSpeedToAllRoutes()
+    {
+        var count = 0;
+        foreach (var route in Object.FindObjectsByType<TrafficRoute>(FindObjectsSortMode.None))
+        {
+            if (route == null)
+                continue;
+
+            Undo.RecordObject(route, "Urban traffic speed");
+            route.speedKmh = 10f;
+            EditorUtility.SetDirty(route);
+            count++;
+        }
+
+        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+        EditorUtility.DisplayDialog("Tráfego",
+            count > 0
+                ? count + " rota(s) com speedKmh = 10.\nSalve a cena (Ctrl+S) e dê Play."
+                : "Nenhuma TrafficRoute na cena.",
+            "OK");
+    }
+
     [MenuItem(MenuRoot + "Ordenar waypoints da rota selecionada (cruzamentos em sequência)")]
     static void OrderSelectedRouteWaypoints()
     {
@@ -197,10 +253,13 @@ public static class CityTrafficRouteGeneratorMenu
             if (route == null)
                 continue;
 
+            route.SnapWaypointsToRoadCenter();
+            route.RealignWaypointsToGround();
             Undo.RegisterCreatedObjectUndo(route.gameObject, "Create network traffic route");
             created++;
         }
 
+        RoadCenterSnap.InvalidateCache();
         EditorSceneManager.MarkSceneDirty(scene);
         EditorUtility.DisplayDialog(
             "Tráfego",

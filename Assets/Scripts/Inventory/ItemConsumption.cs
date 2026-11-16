@@ -33,6 +33,17 @@ public static class ItemConsumption
         if (Mathf.Abs(item.reputationRestore) > 0.001f)
             needs.AddReputation(item.reputationRestore);
 
+        var protectionGain = item.protectionRestore;
+        if (Mathf.Abs(protectionGain) < 0.001f && item.consumable && item.hungerRestore > 0.001f)
+        {
+            var settings = RecomecoGameplaySettings.Instance;
+            if (settings != null)
+                protectionGain = settings.mealProtectionRestore;
+        }
+
+        if (Mathf.Abs(protectionGain) > 0.001f)
+            needs.AddProtection(protectionGain);
+
         if (Mathf.Abs(item.hungerRestore) > 0.001f)
             MissionProgress.NotifyAteFood();
 

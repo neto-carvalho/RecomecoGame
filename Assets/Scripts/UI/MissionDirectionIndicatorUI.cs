@@ -64,7 +64,7 @@ public class MissionDirectionIndicatorUI : MonoBehaviour
 
         var distance = PlanarDistance(playerPos.Value, target.WorldPosition);
         var screenPoint = GetClampedScreenPoint(_camera, target.WorldPosition, EdgePadding, out var isOnScreen);
-        var label = target.Label + " — " + FormatDistance(distance);
+        var label = target.Label + " · " + FormatDistance(distance);
 
         if (_labelText != null)
             _labelText.text = label;
