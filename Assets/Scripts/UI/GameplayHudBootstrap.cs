@@ -115,6 +115,7 @@ public static class GameplayHudBootstrap
         EnsureMissionPanel(_persistentHudRoot);
         EnsureMissionDirectionIndicator(_persistentHudRoot);
         EnsurePlayerNeedsHud(_persistentHudRoot);
+        EnsureControlsTutorial(_persistentHudRoot);
         SuppressDuplicateGameplayUi();
     }
 
@@ -157,14 +158,16 @@ public static class GameplayHudBootstrap
         var labelGo = new GameObject("DistanceLabel");
         labelGo.transform.SetParent(rootGo.transform, false);
         var labelRect = labelGo.AddComponent<RectTransform>();
-        labelRect.sizeDelta = new Vector2(320f, 32f);
+        labelRect.sizeDelta = new Vector2(420f, 36f);
         var labelText = labelGo.AddComponent<TextMeshProUGUI>();
         if (TMP_Settings.defaultFontAsset != null)
             labelText.font = TMP_Settings.defaultFontAsset;
-        labelText.fontSize = 20f;
+        labelText.fontSize = 22f;
         labelText.fontStyle = FontStyles.Bold;
-        labelText.color = new Color(0.95f, 0.92f, 0.85f, 1f);
+        labelText.color = new Color(0.98f, 0.94f, 0.82f, 1f);
         labelText.alignment = TextAlignmentOptions.Center;
+        labelText.outlineWidth = 0.22f;
+        labelText.outlineColor = new Color(0.08f, 0.06f, 0.02f, 0.85f);
         labelText.raycastTarget = false;
         labelGo.SetActive(false);
 
@@ -477,6 +480,51 @@ public static class GameplayHudBootstrap
         if (hud == null)
             hud = hudRoot.gameObject.AddComponent<GameplayDayNightHud>();
         hud.Wire(clockText);
+    }
+
+    static void EnsureControlsTutorial(GameObject canvasRoot)
+    {
+        if (canvasRoot == null)
+            return;
+
+        if (canvasRoot.transform.Find("GameplayControlsTutorial") != null)
+            return;
+
+        var rootGo = new GameObject("GameplayControlsTutorial");
+        rootGo.transform.SetParent(canvasRoot.transform, false);
+        var rootRect = rootGo.AddComponent<RectTransform>();
+        rootRect.anchorMin = Vector2.zero;
+        rootRect.anchorMax = Vector2.one;
+        rootRect.offsetMin = Vector2.zero;
+        rootRect.offsetMax = Vector2.zero;
+
+        var group = rootGo.AddComponent<CanvasGroup>();
+        group.alpha = 0f;
+        group.blocksRaycasts = false;
+        group.interactable = false;
+
+        var imageGo = new GameObject("Art");
+        imageGo.transform.SetParent(rootGo.transform, false);
+        var imageRect = imageGo.AddComponent<RectTransform>();
+        imageRect.anchorMin = new Vector2(0.5f, 0.5f);
+        imageRect.anchorMax = new Vector2(0.5f, 0.5f);
+        imageRect.pivot = new Vector2(0.5f, 0.5f);
+        imageRect.anchoredPosition = Vector2.zero;
+        imageRect.sizeDelta = new Vector2(960f, 540f);
+
+        var image = imageGo.AddComponent<Image>();
+        image.raycastTarget = false;
+        image.preserveAspect = true;
+        image.color = Color.white;
+
+        var sprite = GameplayControlsTutorialUI.LoadTutorialSpriteForBootstrap();
+        if (sprite != null)
+            image.sprite = sprite;
+
+        var ui = rootGo.AddComponent<GameplayControlsTutorialUI>();
+        ui.Wire(image, imageRect, group);
+        rootGo.transform.SetAsLastSibling();
+        rootGo.SetActive(false);
     }
 
     static void EnsureTipBanner(Transform hudRoot)

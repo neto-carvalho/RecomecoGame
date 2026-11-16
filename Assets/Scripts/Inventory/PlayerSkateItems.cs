@@ -61,8 +61,7 @@ public static class PlayerSkateItems
         }
 
         inventory.RefreshAllSlots();
-        message = "Skate adicionado ao inventário (B na cidade).";
-        GameplayTipBannerUI.Show("Missão concluída! " + message, 9f);
+        message = "Skate no inventário. Na cidade, aperte B para usar.";
         return true;
     }
 }

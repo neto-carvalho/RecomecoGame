@@ -104,6 +104,7 @@ public static class GameplaySceneRuntimeSetup
         SceneTransitionPlayerSetup.AfterSceneLoad(player);
 
         MissionProgress.NotifyEnteredScene(SceneManager.GetActiveScene().name);
+        GameplayControlsTutorialUI.TryShowForNewGame();
     }
 
     static void EnsureGameplayCamera(GameObject player)
@@ -170,6 +171,9 @@ public static class GameplaySceneRuntimeSetup
 
         if (player.GetComponent<PlayerSkateAudio>() == null)
             player.AddComponent<PlayerSkateAudio>();
+
+        if (player.GetComponent<MissionGroundDirectionIndicator>() == null)
+            player.AddComponent<MissionGroundDirectionIndicator>();
 
         EnsureFootstepAudio(player, settings);
     }

@@ -17,7 +17,7 @@ public class SellMinigameUI : MonoBehaviour
     const string SellMissTipMessage =
         "Você errou a venda e perdeu reputação. " +
         "Reputação baixa deixa a faixa verde menor e a venda mais difícil. " +
-        "Alguns lanches na lanchonete recuperam reputação.";
+        "Acertar o minigame aos poucos recupera reputação; lanches na lanchonete também ajudam.";
 
     enum State { PickItem, Ready, Running, Finished }
 
@@ -295,8 +295,12 @@ public class SellMinigameUI : MonoBehaviour
 
             MissionProgress.NotifyStreetSale(total);
 
+            var repGain = ApplySellHitReputationGain(_player, removed);
+
             _feedback.text = "VENDIDO! " + removed + "x " + _selectedItem.itemName +
                              "  +" + MoneyManager.FormatBRL(total);
+            if (repGain > 0.01f)
+                _feedback.text += "  ·  rep. +" + Mathf.RoundToInt(repGain);
             _feedback.color = new Color(0.35f, 1f, 0.45f);
             _closeTimer = 1.4f;
         }
@@ -330,6 +334,26 @@ public class SellMinigameUI : MonoBehaviour
         var settings = RecomecoGameplaySettings.Instance;
         var loss = settings != null ? settings.sellMissReputationLoss : 10f;
         needs.AddReputation(-loss);
+    }
+
+    static float ApplySellHitReputationGain(GameObject player, int unitsSold)
+    {
+        if (unitsSold <= 0 || player == null)
+            return 0f;
+
+        var needs = player.GetComponent<PlayerNeeds>();
+        if (needs == null)
+            return 0f;
+
+        var settings = RecomecoGameplaySettings.Instance;
+        var baseGain = settings != null ? settings.sellHitReputationGain : 4f;
+        var perUnit = settings != null ? settings.sellHitReputationGainPerUnit : 0.35f;
+        var gain = baseGain + perUnit * (unitsSold - 1);
+        if (gain <= 0f)
+            return 0f;
+
+        needs.AddReputation(gain);
+        return gain;
     }
 
     void SetMarkerPosition(float normalized)

@@ -31,8 +31,20 @@ public class PlayerSkateController : MonoBehaviour
     void OnDisable()
     {
         PlayerUnlocks.Changed -= RefreshFromUnlocks;
-        if (_riding)
-            SetRiding(false, silent: true);
+        if (!_riding)
+            return;
+
+        // Não chama SetRiding/Restore aqui: ao sair do Play o Unity já está desativando a hierarquia.
+        _riding = false;
+        if (_skateLocomotion != null)
+            _skateLocomotion.enabled = false;
+        if (_mover != null)
+            _mover.SetSuppressLocomotionAnimation(false);
+        FootstepAudio.SetSuppressedForPlayer(gameObject, false);
+
+        var skateAudio = GetComponent<PlayerSkateAudio>();
+        if (skateAudio != null)
+            skateAudio.ResetState();
     }
 
     void Update()
@@ -104,9 +116,9 @@ public class PlayerSkateController : MonoBehaviour
         {
             if (!silent)
             {
-                InteractionUI.ShowMessage(
-                    "Skate no inventário, mas faltam animações. " +
-                    "Recomeco → Player → Skate — importar animações (Mixamo).");
+                InteractionTransientMessage.Show(
+                    "Você tem skate no inventário. Volte à cidade e use quando puder andar com ele.",
+                    5f);
             }
 
             return;

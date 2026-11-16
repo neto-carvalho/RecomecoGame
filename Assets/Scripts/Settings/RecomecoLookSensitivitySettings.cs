@@ -3,21 +3,26 @@ using UnityEngine;
 
 /// <summary>
 /// Sensibilidade da câmera (mouse). Persiste entre sessões via PlayerPrefs.
+/// O slider 0–100% mapeia linearmente de <see cref="Min"/> a <see cref="Max"/>.
 /// </summary>
 public static class RecomecoLookSensitivitySettings
 {
     const string PrefKey = "recomeco_look_sensitivity";
 
-    /// <summary>Multiplicador sobre a sensibilidade base da câmera (0.1 × 360°).</summary>
-    public const float Min = 0.2f;
-    public const float Max = 1.2f;
+    /// <summary>Mínimo real no 0% do slider (antes era 0.2 — ainda “rápido” demais).</summary>
+    public const float Min = 0.035f;
+    public const float Max = 1f;
     public const float Default = 0.45f;
 
     public static event Action Changed;
 
     public static float Multiplier
     {
-        get => Mathf.Clamp(PlayerPrefs.GetFloat(PrefKey, Default), Min, Max);
+        get
+        {
+            var value = PlayerPrefs.GetFloat(PrefKey, Default);
+            return Mathf.Clamp(value, Min, Max);
+        }
         set
         {
             var clamped = Mathf.Clamp(value, Min, Max);
@@ -38,7 +43,6 @@ public static class RecomecoLookSensitivitySettings
 
     public static string FormatPercent()
     {
-        var display = Mathf.RoundToInt(Mathf.Lerp(20f, 120f, Slider01));
-        return display + "%";
+        return Mathf.RoundToInt(Slider01 * 100f) + "%";
     }
 }

@@ -113,8 +113,18 @@ public class RecomecoGameplaySettings : ScriptableObject
     [Tooltip("Sons de rodas e pulo no skate (Recomeco → Player → Skate — configurar sons).")]
     public SkateSoundLibrary skateSoundLibrary;
 
-    [TextArea(2, 4)]
-    public string skateUnlockBanner = "Você ganhou um skate! Quando as animações estiverem prontas, aperte B na cidade.";
+    [Tooltip("Legenda rápida no rodapé (ex.: ganhou skate). Não usa texto técnico.")]
+    [TextArea(2, 3)]
+    public string skateUnlockBanner = "Parabéns! Você ganhou um skate. Na cidade, aperte B para andar.";
+
+    [Tooltip("Segundos da dica no canto ao ganhar o skate.")]
+    public float skateRewardTipSeconds = 6.5f;
+
+    [Tooltip("Duração máxima de legendas temporárias no rodapé (fora de prompts E/F).")]
+    public float interactionTransientMessageSeconds = 5f;
+
+    [Tooltip("Segundos exibindo o tutorial de controles (Shift / Espaço) no início de partida nova.")]
+    public float controlsTutorialSeconds = 7f;
 
     [Header("Debug / testes (Editor e Development Build)")]
     [Tooltip("Atalhos F9–F12 e dinheiro de teste ao iniciar partida")]
@@ -152,6 +162,12 @@ public class RecomecoGameplaySettings : ScriptableObject
     [Header("Reputação")]
     [Tooltip("Reputação perdida ao errar o minigame de venda na calçada")]
     public float sellMissReputationLoss = 10f;
+
+    [Tooltip("Reputação ganha ao acertar o minigame (base por venda bem-sucedida)")]
+    public float sellHitReputationGain = 4f;
+
+    [Tooltip("Reputação extra por unidade vendida no acerto (além da base)")]
+    public float sellHitReputationGainPerUnit = 0.35f;
 
     [Tooltip("Dica no HUD após errar venda com pedestre (segundos)")]
     public float sellMissTipSeconds = 8f;

@@ -43,15 +43,15 @@ public static class MissionInventoryRewards
         var added = inventory.AddItems(item, quantity);
         if (added < quantity)
         {
-            message = "Inventário cheio — couberam só " + added + " de " + quantity + " (" + item.itemName + ").";
+            message = "Inventário cheio. Couberam só " + added + " de " + quantity + " (" + item.itemName + ").";
             if (showTip && added > 0)
-                GameplayTipBannerUI.Show(message, 8f);
+                GameplayTipBannerUI.Show(message, ResolveTipSeconds());
             return added > 0;
         }
 
         message = item.itemName + " ×" + quantity + " no inventário (I ou Tab).";
         if (showTip)
-            GameplayTipBannerUI.Show("Missão concluída! " + message, 9f);
+            GameplayTipBannerUI.Show("Missão concluída! " + message, ResolveTipSeconds());
 
         return true;
     }
@@ -84,11 +84,19 @@ public static class MissionInventoryRewards
         {
             GameplayTipBannerUI.Show(
                 "Pacotes no inventário. Próximo passo: revender na rua (I ou Tab).",
-                8f);
+                ResolveTipSeconds());
             return;
         }
 
         TryGrant(item, need, out _);
+    }
+
+    static float ResolveTipSeconds()
+    {
+        var settings = RecomecoGameplaySettings.Instance;
+        return settings != null && settings.skateRewardTipSeconds > 0f
+            ? settings.skateRewardTipSeconds
+            : 6.5f;
     }
 
     static void GrantMealRewardIfMissing()

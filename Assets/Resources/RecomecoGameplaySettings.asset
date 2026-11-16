@@ -56,8 +56,10 @@ MonoBehaviour:
   skateVisualLocalScale: {x: 1, y: 1, z: 1}
   skateVisualAutoCenterBounds: 1
   skateSoundLibrary: {fileID: 11400000, guid: c5348b422b6280b4a84ac89c52ece5d6, type: 2}
-  skateUnlockBanner: "Voc\xEA ganhou um skate! Quando as anima\xE7\xF5es estiverem
-    prontas, aperte B na cidade."
+  skateUnlockBanner: "Parab\xE9ns! Voc\xEA ganhou um skate. Na cidade, aperte B para andar."
+  skateRewardTipSeconds: 6.5
+  interactionTransientMessageSeconds: 5
+  controlsTutorialSeconds: 7
   enableDebugCheats: 1
   useTestStartingMoney: 0
   testStartingMoneyCents: 500000
@@ -69,6 +71,8 @@ MonoBehaviour:
   healthRegenPerSecond: 1.25
   healthRegenMinHunger: 25
   sellMissReputationLoss: 10
+  sellHitReputationGain: 4
+  sellHitReputationGainPerUnit: 0.35
   sellMissTipSeconds: 8
   npcSellRefuseZeroProtectionTip: "Ningu\xE9m quer negociar com voc\xEA neste estado.
     Coma algo (lanchonete FOOD4U) para recuperar prote\xE7\xE3o e voltar a vender

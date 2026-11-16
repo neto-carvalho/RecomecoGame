@@ -82,9 +82,7 @@ public class Inventory : MonoBehaviour
         Transform panel = invUI.inventoryPanel.transform;
         foreach (SlotUI slotUi in slotUIs)
         {
-            if (slotUi == null || !slotUi.gameObject.activeInHierarchy)
-                return false;
-            if (!slotUi.transform.IsChildOf(panel))
+            if (slotUi == null || !slotUi.transform.IsChildOf(panel))
                 return false;
         }
 

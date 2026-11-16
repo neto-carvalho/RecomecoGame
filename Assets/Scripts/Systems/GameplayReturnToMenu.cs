@@ -10,6 +10,7 @@ public static class GameplayReturnToMenu
         GameplayHudBootstrap.ResetForMenu();
         GameSession.Reset();
         MissionProgress.Reset();
+        GameplayControlsTutorialUI.ClearPending();
         PlayerHousingState.Reset();
         PlayerUnlocks.Reset();
         GameplayDayNightCycle.ResetForMenu();

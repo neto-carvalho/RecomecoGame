@@ -1,13 +1,16 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Slider de sensibilidade do mouse — menu Opções e pausa.
+/// Sensibilidade do mouse — menu Opções (sub-overlay) e pausa (inline).
 /// </summary>
 public static class LookSensitivityOptionsUI
 {
     const string RowName = "LookSensitivityRow";
+    const string LayoutRootName = "OptionsMenuLayout";
+    const string SensitivityOverlayName = "SensitivityOptionsOverlay";
 
     public static void EnsureOnMainMenuOptions(GameObject optionsPanel)
     {
@@ -27,13 +30,185 @@ public static class LookSensitivityOptionsUI
             heading.margin = new Vector4(24, 20, 24, 8);
         }
 
-        if (box.Find(RowName) != null)
+        if (box.Find(LayoutRootName) != null)
             return;
 
-        CreateAnchoredRow(box, new Vector2(0f, -24f), new Vector2(620f, 120f));
+        RemoveLegacyMainMenuOptionsWidgets(box);
+
+        var layoutGo = new GameObject(LayoutRootName, typeof(RectTransform));
+        layoutGo.transform.SetParent(box, false);
+        var layoutRect = layoutGo.GetComponent<RectTransform>();
+        layoutRect.anchorMin = new Vector2(0.5f, 0.5f);
+        layoutRect.anchorMax = new Vector2(0.5f, 0.5f);
+        layoutRect.pivot = new Vector2(0.5f, 0.5f);
+        layoutRect.anchoredPosition = new Vector2(0f, -12f);
+        layoutRect.sizeDelta = new Vector2(360f, 132f);
+
+        var layout = layoutGo.AddComponent<VerticalLayoutGroup>();
+        layout.spacing = 14f;
+        layout.childAlignment = TextAnchor.MiddleCenter;
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = true;
+        layout.childForceExpandHeight = false;
+        layout.padding = new RectOffset(0, 0, 0, 0);
+
+        CreateMainMenuOptionButton(
+            layoutGo.transform,
+            "CONTROLES",
+            new Color(0.35f, 0.28f, 0.08f, 1f),
+            new Color(0.98f, 0.86f, 0.22f, 1f),
+            () => ControlsGuideOverlayUI.Open(optionsPanel.transform));
+
+        CreateMainMenuOptionButton(
+            layoutGo.transform,
+            "SENSIBILIDADE",
+            new Color(0.16f, 0.32f, 0.22f, 1f),
+            Color.white,
+            () => OpenMainMenuSensitivityOverlay(optionsPanel.transform));
     }
 
-  /// <summary>Filho de um VerticalLayoutGroup (menu de pausa).</summary>
+    static void RemoveLegacyMainMenuOptionsWidgets(Transform box)
+    {
+        var legacyRow = box.Find(RowName);
+        if (legacyRow != null)
+            UnityEngine.Object.Destroy(legacyRow.gameObject);
+
+        var legacyBtn = box.Find("Btn_Controles");
+        if (legacyBtn != null)
+            UnityEngine.Object.Destroy(legacyBtn.gameObject);
+    }
+
+    static void CreateMainMenuOptionButton(
+        Transform parent,
+        string label,
+        Color bg,
+        Color textColor,
+        Action onClick)
+    {
+        var go = new GameObject("Btn_" + label, typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+
+        var le = go.AddComponent<LayoutElement>();
+        le.minHeight = 52f;
+        le.preferredHeight = 52f;
+
+        var img = go.AddComponent<Image>();
+        img.color = bg;
+
+        var button = go.AddComponent<Button>();
+        button.targetGraphic = img;
+        button.onClick.AddListener(() => onClick?.Invoke());
+
+        var tmp = CreateTmp(go.transform, label, 22, TextAlignmentOptions.Center);
+        StretchFull(tmp.rectTransform);
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.color = textColor;
+    }
+
+    static void OpenMainMenuSensitivityOverlay(Transform optionsPanel)
+    {
+        if (optionsPanel == null)
+            return;
+
+        if (optionsPanel.Find(SensitivityOverlayName) != null)
+            return;
+
+        var root = new GameObject(SensitivityOverlayName);
+        root.transform.SetParent(optionsPanel, false);
+        var rootRect = root.AddComponent<RectTransform>();
+        StretchFull(rootRect);
+
+        var dim = new GameObject("Dim");
+        dim.transform.SetParent(root.transform, false);
+        var dimRect = dim.AddComponent<RectTransform>();
+        StretchFull(dimRect);
+        var dimImg = dim.AddComponent<Image>();
+        dimImg.color = new Color(0f, 0f, 0f, 0.72f);
+        dimImg.raycastTarget = true;
+
+        var panel = new GameObject("Panel");
+        panel.transform.SetParent(root.transform, false);
+        var panelRect = panel.AddComponent<RectTransform>();
+        panelRect.anchorMin = new Vector2(0.5f, 0.5f);
+        panelRect.anchorMax = new Vector2(0.5f, 0.5f);
+        panelRect.pivot = new Vector2(0.5f, 0.5f);
+        panelRect.sizeDelta = new Vector2(520f, 220f);
+
+        var panelBg = panel.AddComponent<Image>();
+        panelBg.color = new Color(0.09f, 0.09f, 0.12f, 0.97f);
+
+        var title = CreateTmp(panel.transform, "Sensibilidade do mouse", 24, TextAlignmentOptions.Center);
+        var titleRect = title.rectTransform;
+        titleRect.anchorMin = new Vector2(0f, 1f);
+        titleRect.anchorMax = new Vector2(1f, 1f);
+        titleRect.pivot = new Vector2(0.5f, 1f);
+        titleRect.anchoredPosition = new Vector2(0f, -20f);
+        titleRect.sizeDelta = new Vector2(-32f, 36f);
+        title.fontStyle = FontStyles.Bold;
+
+        var valueTmp = CreateTmp(panel.transform, RecomecoLookSensitivitySettings.FormatPercent(), 22,
+            TextAlignmentOptions.Center);
+        var valueRect = valueTmp.rectTransform;
+        valueRect.anchorMin = new Vector2(0.5f, 1f);
+        valueRect.anchorMax = new Vector2(0.5f, 1f);
+        valueRect.pivot = new Vector2(0.5f, 1f);
+        valueRect.anchoredPosition = new Vector2(0f, -58f);
+        valueRect.sizeDelta = new Vector2(120f, 28f);
+        valueTmp.color = new Color(0.95f, 0.78f, 0.15f, 1f);
+
+        var sliderRoot = new GameObject("SliderRoot", typeof(RectTransform));
+        sliderRoot.transform.SetParent(panel.transform, false);
+        var sliderRootRect = sliderRoot.GetComponent<RectTransform>();
+        sliderRootRect.anchorMin = new Vector2(0f, 0.5f);
+        sliderRootRect.anchorMax = new Vector2(1f, 0.5f);
+        sliderRootRect.pivot = new Vector2(0.5f, 0.5f);
+        sliderRootRect.anchoredPosition = new Vector2(0f, -8f);
+        sliderRootRect.sizeDelta = new Vector2(-48f, 36f);
+
+        var slider = BuildSlider(sliderRoot.transform);
+        slider.SetValueWithoutNotify(RecomecoLookSensitivitySettings.Slider01);
+
+        void RefreshValue() => valueTmp.text = RecomecoLookSensitivitySettings.FormatPercent();
+        RefreshValue();
+        slider.onValueChanged.AddListener(v =>
+        {
+            RecomecoLookSensitivitySettings.Slider01 = v;
+            RefreshValue();
+        });
+
+        var closeBtnGo = new GameObject("Btn_Fechar", typeof(RectTransform));
+        closeBtnGo.transform.SetParent(panel.transform, false);
+        var closeRect = closeBtnGo.GetComponent<RectTransform>();
+        closeRect.anchorMin = new Vector2(0.5f, 0f);
+        closeRect.anchorMax = new Vector2(0.5f, 0f);
+        closeRect.pivot = new Vector2(0.5f, 0f);
+        closeRect.anchoredPosition = new Vector2(0f, 18f);
+        closeRect.sizeDelta = new Vector2(200f, 46f);
+
+        var closeImg = closeBtnGo.AddComponent<Image>();
+        closeImg.color = new Color(0.25f, 0.25f, 0.3f, 1f);
+        var closeBtn = closeBtnGo.AddComponent<Button>();
+        closeBtn.targetGraphic = closeImg;
+
+        var closeLabel = CreateTmp(closeBtnGo.transform, "FECHAR", 20, TextAlignmentOptions.Center);
+        StretchFull(closeLabel.rectTransform);
+        closeLabel.fontStyle = FontStyles.Bold;
+
+        void Close()
+        {
+            if (root != null)
+                UnityEngine.Object.Destroy(root);
+        }
+
+        closeBtn.onClick.AddListener(Close);
+        var closer = root.AddComponent<ControlsGuideOverlayCloser>();
+        closer.Initialize(Close);
+
+        root.transform.SetAsLastSibling();
+    }
+
+    /// <summary>Filho de um VerticalLayoutGroup (menu de pausa).</summary>
     public static void AddPauseSensitivityRow(Transform parent)
     {
         if (parent == null)
@@ -90,52 +265,6 @@ public static class LookSensitivityOptionsUI
 
         void RefreshValue() => valueTmp.text = RecomecoLookSensitivitySettings.FormatPercent();
 
-        RefreshValue();
-        slider.onValueChanged.AddListener(v =>
-        {
-            RecomecoLookSensitivitySettings.Slider01 = v;
-            RefreshValue();
-        });
-    }
-
-    static void CreateAnchoredRow(RectTransform parent, Vector2 pos, Vector2 size)
-    {
-        var row = new GameObject(RowName, typeof(RectTransform));
-        var rowRect = row.GetComponent<RectTransform>();
-        rowRect.SetParent(parent, false);
-        rowRect.anchoredPosition = pos;
-        rowRect.sizeDelta = size;
-
-        var label = CreateTmp(rowRect, "Sensibilidade do mouse", 20, TextAlignmentOptions.MidlineLeft);
-        var labelRect = label.rectTransform;
-        labelRect.anchorMin = new Vector2(0f, 1f);
-        labelRect.anchorMax = new Vector2(1f, 1f);
-        labelRect.pivot = new Vector2(0.5f, 1f);
-        labelRect.anchoredPosition = Vector2.zero;
-        labelRect.sizeDelta = new Vector2(-80f, 32f);
-
-        var valueTmp = CreateTmp(rowRect, RecomecoLookSensitivitySettings.FormatPercent(), 20,
-            TextAlignmentOptions.MidlineRight);
-        var valueRect = valueTmp.rectTransform;
-        valueRect.anchorMin = new Vector2(1f, 1f);
-        valueRect.anchorMax = new Vector2(1f, 1f);
-        valueRect.pivot = new Vector2(1f, 1f);
-        valueRect.anchoredPosition = new Vector2(-4f, 0f);
-        valueRect.sizeDelta = new Vector2(72f, 32f);
-
-        var sliderRoot = new GameObject("SliderRoot", typeof(RectTransform));
-        var sliderRootRect = sliderRoot.GetComponent<RectTransform>();
-        sliderRootRect.SetParent(rowRect, false);
-        sliderRootRect.anchorMin = new Vector2(0f, 0f);
-        sliderRootRect.anchorMax = new Vector2(1f, 0f);
-        sliderRootRect.pivot = new Vector2(0.5f, 0f);
-        sliderRootRect.anchoredPosition = new Vector2(0f, 0f);
-        sliderRootRect.sizeDelta = new Vector2(0f, 32f);
-
-        var slider = BuildSlider(sliderRoot.transform);
-        slider.SetValueWithoutNotify(RecomecoLookSensitivitySettings.Slider01);
-
-        void RefreshValue() => valueTmp.text = RecomecoLookSensitivitySettings.FormatPercent();
         RefreshValue();
         slider.onValueChanged.AddListener(v =>
         {

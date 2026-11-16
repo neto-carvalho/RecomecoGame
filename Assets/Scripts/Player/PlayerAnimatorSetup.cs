@@ -32,8 +32,7 @@ public static class PlayerAnimatorSetup
             if (!IsLocomotionAnimator(a, primary))
                 continue;
 
-            if (!a.gameObject.activeInHierarchy)
-                a.gameObject.SetActive(true);
+            SafeSetActive(a.gameObject, true);
             a.enabled = true;
             a.runtimeAnimatorController = movement;
             a.applyRootMotion = false;
@@ -113,14 +112,24 @@ public static class PlayerAnimatorSetup
 
     static void EnsureVisualHierarchyActive(GameObject player)
     {
-        if (!player.activeSelf)
-            player.SetActive(true);
+        SafeSetActive(player, true);
 
         foreach (var smr in player.GetComponentsInChildren<SkinnedMeshRenderer>(true))
         {
-            if (smr != null && !smr.gameObject.activeSelf)
-                smr.gameObject.SetActive(true);
+            if (smr != null)
+                SafeSetActive(smr.gameObject, true);
         }
+    }
+
+    static void SafeSetActive(GameObject go, bool active)
+    {
+        if (go == null || go.activeSelf == active)
+            return;
+
+        if (!Application.isPlaying)
+            return;
+
+        go.SetActive(active);
     }
 
     static RuntimeAnimatorController GetMovementController(RecomecoGameplaySettings settings)

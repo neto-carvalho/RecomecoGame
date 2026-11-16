@@ -7,13 +7,14 @@ using UnityEngine.UI;
 
 public class GameplayPauseMenu : MonoBehaviour
 {
-    const int PauseUiLayoutVersion = 3;
+    const int PauseUiLayoutVersion = 4;
 
     public static GameplayPauseMenu Instance { get; private set; }
     public static bool IsPaused => Instance != null && Instance._isOpen;
 
     bool _isOpen;
     GameObject _panelRoot;
+    GameObject _controlsOverlay;
 
     GameObject _player;
     MovePlayerInput _playerInput;
@@ -68,7 +69,15 @@ public class GameplayPauseMenu : MonoBehaviour
             return;
 
         if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (_controlsOverlay != null)
+            {
+                CloseControlsOverlay();
+                return;
+            }
+
             Toggle();
+        }
     }
 
     public static void ForceCloseIfOpen()
@@ -119,6 +128,8 @@ public class GameplayPauseMenu : MonoBehaviour
         _isOpen = false;
         Time.timeScale = 1f;
 
+        CloseControlsOverlay();
+
         if (_panelRoot != null)
             _panelRoot.SetActive(false);
 
@@ -134,6 +145,8 @@ public class GameplayPauseMenu : MonoBehaviour
 
         _isOpen = false;
         Time.timeScale = 1f;
+
+        CloseControlsOverlay();
 
         if (_panelRoot != null)
             _panelRoot.SetActive(false);
@@ -182,6 +195,23 @@ public class GameplayPauseMenu : MonoBehaviour
     void OnReturnToMenuClicked()
     {
         GameplayReturnToMenu.GoToMainMenu();
+    }
+
+    void OnControlsClicked()
+    {
+        if (_panelRoot == null)
+            return;
+
+        _controlsOverlay = ControlsGuideOverlayUI.Open(_panelRoot.transform, CloseControlsOverlay);
+    }
+
+    void CloseControlsOverlay()
+    {
+        if (_controlsOverlay == null)
+            return;
+
+        Destroy(_controlsOverlay);
+        _controlsOverlay = null;
     }
 
     void OnSaveGameClicked()
@@ -275,6 +305,7 @@ public class GameplayPauseMenu : MonoBehaviour
         LookSensitivityOptionsUI.AddPauseSensitivityRow(panel.transform);
         AddPauseSpacer(panel.transform, 10f);
 
+        CreatePauseButton(panel.transform, "CONTROLES", new Color(0.35f, 0.28f, 0.08f, 1f), OnControlsClicked);
         CreatePauseButton(panel.transform, "CONTINUAR", new Color(0.15f, 0.4f, 0.2f, 1f), Resume);
         CreatePauseButton(panel.transform, "SALVAR JOGO", new Color(0.18f, 0.28f, 0.45f, 1f), OnSaveGameClicked);
         CreatePauseButton(panel.transform, "MENU INICIAL", new Color(0.45f, 0.15f, 0.15f, 1f), OnReturnToMenuClicked);

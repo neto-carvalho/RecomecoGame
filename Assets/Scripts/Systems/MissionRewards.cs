@@ -23,8 +23,8 @@ public static class MissionRewards
         {
             if (!string.IsNullOrEmpty(grantMsg))
             {
-                InteractionUI.ShowMessage(grantMsg);
-                GameplayTipBannerUI.Show(grantMsg, 9f);
+                InteractionTransientMessage.Show(grantMsg, 5f);
+                GameplayTipBannerUI.Show(grantMsg, settings.skateRewardTipSeconds);
             }
             return;
         }
@@ -34,15 +34,13 @@ public static class MissionRewards
         var key = settings.skateToggleKey;
         var keyLabel = key == KeyCode.None ? "B" : key.ToString();
 
-        var tip = "Skate no inventário! Na cidade, pressione " + keyLabel +
-                  " para montar/desmontar. Abra o inventário (I ou Tab) para conferir.";
+        var banner = string.IsNullOrWhiteSpace(settings.skateUnlockBanner)
+            ? "Parabéns! Você ganhou um skate. Na cidade, aperte " + keyLabel + " para andar."
+            : settings.skateUnlockBanner;
 
-        if (!PlayerSkateController.IsSkateLocomotionReady())
-            tip += " (Animações de skate ainda não configuradas.)";
+        var tipSeconds = settings.skateRewardTipSeconds > 0f ? settings.skateRewardTipSeconds : 6.5f;
+        var cornerTip = banner + " Confira no inventário (I ou Tab).";
 
-        GameplayTipBannerUI.Show(tip, 10f);
-
-        if (!string.IsNullOrEmpty(settings.skateUnlockBanner))
-            InteractionUI.ShowMessage(settings.skateUnlockBanner, null, InteractionUI.PriorityGameplay + 5);
+        GameplayTipBannerUI.Show(cornerTip, tipSeconds);
     }
 }

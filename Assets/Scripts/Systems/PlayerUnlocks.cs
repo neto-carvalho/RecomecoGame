@@ -14,7 +14,7 @@ public static class PlayerUnlocks
         if (!PlayerSkateItems.TryGrantToPlayer(out var message))
         {
             if (!string.IsNullOrEmpty(message))
-                InteractionUI.ShowMessage(message);
+                InteractionTransientMessage.Show(message, 5f);
             return;
         }
 

@@ -63,6 +63,8 @@ public static class MissionProgress
         _lastReportedHouseCollectCount = -1;
         _completionFlashUntil = 0f;
 
+        GameplayControlsTutorialUI.RequestForNewGame();
+
         if (startScene == RecomecoSceneNames.Cidade)
         {
             _current = MissionId.KnowYourShelter;

@@ -1,15 +1,16 @@
+using System.Collections;
 using UnityEngine;
 
 public class InventoryUI : MonoBehaviour
 {
     public GameObject inventoryPanel;
 
-    private Inventory inventory;
-    private bool setupOk;
+    Inventory inventory;
+    bool setupOk;
 
     void Start()
     {
-        inventory = FindFirstObjectByType<Inventory>();
+        ResolveInventory();
 
         if (inventoryPanel == null)
         {
@@ -22,6 +23,19 @@ public class InventoryUI : MonoBehaviour
         setupOk = true;
     }
 
+    void ResolveInventory()
+    {
+        if (inventory != null)
+            return;
+
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+            inventory = player.GetComponent<Inventory>();
+
+        if (inventory == null)
+            inventory = FindFirstObjectByType<Inventory>();
+    }
+
     void Update()
     {
         if (!setupOk)
@@ -29,10 +43,32 @@ public class InventoryUI : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.I))
         {
-            bool open = !inventoryPanel.activeSelf;
+            var open = !inventoryPanel.activeSelf;
             inventoryPanel.SetActive(open);
-            if (open && inventory != null)
-                inventory.RefreshAllSlots();
+            if (open)
+                RefreshInventoryDisplay();
         }
+    }
+
+    void RefreshInventoryDisplay()
+    {
+        ResolveInventory();
+        if (inventory == null)
+            return;
+
+        inventory.ReconnectUi();
+        inventory.RefreshAllSlots();
+        Canvas.ForceUpdateCanvases();
+        StartCoroutine(RefreshInventoryNextFrame());
+    }
+
+    IEnumerator RefreshInventoryNextFrame()
+    {
+        yield return null;
+        if (inventory == null || inventoryPanel == null || !inventoryPanel.activeSelf)
+            yield break;
+
+        inventory.RefreshAllSlots();
+        Canvas.ForceUpdateCanvases();
     }
 }
