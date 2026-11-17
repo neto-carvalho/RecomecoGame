@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class SellItems : MonoBehaviour
 {
-    [Tooltip("Distância máxima para o jogador poder vender (E)")]
+    [Tooltip("Distância máxima para vender (E), em metros no mundo (não escala com o tamanho do player).")]
     public float sellDistance = 3f;
 
     [Tooltip("Nome do item vendido (ex: Latinha). Deve bater com ItemData.itemName.")]
@@ -33,16 +33,38 @@ public class SellItems : MonoBehaviour
 
     int EffectivePricePerUnit => Mathf.Max(1, pricePerUnit);
 
-    void Update()
+    void LateUpdate()
     {
         var player = FindPlayer();
-        var inRange = player != null &&
-                      Vector3.Distance(player.transform.position, transform.position) < sellDistance;
+        if (player == null)
+        {
+            if (_playerWasInRange)
+                InteractionUI.HideMessage(this);
+            _playerWasInRange = false;
+            return;
+        }
+
+        var inRange = InteractionProximity.IsWithinHorizontalRange(
+            transform.position,
+            sellDistance,
+            player.transform,
+            scaleWithPlayer: false);
+
+        if (InteractionNavigationDeferral.ShouldDeferGameplayOverNavigation(
+                transform.position,
+                sellDistance,
+                player.transform))
+        {
+            if (_playerWasInRange)
+                InteractionUI.HideMessage(this);
+            _playerWasInRange = false;
+            return;
+        }
 
         if (!inRange && _playerWasInRange)
             InteractionUI.HideMessage(this);
 
-        if (inRange && player != null)
+        if (inRange)
         {
             if (_feedbackTimer > 0f)
             {

@@ -15,6 +15,9 @@ public class SceneTransitionZone : MonoBehaviour, IInteractionPromptOwner
 
     public KeyCode interactKey = KeyCode.E;
 
+    [Tooltip("Raio extra no chão (metros) além do collider — útil com player pequeno ao lado do táxi.")]
+    public float horizontalInteractionRange;
+
     Collider _trigger;
     bool _playerInside;
 
@@ -43,6 +46,9 @@ public class SceneTransitionZone : MonoBehaviour, IInteractionPromptOwner
 
     void OnTriggerEnter(Collider other)
     {
+        if (horizontalInteractionRange > 0f)
+            return;
+
         if (!IsPlayerCollider(other))
             return;
 
@@ -51,25 +57,49 @@ public class SceneTransitionZone : MonoBehaviour, IInteractionPromptOwner
 
     void OnTriggerExit(Collider other)
     {
+        if (horizontalInteractionRange > 0f)
+            return;
+
         if (!IsPlayerCollider(other))
             return;
 
         SetInside(false);
     }
 
+    public bool IsPlayerInside(Transform player)
+    {
+        if (player == null)
+            return false;
+
+        if (_trigger != null && InteractionProximity.IsInsideTrigger(_trigger, player))
+            return true;
+
+        return horizontalInteractionRange > 0f &&
+               InteractionProximity.IsWithinHorizontalRange(
+                   transform.position,
+                   horizontalInteractionRange,
+                   player,
+                   scaleWithPlayer: false);
+    }
+
     void LateUpdate()
     {
         var player = FindPlayerRoot();
-        var inside = player != null && InteractionProximity.IsInsideTrigger(_trigger, player.transform);
+        var inside = player != null &&
+                     IsPlayerInside(player.transform) &&
+                     !ShouldDeferFerroVelhoReturnForSell(player.transform);
 
-        if (inside != _playerInside)
-            SetInside(inside);
-
-        if (!_playerInside)
+        if (!inside)
         {
-            InteractionUI.HideMessage(this);
+            if (_playerInside)
+                SetInside(false);
             return;
         }
+
+        if (!_playerInside)
+            _playerInside = true;
+
+        InteractionUI.ShowMessage(messageNear, this, InteractionUI.PriorityNavigation);
 
         if (!Input.GetKeyDown(interactKey))
             return;
@@ -83,9 +113,7 @@ public class SceneTransitionZone : MonoBehaviour, IInteractionPromptOwner
             return;
 
         _playerInside = inside;
-        if (inside)
-            InteractionUI.ShowMessage(messageNear, this, InteractionUI.PriorityNavigation);
-        else
+        if (!inside)
             InteractionUI.HideMessage(this);
     }
 
@@ -120,6 +148,17 @@ public class SceneTransitionZone : MonoBehaviour, IInteractionPromptOwner
     }
 
     static GameObject FindPlayerRoot() => InteractionProximity.GetPlayer();
+
+    bool ShouldDeferFerroVelhoReturnForSell(Transform player)
+    {
+        if (player == null || !FerroVelhoWalkableGround.IsFerroVelhoActive())
+            return false;
+
+        if (targetSceneName != RecomecoSceneNames.Cidade)
+            return false;
+
+        return FerroVelhoEntranceInteractionLayout.ShouldPreferSellOverTaxi(player);
+    }
 
     public static Vector3 ResolveSpawnOutsideZones(Vector3 position, Quaternion rotation)
     {

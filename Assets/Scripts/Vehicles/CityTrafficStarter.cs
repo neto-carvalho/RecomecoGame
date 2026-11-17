@@ -27,6 +27,7 @@ public sealed class CityTrafficStarter : MonoBehaviour
             route.EnsureReady();
 
         var count = CityTrafficManager.EnsureInstance().AssignAllTraffic();
+        SceneVehicleColliderBootstrap.EnsureForActiveScene();
         Debug.Log("[Tráfego] Inicialização tardia concluída. Veículos ativos (rota + ruas): " + count);
 
         Destroy(gameObject);

@@ -5,7 +5,8 @@ using TMPro;
 
 public class InteractionUI : MonoBehaviour
 {
-    public const int PriorityNavigation = 0;
+    /// <summary>Portal, táxi e portas — deve ganhar na legenda sobre venda/loja.</summary>
+    public const int PriorityNavigation = 25;
     public const int PriorityGameplay = 10;
 
     public static InteractionUI instance;
@@ -87,7 +88,7 @@ public class InteractionUI : MonoBehaviour
 
     public static void BindForActiveScene()
     {
-        if (instance != null && instance.interactionText != null)
+        if (instance != null && instance.interactionText != null && instance.isActiveAndEnabled)
             return;
 
         var hudRoot = GameplayHudBootstrap.GetHudRoot();

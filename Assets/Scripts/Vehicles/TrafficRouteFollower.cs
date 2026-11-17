@@ -319,7 +319,7 @@ public class TrafficRouteFollower : MonoBehaviour
         if (hit.collider != null && hit.collider.transform.root == transform.root)
             return desired;
 
-        if (!IsOtherTraffic(hit.collider))
+        if (!IsOtherTraffic(hit.collider) && !IsPlayerObstacle(hit.collider))
             return desired;
 
         if (hit.distance <= gap * 0.55f)
@@ -339,6 +339,18 @@ public class TrafficRouteFollower : MonoBehaviour
         var root = col.transform.root;
         return root.GetComponent<TrafficRouteFollower>() != null
                || root.GetComponent<CityTrafficVehicle>() != null;
+    }
+
+    static bool IsPlayerObstacle(Collider col)
+    {
+        if (col == null)
+            return false;
+
+        var cc = col.GetComponent<CharacterController>() ?? col.GetComponentInParent<CharacterController>();
+        if (cc == null)
+            return false;
+
+        return cc.GetComponent<PlayerNeeds>() != null || cc.GetComponentInParent<PlayerNeeds>() != null;
     }
 
     float AccelRate() => _settings != null ? _settings.trafficAcceleration : 4.2f;

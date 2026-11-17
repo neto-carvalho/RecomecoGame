@@ -462,7 +462,7 @@ public static class SceneTransitionSetupMenu
             var sell = Undo.AddComponent<SellItems>(sellGo);
             sell.itemName = "Latinha";
             sell.pricePerUnit = 0;
-            sell.sellDistance = 5f;
+            sell.sellDistance = 3f;
             sell.messageNear = "Aperte E para vender";
         }
     }

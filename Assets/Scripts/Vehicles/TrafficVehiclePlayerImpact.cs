@@ -2,24 +2,28 @@ using Controller;
 using UnityEngine;
 
 /// <summary>
-/// Dano e empurrão quando o tráfego atinge o jogador (estilo atropelamento leve).
+/// Bloqueio físico (empurrão) e dano quando o tráfego atinge o jogador.
 /// </summary>
 [DisallowMultipleComponent]
+[DefaultExecutionOrder(120)]
 public sealed class TrafficVehiclePlayerImpact : MonoBehaviour
 {
     [SerializeField] float minSpeedKmhToHurt = 6f;
     [SerializeField] float damagePerHit = 38f;
     [SerializeField] float knockbackForce = 6.5f;
     [SerializeField] float hitCooldownSeconds = 0.85f;
+    [SerializeField] float playerSeparationPadding = 0.12f;
 
     TrafficRouteFollower _follower;
     BoxCollider _box;
+    Rigidbody _rb;
     float _nextHitTime;
 
     void Awake()
     {
         _follower = GetComponent<TrafficRouteFollower>();
         _box = GetComponent<BoxCollider>();
+        _rb = GetComponent<Rigidbody>();
     }
 
     void FixedUpdate()
@@ -27,16 +31,11 @@ public sealed class TrafficVehiclePlayerImpact : MonoBehaviour
         if (_box == null)
             return;
 
-        var speedKmh = GetSpeedKmh();
-        if (speedKmh < minSpeedKmhToHurt)
-            return;
-
-        if (Time.time < _nextHitTime)
-            return;
-
         var center = _box.bounds.center;
         var half = _box.bounds.extents * 0.82f;
         var hits = Physics.OverlapBox(center, half, transform.rotation, ~0, QueryTriggerInteraction.Ignore);
+        var speedKmh = GetSpeedKmh();
+
         foreach (var col in hits)
         {
             if (col == null || col.transform.IsChildOf(transform))
@@ -50,8 +49,66 @@ public sealed class TrafficVehiclePlayerImpact : MonoBehaviour
                 && PlayerDrivableVehicle.Active.transform.root == playerRoot)
                 continue;
 
-            ApplyHit(playerRoot, speedKmh);
+            PushPlayerOutOfVehicle(playerRoot, col);
+            NudgeVehicleFromPlayer(playerRoot);
+
+            if (speedKmh >= minSpeedKmhToHurt && Time.time >= _nextHitTime)
+            {
+                ApplyHit(playerRoot, speedKmh);
+                return;
+            }
+        }
+    }
+
+    void PushPlayerOutOfVehicle(Transform playerRoot, Collider playerCol)
+    {
+        var cc = playerCol.GetComponent<CharacterController>()
+                 ?? playerCol.GetComponentInParent<CharacterController>();
+        if (cc == null || !cc.enabled)
             return;
+
+        var playerCenter = cc.transform.position + cc.center;
+        var closest = _box.ClosestPoint(playerCenter);
+
+        var offset = playerCenter - closest;
+        offset.y = 0f;
+
+        var minDist = cc.radius + playerSeparationPadding;
+        if (offset.sqrMagnitude < 0.0004f)
+        {
+            offset = -transform.forward;
+            offset.y = 0f;
+            if (offset.sqrMagnitude < 0.0004f)
+                offset = Vector3.right;
+        }
+
+        offset.Normalize();
+        var penetration = minDist - Vector3.Distance(
+            new Vector3(playerCenter.x, 0f, playerCenter.z),
+            new Vector3(closest.x, 0f, closest.z));
+
+        if (penetration <= 0f)
+            return;
+
+        var push = offset * (penetration + 0.02f);
+        cc.Move(push);
+    }
+
+    void NudgeVehicleFromPlayer(Transform playerRoot)
+    {
+        if (_rb == null)
+            return;
+
+        var playerPos = playerRoot.position;
+        var toPlayer = playerPos - transform.position;
+        toPlayer.y = 0f;
+        if (toPlayer.sqrMagnitude < 0.01f)
+            return;
+
+        if (Vector3.Dot(transform.forward, toPlayer.normalized) > 0.25f)
+        {
+            var back = -transform.forward * 0.06f;
+            _rb.MovePosition(_rb.position + back);
         }
     }
 

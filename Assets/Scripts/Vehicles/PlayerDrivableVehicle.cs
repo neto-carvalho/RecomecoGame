@@ -29,6 +29,8 @@ public class PlayerDrivableVehicle : MonoBehaviour, IInteractionPromptOwner
 
     void Awake()
     {
+        VehicleColliderUtility.EnsureSceneVehicleBlocksPlayer(gameObject);
+
         _rb = GetComponent<Rigidbody>();
         if (_rb == null)
             VehicleColliderUtility.EnsureDrivingRigidbody(gameObject);

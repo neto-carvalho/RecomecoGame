@@ -109,6 +109,7 @@ public static class FerroVelhoWalkableGround
         FerroVelhoSceneGround.EnsureSceneGroundColliders(scene);
         FerroVelhoSceneColliders.EnsureColliders(scene);
         RefreshFromSceneMarkers();
+        FerroVelhoEntranceInteractionLayout.Ensure(scene);
         EnsureInScene(scene);
         if (!SceneTransitionState.TryApplyPendingSpawn())
             PlacePlayersOnGround();
@@ -123,6 +124,7 @@ public static class FerroVelhoWalkableGround
         FerroVelhoSceneGround.EnsureSceneGroundColliders(scene);
         FerroVelhoSceneColliders.EnsureColliders(scene);
         RefreshFromSceneMarkers();
+        FerroVelhoEntranceInteractionLayout.Ensure(scene);
         EnsureInScene(scene);
 
         if (SceneTransitionState.TryApplyPendingSpawn())

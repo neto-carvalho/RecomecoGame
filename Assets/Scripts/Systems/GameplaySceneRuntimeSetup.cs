@@ -104,6 +104,7 @@ public static class GameplaySceneRuntimeSetup
         SceneTransitionPlayerSetup.AfterSceneLoad(player);
 
         MissionProgress.NotifyEnteredScene(SceneManager.GetActiveScene().name);
+        SceneVehicleColliderBootstrap.EnsureForActiveScene();
         GameplayControlsTutorialUI.TryShowForNewGame();
     }
 
