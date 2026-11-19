@@ -1,6 +1,6 @@
 # DEVLOG — Projeto "Recomeço"
 
-Este documento registra o progresso do desenvolvimento do jogo e o **estado atual** para TCC / entrega.
+Este documento registra o progresso do desenvolvimento do jogo e o **estado atual** do protótipo.
 
 | | |
 |---|---|
@@ -284,7 +284,7 @@ Menus Editor (versão enxuta): ver tabela em [README.md](README.md#ferramentas-d
 
 ---
 
-# PILARES DE DESIGN (referência TCC)
+# PILARES DE DESIGN
 
 1. **Renda informal** — coleta, ferro velho, revenda, venda a NPC; dinheiro sempre escasso no início.
 2. **Corpo exposto** — fome, doença e proteção; dormir mal na rua não “resolve” o jogo.
@@ -293,12 +293,12 @@ Menus Editor (versão enxuta): ver tabela em [README.md](README.md#ferramentas-d
 
 ---
 
-# MATRIZ MECÂNICA ↔ PRECARIEDADE (anexo sugerido)
+# MATRIZ MECÂNICA ↔ PRECARIEDADE
 
 | Mecânica | O que comunica |
 |----------|----------------|
 | Latinhas + ferro velho | Renda imediata, trabalho de baixo retorno |
-| Revenda / meta R$ 4,00 | Capital mínimo para subsistir na cidade |
+| Revenda / meta R$ 15,00 | Capital mínimo para avançar na missão de rua (build entregue) |
 | Lanchonete + fome | Custo fixo de viver; pressão constante |
 | Reputação na venda | Confiança social necessária para renda na rua |
 | Proteção / doença | Exposição ao clima e à falta de abrigo |
@@ -331,7 +331,7 @@ Menus Editor (versão enxuta): ver tabela em [README.md](README.md#ferramentas-d
 
 ## O que fica em sandbox após `AllComplete`
 
-Exploração livre na Cidade com sistemas ativos (fome, tráfego, etc.), sem novo arco de missões — **limitação assumida** para o TCC.
+Exploração livre na Cidade com sistemas ativos (fome, tráfego, etc.), sem novo arco de missões — **limitação assumida** deste vertical slice.
 
 ---
 
@@ -349,13 +349,16 @@ IDs de spawn e nomes constantes: `RecomecoSceneNames.cs`.
 
 ---
 
-# PRÓXIMOS PASSOS (entrega TCC — não features obrigatórias)
+# PRÓXIMOS PASSOS (jogo)
 
-1. **Playtest estruturado** (5–10 pessoas, roteiro, questionário curto).
-2. **Build PC** de demonstração + teste de save/load fora do Editor.
-3. **Monografia** — problema, referencial, método, matriz acima, limitações, avaliação.
-4. **Atualizar este DEVLOG** após cada marco de playtest ou correção crítica.
-5. Opcional: tela ou texto curto de **epílogo** ao completar missões (reforço narrativo).
+1. **Build PC** estável — mesmo executável usado em testes; validar save/load fora do Editor.
+2. **Playtest** — registrar feedback e bugs neste DEVLOG após cada rodada.
+3. Opcional: tela ou texto curto de **epílogo** ao completar missões (reforço narrativo).
+4. Opcional: ampliar missões pós-lojinha no `MissionProgress` (texto e marcos alinhados à meta de revenda **R$ 15,00**).
+
+## Playtests informais (nov/2026)
+
+Três sessões (~30–40 min), fluxo até a missão de revenda na rua. Ajustes posteriores: reputação no minigame de venda (`SellMinigameUI`) e itens FOOD4U com `reputationRestore`.
 
 ## Trabalhos futuros (fora do escopo atual)
 
@@ -368,6 +371,6 @@ IDs de spawn e nomes constantes: `RecomecoSceneNames.cs`.
 
 O projeto **superou o MVP de latinha + ferro velho**: é um **vertical slice** jogável alinhado ao tema de precariedade e recomeço habitacional.
 
-O histórico **DIA 1–10** (início deste arquivo) documenta a fundação técnica; as **FASES 11–16** descrevem a evolução até o estado atual.
+O histórico **DIA 1–10** documenta a fundação técnica; as **FASES 11–16** descrevem a evolução até o estado atual.
 
 Para abrir ajustes de balanceamento: menu **Recomeco → Abrir Gameplay Settings**.

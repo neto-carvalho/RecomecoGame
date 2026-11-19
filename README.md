@@ -3,7 +3,7 @@
 Jogo de simulação / economia informal para PC, desenvolvido em **Unity 6** com **URP**.  
 Tema: **precariedade habitacional e recomeço** — da coleta no ferro velho à moradia precária na cidade e, por fim, um lugar seguro para dormir e salvar.
 
-Documentação de desenvolvimento: **[DEVLOG.md](DEVLOG.md)** (estado atual, fases, matriz mecânica ↔ precariedade, roteiro TCC).
+Documentação de desenvolvimento: **[DEVLOG.md](DEVLOG.md)** (estado atual, fases, matriz mecânica ↔ precariedade).
 
 ## Requisitos
 
@@ -70,4 +70,4 @@ Assets de terceiros (Kenney, Flat Style Vehicles, packs urbanos, etc.) — ver *
 
 ## Repositório
 
-Não versionar pastas geradas: `Library/`, `Temp/`, `Logs/`, `UserSettings/` (ver `.gitignore`).
+Não versionar pastas geradas da Unity: `Library/`, `Temp/`, `Logs/`, `UserSettings/` (ver `.gitignore`).

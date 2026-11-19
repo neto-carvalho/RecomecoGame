@@ -38,6 +38,15 @@ Temp_DSEG.zip
 ExportedObj/
 .consulo/
 *.csproj
+
+# Relatório PFC / TCC — não versionar (Google Drive + Downloads no PC)
+Apresentação PFC*.docx
+*Relatorio*PFC*.docx
+*Relatório*PFC*.docx
+*.docx
+
+# Editor/agent local config (not part of the game)
+.cursor/
 *.unityproj
 *.sln
 *.suo
